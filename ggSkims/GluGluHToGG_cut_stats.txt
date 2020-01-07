@@ -1,0 +1,5 @@
+..       None | Npassed: 1946414 | f_prev: 1.000 | f_total: 1.000
+..        trg | Npassed:  987055 | f_prev: 0.507 | f_total: 0.507
+..       npho | Npassed:  813487 | f_prev: 0.824 | f_total: 0.418
+..     presel | Npassed:  435162 | f_prev: 0.535 | f_total: 0.224
+..        mgg | Npassed:  434104 | f_prev: 0.998 | f_total: 0.223
