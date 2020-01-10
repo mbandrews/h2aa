@@ -3,6 +3,11 @@ import ROOT
 from ROOT import TFile, TTree, TCanvas, TGraph, TMultiGraph, TGraphErrors, TLegend
 from multiprocessing import Pool
 from collections import OrderedDict
+import argparse
+
+parser = argparse.ArgumentParser(description='Run h2aa limit setting.')
+parser.add_argument('--no_fit', action='store_true', help='Switch to skip limit fitting.')
+args = parser.parse_args()
 
 def run_combine(process):
     os.system('combine %s'%process)
@@ -16,20 +21,26 @@ samples = [
 fitalgo = 'AsymptoticLimits'
 processes = ['-M %s Datacards/h4g_MA_.txt --keyword-value MA=%sGeV'%(fitalgo, s) for s in samples]
 
-#pool = Pool(processes=len(processes))
-#pool.map(run_combine, processes)
-#pool.close()
-#pool.join()
+do_fit = not args.no_fit
+if do_fit:
+    print('Doing limit fitting.')
+    pool = Pool(processes=len(processes))
+    pool.map(run_combine, processes)
+    pool.close()
+    pool.join()
 
 def get_limitfile_mass(f):
     mass = f.split('.')[-2].replace('MA','').replace('GeV','')
     return mass
 
+# NOTE: an extra `scale` needed to be applied when running `run_sg_yield.py` for limit setting here to converge.
+# => Need to undo this `scale` when making the actual plots!!!
 def get_limits(f, scale=1.e-3):
 
     tree = ROOT.TChain("limit")
     tree.Add(f)
     n_limit_pts = tree.GetEntries()
+    print(n_limit_pts)
     assert n_limit_pts == 6
 
     pts = ['dn2', 'dn1', 'nom', 'up1', 'up2', 'obs']
@@ -38,6 +49,8 @@ def get_limits(f, scale=1.e-3):
     for i,pt in enumerate(pts):
         tree.GetEntry(i)
         limit_pts[pt] = scale*tree.limit
+        if i == 2:
+            print(limit_pts[pt])
 
     return limit_pts
 
@@ -99,7 +112,7 @@ def plotUpperLimits(sample_limits):
     frame.GetYaxis().SetLabelSize(0.04)
     frame.GetYaxis().SetTitleOffset(1.1)
     frame.GetYaxis().SetMaxDigits(3)
-    frame.GetXaxis().SetNdivisions(508)
+    #frame.GetXaxis().SetNdivisions(508)
     frame.GetYaxis().CenterTitle(True)
     #frame.GetYaxis().SetTitle("95% upper limit on #sigma / #sigma_{SM}")
     #frame.GetYaxis().SetTitle("95% upper limit on #sigma #times BR / (#sigma #times BR)_{SM}")
@@ -107,7 +120,11 @@ def plotUpperLimits(sample_limits):
     #frame.GetXaxis().SetTitle("background systematic uncertainty [%]")
     frame.GetXaxis().SetTitle("m_{a} [GeV]")
     frame.SetMinimum(0)
-    frame.SetMaximum(max(up2s)*1.05)
+    #frame.SetMaximum(max(up2s)*1.05)
+    frame.SetMaximum(max(up2s)*1.4)
+    #frame.SetMinimum(1.e-4)
+    #frame.SetMaximum(1.e-2)
+    #ROOT.gPad.SetLogy()
     #frame.GetXaxis().SetLimits(min(values),max(values))
     frame.GetXaxis().SetLimits(0., 1.2) # GeV
 
@@ -148,6 +165,7 @@ def plotUpperLimits(sample_limits):
 
     print " "
     c.Draw()
+    c.Update()
     c.Print("Plots/UpperLimits%s.eps"%(''))
     #c.Close()
 
