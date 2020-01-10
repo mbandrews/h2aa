@@ -1,3 +1,6 @@
+*.pyc
 *.root
+*.npz
+*.eps
 crab/crab_*
 ntupleAnalysis/__*

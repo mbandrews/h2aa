@@ -24,7 +24,7 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
 
     return pyargs
 
-def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False):
+def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False):
 
     '''
     [1] Run bkg analyzer with 2d-ma signal region `sg` blinded
@@ -60,7 +60,7 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False):
 
     s = s.replace('[','').replace(']','')
     regions = ['sb', 'sr']
-    processes = [bkg_process(s, r, blind, ma_inputs, output_dir) for r in regions]
+    processes = [bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight) for r in regions]
 
     # hgg, mH-SR
     s = 'GluGluHToGG'
@@ -69,7 +69,8 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False):
     assert len(ma_inputs) > 0
 
     r = 'sr'
-    processes.append(bkg_process(s, r, blind, ma_inputs, output_dir))
+    #processes.append(bkg_process(s, r, blind, ma_inputs, output_dir))
+    processes.append(bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight))
 
     # Run processes in parallel
     pool = Pool(processes=len(processes))
@@ -101,7 +102,7 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False):
 
     s = s.replace('[','').replace(']','')
     regions = ['sb']
-    processes = [bkg_process(s, r, blind, ma_inputs, output_dir) for r in regions]
+    processes = [bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight) for r in regions]
 
     # hgg, mH-SR
     s = 'GluGluHToGG'
@@ -320,15 +321,28 @@ def fit_templates(blind='sg', workdir='Templates', derive_fit=False):
     #fgg = 1.01192e-02
     #fjj = 9.89872e-01
     #v2
-    fgg = 9.95548e-03
-    fjj = 9.90042e-01
+    #fgg = 9.95548e-03
+    #fjj = 9.90042e-01
+    # ggntuple+ptreweight, n=10k
+    #fgg = 1.02883e-02
+    #fjj = 9.89702e-01
+    # ggntuple+ptreweight+bdt>-0.98, n=all
+    fgg = 7.63500e-04
+    fjj = 9.99414e-01
+    # ggntuple+ptreweight+bdt>-0.90, n=all
+    fgg = 0.
+    fjj = 1.
+    #fgg = 0.05
+    #fjj = 0.95
 
     if derive_fit:
         mc = ROOT.TObjArray()
         mc.Add(h['gg'])
         mc.Add(h['jj'])
         fit = ROOT.TFractionFitter(h['Run2017B-F_sr_ma0vma1'], mc)
-        fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
+        fit.Constrain(0, 0., 0.1)
+        fit.Constrain(1, 0.9, 1.)
+        status = fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
         print('fit status:',status)
 
     k = 'Run2017B-F_sb2sr_ma0vma1'

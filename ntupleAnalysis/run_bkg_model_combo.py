@@ -54,21 +54,25 @@ for sample in samples:
     # Run template fitting
     #run_combined_template(derive_fit=True)
     #run_combined_template(derive_fit=False)
+    #run_combined_template(derive_fit=True, do_pt_reweight=True)
+    #run_combined_template(derive_fit=False, do_pt_reweight=True)
 
-    #'''
+    '''
     # Derive normalization
     #norm = get_bkg_norm(blind='sg', sb='sbcombo')
     #norm = get_bkg_norm(blind='sg', sb='sb')
     #norm = 0.870115
     #norm = 0.888882
-    norm = get_bkg_norm(blind='sg', sb='sb', do_pt_reweight=True)
+    #norm = get_bkg_norm(blind='sg', sb='sb', do_pt_reweight=True)
+    norm = get_bkg_norm(blind='sg', sb='sbcombo', do_pt_reweight=True)
 
     # Rerun data with fixed normalization
     #blind = 'notgjet'
     #blind = 'notgg'
-    blind = 'sg'
+    #blind = 'sg'
     #blind = None
     #blind = 'diag_lo_hi'
+    blind = 'offdiag_lo_hi' # for actual limit setting
 
     # Run both SB and SR to bkg processes
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
@@ -76,7 +80,7 @@ for sample in samples:
     assert len(ma_inputs) > 0
     s = sample.replace('[','').replace(']','')
     do_combo_template = True
-    do_combo_template = False
+    #do_combo_template = False
     do_ptomGG = True
     do_pt_reweight = True
     #r = 'sb2sr'
@@ -97,7 +101,7 @@ for sample in samples:
 
     plot_srvsb(s, blind)
     #plot_srvsb_pt(s, blind, sb='sb2sr')
-    #'''
+    '''
 
     '''
     # Run bkg model in SR

@@ -12,7 +12,7 @@ from get_bkg_norm import *
 import ROOT
 
 # Register command line options
-parser = argparse.ArgumentParser(description='Run STEALTH selection.')
+parser = argparse.ArgumentParser(description='Run h2aa bkg model.')
 parser.add_argument('-s', '--sample', default='test', type=str, help='Sample name.')
 parser.add_argument('-r', '--region', default='sb', type=str, help='Region: `sb` or `sr`.')
 parser.add_argument('-i', '--inputs', default=['MAntuples/Run2017F_mantuple.root'], nargs='+', type=str, help='Input MA ntuple.')
@@ -37,15 +37,18 @@ do_combined_template = args.do_combined_template
 if args.do_combined_template and 'Run2017' in sample and region == 'sr':
     print('WARNING: will not use combined template for SR data!')
     do_combined_template = False
+
 #do_combined_template = args.do_combined_template and (region != 'sr' or 'Run2017' not in sample)
 if do_combined_template:
     print('Using combined template')
     s = 'Run2017B-F+GluGluHToGG'
     r = 'sb2sr'
     nfma = np.load("Weights/%s_%s_blind_%s_wgts.npz"%(s, r, None))
+
 do_ptomGG = args.do_ptomGG
 if do_ptomGG:
     print('Using pt/mGG cuts')
+
 do_pt_reweight = args.do_pt_reweight
 if do_pt_reweight:
     print('Using pt weights')
@@ -70,7 +73,7 @@ print('N evts in MA ntuple:',nEvts)
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts
-iEvtEnd   = 100000
+#iEvtEnd   = 10000
 
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0
@@ -92,8 +95,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     #if region != 'sr' and do_pt_reweight:
     if 'sb' in region and do_pt_reweight:
         wgt = wgt*get_pt_wgt(tree, nfpt['pt_edges'], nfpt['pt_wgts'])
-    #if do_combined_template:
-    #    wgt = wgt*get_combined_template_wgt(tree, nfma['ma_edges'], nfma['wgts'])
+    if do_combined_template:
+        wgt = wgt*get_combined_template_wgt(tree, nfma['ma_edges'], nfma['wgts'])
         #print(wgt)
 
     #if nWrite > 10:break
