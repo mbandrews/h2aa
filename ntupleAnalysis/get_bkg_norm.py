@@ -24,9 +24,12 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
 
     return pyargs
 
-def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False):
+def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False, do_ptomGG=False):
 
     '''
+    do_pt_reweight: boolean applied to SB regions only!
+    do_ptomGG: boolean applied to SB regions only!
+
     [1] Run bkg analyzer with 2d-ma signal region `sg` blinded
     to derive 2d-ma templates for hgg in mH-SR, data mH-SB and the target data mH-SR
 
@@ -43,6 +46,8 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_r
     binned by the 2d-ma distn. These will then be responsible for "enhancing" the
     basic mH-SB shape to account for the hgg contribution when running the evt loop.
     '''
+    if not do_ptomGG:
+        assert do_pt_reweight
 
     output_dir = 'Templates'
     if not os.path.isdir(output_dir):
@@ -60,7 +65,10 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_r
 
     s = s.replace('[','').replace(']','')
     regions = ['sb', 'sr']
-    processes = [bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight) for r in regions]
+    processes = [bkg_process(s, r, blind, ma_inputs, output_dir,\
+            do_ptomGG=do_ptomGG if 'sb' in r else True,\
+            do_pt_reweight=do_pt_reweight if 'sb' in r else False)\
+            for r in regions]
 
     # hgg, mH-SR
     s = 'GluGluHToGG'
@@ -69,8 +77,8 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_r
     assert len(ma_inputs) > 0
 
     r = 'sr'
-    #processes.append(bkg_process(s, r, blind, ma_inputs, output_dir))
-    processes.append(bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight))
+    processes.append(bkg_process(s, r, blind, ma_inputs, output_dir))
+    #processes.append(bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight))
 
     # Run processes in parallel
     pool = Pool(processes=len(processes))
@@ -102,7 +110,10 @@ def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_r
 
     s = s.replace('[','').replace(']','')
     regions = ['sb']
-    processes = [bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight) for r in regions]
+    processes = [bkg_process(s, r, blind, ma_inputs, output_dir,\
+            do_ptomGG=do_ptomGG if 'sb' in r else True,\
+            do_pt_reweight=do_pt_reweight if 'sb' in r else False)\
+            for r in regions]
 
     # hgg, mH-SR
     s = 'GluGluHToGG'
@@ -147,7 +158,7 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     assert len(ma_inputs) > 0
     sample = sample.replace('[','').replace(']','')
     regions = [sb, 'sr']
-    processes = [bkg_process(sample, r, blind, ma_inputs, workdir, do_ptomGG=do_ptomGG) for r in regions]
+    processes = [bkg_process(sample, r, blind, ma_inputs, workdir, do_ptomGG=do_ptomGG if r == sb else True) for r in regions]
 
     # Run processes in parallel
     pool = Pool(processes=len(processes))
@@ -199,10 +210,12 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     # Write out weights to numpy file
     np.savez("%s/%s_%s2sr_blind_%s_ptwgts.npz"%(output_dir, sample, sb, blind), pt_edges=pt_edges, pt_wgts=ratio)
 
-def get_bkg_norm(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False):
+def get_bkg_norm(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False, do_ptomGG=False):
     '''
     Calculate normalization for the mapping of 2d-ma data mH-SB template(s) to data mH-SR.
     '''
+    if not do_ptomGG:
+        assert do_pt_reweight
 
     # Run both SB and SR to bkg processes
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
@@ -211,8 +224,10 @@ def get_bkg_norm(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates'
     sample = sample.replace('[','').replace(']','')
     regions = [sb, 'sr']
     processes = [bkg_process(sample, r, blind, ma_inputs, workdir,\
-            do_combo_template = True if r == 'sbcombo' else False,\
-            do_pt_reweight=do_pt_reweight) for r in regions]
+            do_combo_template=True if r == 'sbcombo' else False,\
+            do_ptomGG=do_ptomGG if r == sb else True,\
+            do_pt_reweight=do_pt_reweight if r == sb else False)\
+            for r in regions]
 
     # Run processes in parallel
     pool = Pool(processes=len(processes))

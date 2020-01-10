@@ -1,4 +1,5 @@
 from __future__ import print_function
+from collections import OrderedDict
 import numpy as np
 np.random.seed(0)
 import os, glob
@@ -31,6 +32,7 @@ blind = args.blind
 sample = args.sample
 region = args.region
 norm = args.norm
+outdir = args.outdir
 #if sample == 'sb2sr':
 #    norm = 0.8526129175228655
 do_combined_template = args.do_combined_template
@@ -45,19 +47,29 @@ if do_combined_template:
     r = 'sb2sr'
     nfma = np.load("Weights/%s_%s_blind_%s_wgts.npz"%(s, r, None))
 
-do_ptomGG = args.do_ptomGG
-if do_ptomGG:
-    print('Using pt/mGG cuts')
-
 do_pt_reweight = args.do_pt_reweight
 if do_pt_reweight:
+    assert region != 'sr'
     print('Using pt weights')
     s = 'Run2017B-F'
     r = 'sb2sr'
     nfpt = np.load("Weights/%s_%s_blind_%s_ptwgts.npz"%(s, r, None))
 
+do_ptomGG = args.do_ptomGG
+#do_ptomGG = args.do_ptomGG if 'sb' not in region else False
+if do_ptomGG:
+    print('Using pt/mGG cuts')
+else:
+    assert region != 'sr'
+    #assert do_pt_reweight
+
 hists = {}
 create_hists(hists)
+
+cuts = [str(None), 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'bdt']
+cut_hists = OrderedDict()
+create_cut_hists(cut_hists, cuts)
+counts = OrderedDict([(cut, 0) for cut in cuts])
 
 print('Setting MA as TTree')
 print('N MA files:',len(args.inputs))
@@ -73,7 +85,7 @@ print('N evts in MA ntuple:',nEvts)
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts
-#iEvtEnd   = 10000
+#iEvtEnd   = 100000
 
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0
@@ -86,6 +98,9 @@ for iEvt in range(iEvtStart,iEvtEnd):
     evt_statusf = tree.GetEntry(iEvt)
     if evt_statusf <= 0: continue
 
+    # Apply event selection
+    if not select_event(tree, cuts, cut_hists, counts): continue
+
     # Analyze event
     if not analyze_event(tree, region, blind, do_ptomGG): continue
 
@@ -93,7 +108,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     #wgt = 1. if 'Data' in args.treename else tree.weight
     wgt = 1.
     #if region != 'sr' and do_pt_reweight:
-    if 'sb' in region and do_pt_reweight:
+    #if 'sb' in region and do_pt_reweight:
+    if do_pt_reweight:
         wgt = wgt*get_pt_wgt(tree, nfpt['pt_edges'], nfpt['pt_wgts'])
     if do_combined_template:
         wgt = wgt*get_combined_template_wgt(tree, nfma['ma_edges'], nfma['wgts'])
@@ -120,4 +136,8 @@ print('h[maxy].GetEntries():',hists['maxy'].GetEntries())
 print('h[maxy].Integral():',hists['maxy'].Integral())
 
 # Initialize output ntuple
-write_hists(hists, "%s/%s_%s_blind_%s_templates.root"%(args.outdir, sample, region, blind))
+write_hists(hists, "%s/%s_%s_blind_%s_templates.root"%(outdir, sample, region, blind))
+write_cut_hists(hists, "%s/%s_%s_cut_hists.root"%(outdir, sample, region))
+
+# Print cut flow summary
+print_stats(counts, "%s/%s_%s_cut_stats.txt"%(outdir, sample, region))

@@ -93,7 +93,7 @@ def create_cut_hists(h, cuts):
         #if 'mgg' in c:
         h[cut+'mgg'] = ROOT.TH1F(cut+'mgg', cut+'mgg', 50, 50., 200.)
 
-def fill_cut_hists(h, tree, cut_, outvars):
+def fill_cut_hists(h, tree, cut_, outvars=None):
 
     cut = cut_+'_'
 
@@ -112,8 +112,9 @@ def fill_cut_hists(h, tree, cut_, outvars):
         #h[cut+'HLTDipho_m90'].Fill(tree.HLTPho>>14&1)
         h[cut+'HLTDiphoPV_m55'].Fill(tree.HLTPho>>37&1)
 
-    if 'mgg' in outvars.keys():
-        h[cut+'mgg'].Fill(outvars['mgg'])
+    if outvars is not None:
+        if 'mgg' in outvars.keys():
+            h[cut+'mgg'].Fill(outvars['mgg'])
 
 
 def fill_hists(h, tree, wgt):

@@ -33,7 +33,7 @@ def EB_presel(i, tree):
 
     return True
 
-def select_event(tree, cuts, hists, counts, outvars):
+def select_event(tree, cuts, hists, counts, outvars=None):
 
     cut = str(None)
     fill_cut_hists(hists, tree, cut, outvars)
@@ -91,6 +91,20 @@ def select_event(tree, cuts, hists, counts, outvars):
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
+    # pt/mGG cuts
+    cut = 'ptomGG'
+    if cut in cuts:
+        if not ptomGG_passed(tree): return False
+        fill_cut_hists(hists, tree, cut, outvars)
+        counts[cut] += 1
+
+    # bdt cut
+    cut = 'bdt'
+    if cut in cuts:
+        if not bdt_passed(tree): return False
+        fill_cut_hists(hists, tree, cut, outvars)
+        counts[cut] += 1
+
     return True
 
 def analyze_event(tree, region, blind, do_ptomGG=True):
@@ -100,13 +114,6 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
 
     # Check if event is part of blinded region
     if is_blinded(blind, tree): return False
-
-    # Check if passes pt/mGG cuts
-    if 'sb' not in region and not ptomGG_passed(tree): return False
-    #else:
-    #    if do_ptomGG and not ptomGG_passed(tree): return False
-
-    if not bdt_passed(tree): return False
 
     return True
 
