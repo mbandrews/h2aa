@@ -24,6 +24,68 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
 
     return pyargs
 
+def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False, do_ptomGG=False):
+
+    '''
+    do_pt_reweight: boolean applied to SB regions only!
+    do_ptomGG: boolean applied to SB regions only!
+
+    [1] Run bkg analyzer with 2d-ma signal region `sg` blinded
+    to derive 2d-ma templates for hgg in mH-SR, data mH-SB and the target data mH-SR
+
+    [2] Use TFractionFitter to fit relative proportions of hgg, mH-low, mH-high SB templates
+    in mH-SR, fgg, flo, fhi, respectively. TODO: Implement hgg
+
+    '''
+    if not do_ptomGG:
+        assert do_pt_reweight
+
+    output_dir = 'Templates'
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+
+    # [1] First run hgg, data mH-SB, data mH-SR with 2d-ma-SR blinded
+    # These will output TH2F histograms into root files which will be picked up in [2]
+    blind = 'sg'
+
+    # Data mH-SB and mH-SR
+    s = 'Run2017[B-F]'
+    ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%s)
+    print('len(ma_inputs):',len(ma_inputs))
+    assert len(ma_inputs) > 0
+
+    s = s.replace('[','').replace(']','')
+    #regions = ['sb', 'sr']
+    regions = ['sblo', 'sbhi', 'sr']
+    processes = [bkg_process(s, r, blind, ma_inputs, output_dir,\
+            do_ptomGG=do_ptomGG if 'sb' in r else True,\
+            do_pt_reweight=do_pt_reweight if 'sb' in r else False)\
+            for r in regions]
+
+    # hgg, mH-SR
+    s = 'GluGluHToGG'
+    ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%s)
+    print('len(ma_inputs):',len(ma_inputs))
+    assert len(ma_inputs) > 0
+
+    r = 'sr'
+    processes.append(bkg_process(s, r, blind, ma_inputs, output_dir))
+    #processes.append(bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight))
+
+    # Run processes in parallel
+    pool = Pool(processes=len(processes))
+    pool.map(run_process, processes)
+    pool.close()
+    pool.join()
+
+    # [2] Fit hgg and mH-SB template fractions into mH-SR:
+    # Normalize templates to unit Integral() in the unblinded region.
+    # NOTE: TFractionFiter seg faults at deconstruction in PyROOT...
+    # need to put in fgg, flo, fhi by hand after, or [TODO] re-implement in C++.
+    fgg, flo, fhi = fit_templates_sb(blind, output_dir, derive_fit)
+
+    return fgg, flo, fhi
+
 def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False, do_ptomGG=False):
 
     '''
@@ -139,7 +201,7 @@ def load_hists(h, hf, samples, regions, keys, blind, input_dir):
     # to remain persistent, otherwise segfaults
     for s in samples :
         for r in regions:
-            if s == 'GluGluHToGG' and r == 'sb': continue
+            if s == 'GluGluHToGG' and 'sb' in r: continue
             if 'Run2017' in s and r == 'sr' and blind == None and 'pt0vpt1' not in keys: continue
             sr = '%s_%s'%(s, r)
             hf[sr] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(input_dir, s, r, blind),"READ")
@@ -210,6 +272,81 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     # Write out weights to numpy file
     np.savez("%s/%s_%s2sr_blind_%s_ptwgts.npz"%(output_dir, sample, sb, blind), pt_edges=pt_edges, pt_wgts=ratio)
 
+def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False, do_ptomGG=False, run_bkg=True):
+    '''
+    Calculate relative normalization between data mH-SB templates and data mH-SR.
+    sb: sb, sbcombo, sblo, sbhi
+    '''
+
+    if not do_ptomGG:
+        pass
+        assert do_pt_reweight
+
+    regions = [sb, 'sr']
+    #regions = ['sr']
+    #if 'lo' in sb:
+    #    regions.append('sblo')
+    #if 'hi' in sb:
+    #    regions.append('sbhi')
+    #else:
+    #    regions.append(sb)
+
+    # Run both SB and SR to bkg processes
+    ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
+    sample = sample.replace('[','').replace(']','')
+    print('len(ma_inputs):',len(ma_inputs))
+    assert len(ma_inputs) > 0
+    if run_bkg:
+        #processes = [bkg_process(sample, r, blind, ma_inputs, workdir,\
+        #        do_combo_template=True if r == 'sbcombo' else False,\
+        #        do_ptomGG=do_ptomGG if r == sb else True,\
+        #        do_pt_reweight=do_pt_reweight if r == sb else False)\
+        #        for r in regions]
+        processes = [bkg_process(sample, r, blind, ma_inputs, workdir,\
+                #do_combo_template=True if r == 'sbcombo' else False,\
+                do_ptomGG=do_ptomGG if r == sb else True,\
+                do_pt_reweight=do_pt_reweight if r == sb else False)\
+                for r in regions]
+        # Run processes in parallel
+        pool = Pool(processes=len(processes))
+        pool.map(run_process, processes)
+        pool.close()
+        pool.join()
+
+    h, hf = {}, {}
+    entries = {}
+    integral = {}
+    #norm = {}
+
+    keys = ['maxy']
+
+    for r in regions:
+        print("%s/%s_%s_blind_%s_templates.root"%(workdir, sample, r, blind))
+        hf[r] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(workdir, sample, r, blind),"READ")
+        for k in keys:
+            rk = '%s_%s'%(r, k)
+            #print(rk)
+            #if rk == 'sr_maxy': c[rk] = ROOT.TCanvas("c%s"%rk,"c%s"%rk, wd, ht)
+            h[rk] = hf[r].Get(k)
+            #h[rk].Draw("")
+            entries[rk] = h[rk].GetEntries()
+            integral[rk] = h[rk].Integral()
+
+    for r_ in regions:
+        if r_ == 'sr': continue
+        #r = '%s2sr'%r_
+        r = r_
+        for k in keys:
+            if k != 'maxy': continue
+            rk = '%s_%s'%(r, k)
+            #print(rk)
+            h[rk] = h[rk].Clone()
+            #norm['%s2sr'%r] = integral['sr_%s'%k]/integral[rk]
+            #print('%s2sr norm: %f'%(r, norm['%s2sr'%r]))
+            norm = integral['sr_%s'%k]/integral[rk]
+
+    return norm
+
 def get_bkg_norm(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False, do_ptomGG=False):
     '''
     Calculate normalization for the mapping of 2d-ma data mH-SB template(s) to data mH-SR.
@@ -269,7 +406,165 @@ def get_bkg_norm(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates'
         #h[rk].Draw("hist same")
 
     return norm
-    # derive 1sigma uncert vs ma
+
+def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
+    '''
+    Fit for fraction of hgg and data mH-low, mH-high SB templates in data mH-SR, fgg, flo, fhi, resp.
+    Normalize each template to have unit Integral() first.
+    '''
+    h, hf = {}, {}
+    samples = ['Run2017B-F', 'GluGluHToGG']
+    #regions = ['sb', 'sr']
+    regions = ['sblo', 'sbhi', 'sr']
+    keys = ['ma0vma1']
+    load_hists(h, hf, samples, regions, keys, blind, workdir)
+
+    '''
+    for s in samples :
+        for r in regions:
+            if s == 'GluGluHToGG' and r == 'sb': continue
+            for k in keys:
+                srk = '%s_%s_%s'%(s, r, k)
+                print(srk)
+                print(h[srk].GetNbinsX(), h[srk].GetNbinsY())
+                print(h[srk].Integral())
+                print(h[srk].GetBinContent(1,1))
+                ngg = 0
+                for i,ix in enumerate(range(1,h[srk].GetNbinsX()+1)):
+                    for j,iy in enumerate(range(1,h[srk].GetNbinsY()+1)):
+                        ngg += h[srk].GetBinContent(ix, iy)
+                print(ngg)
+                print('gg:',get_entries_cr(h[srk], 'gg'))
+                print('gj:',get_entries_cr(h[srk], 'gj'))
+                print('jg:',get_entries_cr(h[srk], 'jg'))
+                print('jj:',get_entries_cr(h[srk], 'jj'))
+                print('integral-all:',h[srk].Integral()-(\
+                        get_entries_cr(h[srk], 'gg')\
+                        +get_entries_cr(h[srk], 'gj')\
+                        +get_entries_cr(h[srk], 'jg')\
+                        +get_entries_cr(h[srk], 'jj')))
+    '''
+
+    # sb2sr = fgg*gg_normed + fsb*sb_normed
+    # 0th ordero: fgg, fsb chosen s.t.
+    # to check sb2sr(gg) ~ sr(gg) AND sb2sr(jj) ~ sr(jj)
+    # need not be fsb = 1-fgg since normalizations are not completely orthogonal
+    # 1st order: do TFractionFitter template fit -> converges but segfaults on exit
+    # => need to put in values by hand after fit
+    norm = {}
+
+    h['Run2017B-F_sr_ma0vma1'].Scale(1./h['Run2017B-F_sr_ma0vma1'].Integral())
+
+    h['gg'] = h['GluGluHToGG_sr_ma0vma1'].Clone()
+    #norm['gg'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg')/get_entries_cr(h['gg'], 'gg')
+    #h['gg'].Scale(norm['gg'])
+    h['gg'].Scale(1./h['gg'].Integral())
+    #print('gg:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg'), get_entries_cr(h['gg'], 'gg'))
+    print('higgs-only, gg:%f, jj:%f'%(get_entries_cr(h['gg'], 'gg'), get_entries_cr(h['gg'], 'jj')))
+
+    #h['jj'] = h['Run2017B-F_sb_ma0vma1'].Clone()
+    #norm['jj'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jj'], 'jj')
+    #h['jj'].Scale(norm['jj'])
+    ##print('jj:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj'), get_entries_cr(h['jj'], 'jj'))
+    #print('sb-only, gg:%f, jj:%f'%(get_entries_cr(h['jj'], 'gg'), get_entries_cr(h['jj'], 'jj')))
+    #print('sr-obs, gg:%f, jj:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
+
+    h['jjlo'] = h['Run2017B-F_sblo_ma0vma1'].Clone()
+    #norm['jjlo'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jjlo'], 'jj')
+    #h['jjlo'].Scale(norm['jjlo'])
+    h['jjlo'].Scale(1./h['jjlo'].Integral())
+    #print('jjlo:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj'), get_entries_cr(h['jjlo'], 'jj'))
+    print('sb-only, gg:%f, jjlo:%f'%(get_entries_cr(h['jjlo'], 'gg'), get_entries_cr(h['jjlo'], 'jj')))
+    print('sr-obs, gg:%f, jjlo:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
+
+    h['jjhi'] = h['Run2017B-F_sbhi_ma0vma1'].Clone()
+    #norm['jjhi'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jjhi'], 'jj')
+    #h['jjhi'].Scale(norm['jjhi'])
+    h['jjhi'].Scale(1./h['jjhi'].Integral())
+    #print('jjhi:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj'), get_entries_cr(h['jjhi'], 'jj'))
+    print('sb-only, gg:%f, jjhi:%f'%(get_entries_cr(h['jjhi'], 'gg'), get_entries_cr(h['jjhi'], 'jj')))
+    print('sr-obs, gg:%f, jjhi:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
+
+    #fgg, fjj = 1., 0.
+    #fgg, fjj = 0., 1.
+    #fgg, fjj = 0.01, 1.
+    #v1
+    #fgg = 1.01192e-02
+    #fjj = 9.89872e-01
+    #v2
+    #fgg = 9.95548e-03
+    #fjj = 9.90042e-01
+    # ggntuple+ptreweight, n=10k
+    #fgg = 1.02883e-02
+    #fjj = 9.89702e-01
+    # ggntuple+ptreweight+bdt>-0.98, n=all
+    fgg = 7.63500e-04
+    fjj = 9.99414e-01
+    # ggntuple+ptreweight+bdt>-0.90, n=all
+    fgg = 0.
+    fjj = 1.
+    #fgg = 0.05
+    #fjj = 0.95
+    fgg = 4.06623e-01
+    flo = 3.30289e-01
+    fhi = 1.87576e-01
+    fgg = 3.02932e-01
+    flo = 3.70054e-01
+    fjj = 3.15643e-01
+
+    fgg = 0.
+    flo = 5.17282e-01
+    fhi = 4.57097e-01
+
+    #no bdt
+    fgg = 0.
+    flo = 5.08462e-01
+    fhi = 4.91340e-01
+
+    #bdt > -0.9
+    fgg = 0.
+    flo = 5.20326e-01
+    fhi = 4.79670e-01
+
+    fgg = fgg/(fgg+flo+fhi)
+    flo = flo/(fgg+flo+fhi)
+    fhi = fhi/(fgg+flo+fhi)
+
+    if derive_fit:
+        mc = ROOT.TObjArray()
+        #mc.Add(h['gg'])
+        mc.Add(h['jjlo'])
+        mc.Add(h['jjhi'])
+        fit = ROOT.TFractionFitter(h['Run2017B-F_sr_ma0vma1'], mc)
+        fit.Constrain(0, 0., 1.)
+        fit.Constrain(1, 0., 1.)
+        #fit.Constrain(2, 0., 1.)
+        status = fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
+        print('fit status:',status)
+
+    #'''
+    k = 'Run2017B-F_sb2sr_ma0vma1'
+    #h[k] = h['gg'].Clone()
+    #h[k].Scale(fgg)
+    h[k] = h['jjlo'].Clone()
+    h[k].Scale(flo)
+    #print(get_entries_cr(h[k],'gg'))
+    #h[k].Add(h['jjlo'], flo)
+    h[k].Add(h['jjhi'], fhi)
+    #print(h[k].Integral())
+    h[k].Scale(1./h[k].Integral())
+    #print(h[k].Integral())
+
+    print('sb2sr, gg:%f, jj:%f'%(get_entries_cr(h[k], 'gg'), get_entries_cr(h[k], 'jj')))
+    norm['sb2sr'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')/get_entries_cr(h[k], 'jj')
+    h[k].Scale(norm['sb2sr'])
+    print('sb2sr, gg:%f, jj:%f'%(get_entries_cr(h[k], 'gg'), get_entries_cr(h[k], 'jj')))
+    print('gg ratio:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg')/get_entries_cr(h[k], 'gg'))
+    #'''
+
+    print('fgg: %f, flo:%f, fhi:%f'%(fgg, flo, fhi))
+    #return fgg, fjj, norm
+    return fgg, flo, fhi
 
 def fit_templates(blind='sg', workdir='Templates', derive_fit=False):
     '''
@@ -385,30 +680,38 @@ def get_template_ratio(fgg, fjj, norm, blind=None, workdir='Templates'):
     '''
     h, hf = {}, {}
     samples = ['Run2017B-F', 'GluGluHToGG']
-    regions = ['sb', 'sr']
+    #regions = ['sb', 'sr']
+    regions = ['sblo', 'sbhi', 'sr']
     keys = ['ma0vma1']
     load_hists(h, hf, samples, regions, keys, blind, workdir)
 
     # Get hgg template and normalize
-    h['gg'] = h['GluGluHToGG_sr_ma0vma1'].Clone()
-    h['gg'].Scale(norm['gg'])
-    #print('gg:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg'), get_entries_cr(h['gg'], 'gg'))
-    print('higgs-only, gg:%f, jj:%f'%(get_entries_cr(h['gg'], 'gg'), get_entries_cr(h['gg'], 'jj')))
+    #h['gg'] = h['GluGluHToGG_sr_ma0vma1'].Clone()
+    #h['gg'].Scale(norm['gg'])
+    #print('higgs-only, gg:%f, jj:%f'%(get_entries_cr(h['gg'], 'gg'), get_entries_cr(h['gg'], 'jj')))
 
     # Get data mH-SB template and normalize
-    h['jj'] = h['Run2017B-F_sb_ma0vma1'].Clone()
-    h['jj'].Scale(norm['jj'])
-    print('sb-only, gg:%f, jj:%f'%(get_entries_cr(h['jj'], 'gg'), get_entries_cr(h['jj'], 'jj')))
+    h['jjlo'] = h['Run2017B-F_sblo_ma0vma1'].Clone()
+    h['jjlo'].Scale(1./h['jjlo'].Integral())
+    print('sb-only, gg:%f, jjlo:%f'%(get_entries_cr(h['jjlo'], 'gg'), get_entries_cr(h['jjlo'], 'jj')))
+
+    h['jjhi'] = h['Run2017B-F_sbhi_ma0vma1'].Clone()
+    h['jjhi'].Scale(1./h['jjhi'].Integral())
+    print('sb-only, gg:%f, jjhi:%f'%(get_entries_cr(h['jjhi'], 'gg'), get_entries_cr(h['jjhi'], 'jj')))
 
     # Contstuct fgg*template_hgg + fjj*template_mH-SB
     s = 'Run2017B-F+GluGluHToGG'
     r = 'sb2sr'
     k = 'ma0vma1'
     srk = '%s_%s_%s'%(s, r, k)
-    h[srk] = h['gg'].Clone()
-    h[srk].Scale(fgg)
-    h[srk].Add(h['jj'], fjj)
-    h[srk].Scale(norm['sb2sr'])
+    #h[srk] = h['gg'].Clone()
+    #h[srk].Scale(fgg)
+    #h[srk].Add(h['jj'], fjj)
+    #h[srk].Scale(norm['sb2sr'])
+    h[srk] = h['jjlo'].Clone()
+    h[srk].Scale(flo)
+    h[srk].Add(h['jjhi'], fhi)
+    h[srk].Scale(1./h[srk].Integral())
     print('sb2sr, gg:%f, jj:%f'%(get_entries_cr(h[srk], 'gg'), get_entries_cr(h[srk], 'jj')))
 
     # Take ratio of combined template to (normalized) template_mH-SB

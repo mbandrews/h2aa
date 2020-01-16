@@ -144,7 +144,12 @@ def in_region(region, tree):
     in_sbhi = tree.mgg >= 140. and tree.mgg < 180.
 
     #if region == 'sb' or region == 'sb2sr':
-    if 'sb' in region:
+    #if 'sb' in region:
+    if 'sblo' in region:
+        if in_sblo: return True
+    elif 'sbhi' in region:
+        if in_sbhi: return True
+    elif 'sb' in region:
         if in_sblo or in_sbhi: return True
     elif region == 'sr':
         if in_sr: return True

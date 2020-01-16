@@ -53,7 +53,8 @@ for s in samples:
     for r in regions:
         print('For region:',r)
         # Regress 2d ma off-diagonals in signal region (SR) and sideband (SB)
-        pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s'%(s, r, blind, ' '.join(ma_inputs), get_ma_tree_name(s), output_dir)
+        pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s --do_ptomGG'\
+                %(s, r, blind, ' '.join(ma_inputs), get_ma_tree_name(s), output_dir)
         print('Doing: %s'%pyargs)
         processes.append(pyargs)
         #break
@@ -71,7 +72,7 @@ for s in samples:
 
     # Rerun data with fixed normalization
     r = 'sr'
-    pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s -n %f'\
+    pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s -n %f --do_ptomGG'\
             %(s, r, blind, ' '.join(ma_inputs), get_ma_tree_name(s), output_dir, norm)
     print('Doing: %s'%pyargs)
     os.system('python %s'%pyargs)

@@ -67,6 +67,7 @@ hists = {}
 create_hists(hists)
 
 cuts = [str(None), 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'bdt']
+#cuts = [str(None), 'ptomGG'] if do_ptomGG else [str(None)]
 cut_hists = OrderedDict()
 create_cut_hists(cut_hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])

@@ -112,7 +112,7 @@ def get_hname(s, r):
 
 for s in samples:
 
-    #key = 'ma1'
+    key = 'ma1'
     #key = 'ma0'
     key = 'ma0vma1'
     #key = 'maxy'

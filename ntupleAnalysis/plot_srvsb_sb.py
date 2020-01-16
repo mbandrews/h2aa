@@ -1,8 +1,9 @@
 import ROOT
+import numpy as np
 from array import array
 from hist_utils import *
 
-def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, sb='sb2sr'):
+def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
 
     hc = {}
 
@@ -48,7 +49,7 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, sb='sb2sr'):
     hc[k].GetYaxis().SetMaxDigits(3)
     #hc[k].Draw("hist same")
     hc[k].Draw("E")
-    k = sb+'_%s'%k_
+    k = 'sb2sr_%s'%k_
     h[k].SetLineColor(9)
     #h[k].Draw("hist SAME")
     h[k].SetFillColor(9)
@@ -60,13 +61,16 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, sb='sb2sr'):
     hc[k].Draw("hist same")
 
     k = 'sr_%s'%k_
-    ymax = 1.2*max(h[k].GetMaximum(), h[sb+'_%s'%k_].GetMaximum())
+    ymax = 1.2*max(h[k].GetMaximum(), h['sb2sr_%s'%k_].GetMaximum())
     if ymax_ == -1 and hc[k].GetBinContent(2) > 0.:
-        ymax = 1.2*hc[k].GetBinContent(2)
+        #ymax = 1.2*hc[k].GetBinContent(2)
+        ymax = 1.2*max(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]),
+                       np.max([hc['sb2sr_%s'%k_].GetBinContent(ib) for ib in range(2, hc['sb2sr_%s'%k_].GetNbinsX()+2)]))
+        #ymax = 1.2*np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)])
+        #print(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]))
     if ymax_ is not None and ymax_ > 0.:
         ymax = ymax_
     hc[k].GetYaxis().SetRangeUser(0.1, ymax)
-    hc[k].GetXaxis().SetRangeUser(0., 100.)
 
     l, l2, hatch = {}, {}, {}
     legend = {}
@@ -91,7 +95,7 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, sb='sb2sr'):
 
     #legend[k] = ROOT.TLegend(0.5,0.68,0.8,0.86) #(x1, y1, x2, y2)
     #legend[k].AddEntry(hc[k].GetName(),"Obs","l")
-    #legend[k].AddEntry(hc[sb+'_maxy'].GetName(),"Exp","l")
+    #legend[k].AddEntry(hc['sb2sr_maxy'].GetName(),"Exp","l")
     #legend[k].SetBorderSize(0)
     #legend[k].Draw("same")
 
@@ -128,8 +132,8 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, sb='sb2sr'):
     fUnity.SetTitle("")
     fUnity.Draw()
 
-    k = sb+'osr_%s'%k_
-    h[k] = h[sb+'_%s'%k_].Clone()
+    k = 'sb2srosr_%s'%k_
+    h[k] = h['sb2sr_%s'%k_].Clone()
     h[k].SetLineColor(9)
     h[k].Sumw2()
     h[k].SetStats(0)
@@ -166,22 +170,22 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, sb='sb2sr'):
     c[k].Update()
     #c[k].Print('Plots/%s_sb2srvsr_blind_%s.eps'%(sample, blind))
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
-    if 'pt1' in k_:
+    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+    if 'ma1' in k_:
         pass
-        c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
-    #c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+        #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
 
-def plot_srvsb_pt(sample, blind, sb='sb2sr'):
+def plot_srvsb_sb(sample, blind):
 
     hf, h = {}, {}
     c = {}
 
-    regions = [sb, 'sr']
-    #regions = ['sbcombo2sr', 'sr']
+    #regions = ['sb2sr', 'sr']
     regions = ['sblo2sr', 'sbhi2sr', 'sr']
+    #regions = ['sbcombo2sr', 'sr']
     #keys = ['ma0vma1', 'maxy']
     #keys = ['maxy']
-    keys = ['pt0','pt1']
+    keys = ['maxy','ma0','ma1']
 
     for r in regions:
         hf[r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
@@ -190,8 +194,6 @@ def plot_srvsb_pt(sample, blind, sb='sb2sr'):
             #if rk == 'sr_maxy': c[rk] = ROOT.TCanvas("c%s"%rk,"c%s"%rk, wd, ht)
             h[rk] = hf[r].Get(k)
             #h[rk].Draw("")
-
-    #regions = ['sb2sr', 'sr']
 
     for k in keys:
         h['sb2sr_%s'%k] = h['sblo2sr_%s'%k].Clone()
@@ -213,9 +215,10 @@ def plot_srvsb_pt(sample, blind, sb='sb2sr'):
     #k = 'maxy'
     for k in keys:
         if k == 'maxy':
-            draw_hist_1dma(k, h, c, sample, blind, -1, sb=sb)
+            draw_hist_1dma(k, h, c, sample, blind, -1)
             #draw_hist_1dma(k, h, c, sample, blind, 4.e3)
             #draw_hist_1dma(k, h, c, sample, blind)
         else:
-            draw_hist_1dma(k, h, c, sample, blind, sb=sb)
+            #draw_hist_1dma(k, h, c, sample, blind)
+            draw_hist_1dma(k, h, c, sample, blind, -1)
 
