@@ -24,6 +24,7 @@ parser.add_argument('--do_ptomGG', action='store_true', help='Switch to apply pt
 parser.add_argument('--do_pt_reweight', action='store_true', help='Switch to apply 2d pt re-weighting.')
 parser.add_argument('--do_combined_template', action='store_true', help='Switch to apply 2d ma re-weighting corresponding to combined hgg SR + data SB template.')
 parser.add_argument('-n', '--norm', default=None, type=float, help='SB to SR normalization.')
+parser.add_argument('-e', '--events', default=-1, type=int, help='Number of evts to process.')
 args = parser.parse_args()
 
 ma_binw = 25. # MeV
@@ -85,8 +86,8 @@ nEvts = tree.GetEntries()
 print('N evts in MA ntuple:',nEvts)
 # Event range to process
 iEvtStart = 0
-iEvtEnd   = nEvts
-#iEvtEnd   = 100000
+iEvtEnd   = nEvts if args.events == -1 else args.events
+#iEvtEnd   = 10000
 
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0

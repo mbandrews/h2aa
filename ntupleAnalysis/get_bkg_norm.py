@@ -6,14 +6,14 @@ import os, glob
 from root_numpy import hist2array
 from data_utils import *
 
-def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False):
+def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1):
     '''
     Convenience fn for running the background modeling event loop.
     Returns a string for the python command arguments to be executed.
     '''
     print('Running bkg model for sample %s, region: %s, blind: %s'%(s, r, blind))
-    pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s -n %f'\
-            %(s, r, blind, ' '.join(ma_inputs), get_ma_tree_name(s), output_dir, norm)
+    pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s -n %f -e %d'\
+            %(s, r, blind, ' '.join(ma_inputs), get_ma_tree_name(s), output_dir, norm, nevts)
     if do_combo_template:
         pyargs += ' --do_combined_template'
     if do_ptomGG:

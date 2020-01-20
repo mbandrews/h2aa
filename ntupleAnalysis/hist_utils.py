@@ -37,13 +37,15 @@ def create_hists(h):
 
     pt_bins_ = {}
     dPt = 1
-    pt_bins_[0] = np.arange(26,100,dPt)
+    #pt_bins_[0] = np.arange(26,100,dPt)
+    pt_bins_[0] = np.arange(25,100,dPt)
     dPt = 5
     pt_bins_[1] = np.arange(100,120,dPt)
     dPt = 20
     pt_bins_[2] = np.arange(120,200,dPt)
     dPt = 750-200
     pt_bins_[3] = np.arange(200,750+dPt,dPt)
+
     pt_bins = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_.values()])
     n_pt_bins = len(pt_bins)-1
     pt_bins = array('d', list(pt_bins))
@@ -54,6 +56,8 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
     k = 'pt0vpt1'
     h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, n_pt_bins, pt_bins)
+    k = 'ptxy'
+    h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
 
     k = 'energy0'
     h[k] = ROOT.TH1F(k, k, 50, 20., 170.)
@@ -143,6 +147,8 @@ def fill_hists(h, tree, wgt):
     h['pt0'].Fill(tree.phoEt[0], wgt)
     h['pt1'].Fill(tree.phoEt[1], wgt)
     h['pt0vpt1'].Fill(tree.phoEt[0], tree.phoEt[1], wgt)
+    h['ptxy'].Fill(tree.phoEt[0], wgt)
+    h['ptxy'].Fill(tree.phoEt[1], wgt)
 
     h['energy0'].Fill(tree.phoE[0], wgt)
     h['energy1'].Fill(tree.phoE[1], wgt)
