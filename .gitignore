@@ -2,7 +2,7 @@
 *.root
 *.npz
 *.eps
+*.txt
 ggSkims/*
 crab/crab_*
 ntupleAnalysis/__*
-
