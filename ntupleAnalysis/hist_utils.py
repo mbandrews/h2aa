@@ -68,6 +68,8 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
     k = 'bdt1'
     h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    k = 'bdtxy'
+    h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
 
     k = 'mGG'
     h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
@@ -155,6 +157,8 @@ def fill_hists(h, tree, wgt):
 
     h['bdt0'].Fill(tree.phoIDMVA[0], wgt)
     h['bdt1'].Fill(tree.phoIDMVA[1], wgt)
+    h['bdtxy'].Fill(tree.phoIDMVA[0], wgt)
+    h['bdtxy'].Fill(tree.phoIDMVA[1], wgt)
 
     h['mGG'].Fill(tree.mgg, wgt)
 

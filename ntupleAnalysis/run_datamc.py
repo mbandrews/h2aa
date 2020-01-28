@@ -125,7 +125,8 @@ for sample in samples:
                 norm=norm[sample],\
                 #do_ptomGG=False if 'sb' in r else True,\
                 #do_pt_reweight=True if 'sb' in r else False)\
-                nevts=10000
+                #nevts=100000
+                nevts=-1
                 ))
 
 # Run processes in parallel

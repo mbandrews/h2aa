@@ -120,8 +120,8 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
 def bdt_passed(tree):
     #if tree.phoIDMVA[0] < -0.96: return False
     #if tree.phoIDMVA[1] < -0.96: return False
-    if tree.phoIDMVA[0] < -0.90: return False
-    if tree.phoIDMVA[1] < -0.90: return False
+    if tree.phoIDMVA[0] < -0.995: return False
+    if tree.phoIDMVA[1] < -0.995: return False
     return True
 
 def ptomGG_passed(tree):
