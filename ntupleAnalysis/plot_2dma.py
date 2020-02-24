@@ -17,7 +17,8 @@ def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
     ROOT.gPad.SetBottomMargin(0.14)
     ROOT.gStyle.SetPalette(55)#53
     h[k].GetYaxis().SetTitleOffset(1.)
-    h[k].GetZaxis().SetTitle("Events")
+    #h[k].GetZaxis().SetTitle("Events")
+    h[k].GetZaxis().SetTitle("Events / 25 MeV")
     h[k].GetZaxis().SetTitleOffset(1.5)
     h[k].GetZaxis().SetTitleSize(0.05)
     h[k].GetZaxis().SetTitleFont(62)
@@ -49,17 +50,20 @@ def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
 hf, h = {}, {}
 c = {}
 
-regions = ['sb2sr']
-#regions = ['sb']
-#regions = ['sr']
+#regions = ['sb2sr']
+#regions = ['sblo']
+#regions = ['sbhi']
+regions = ['sr']
 keys = ['ma0vma1']
 sample = 'Run2017B-F'
 blind = 'diag_lo_hi'
-blind = None
+#blind = 'sg'
+#blind = None
 
 for r in regions:
     hf[r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
     for k in keys:
         rk = '%s_%s'%(r, k)
         h[rk] = hf[r].Get(k)
-        draw_hist_2dma(k, h, c, sample, blind, r, do_trunc=False)
+        #draw_hist_2dma(k, h, c, sample, blind, r, do_trunc=False)
+        draw_hist_2dma(k, h, c, sample, blind, r, do_trunc=True)

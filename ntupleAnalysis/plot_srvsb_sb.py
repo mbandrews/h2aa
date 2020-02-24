@@ -28,7 +28,8 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
 
     pUp.cd()
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a,pred} [GeV]", "N_{a}", "")
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a}", "")
+    #h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a}", "")
+    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / 25 MeV", "")
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     #h[k].SetLineColor(9)
@@ -37,6 +38,10 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     #h[k].SetFillStyle(fill_style)
     #h[k].Draw("%s"%err_style)
     hc[k] = h[k].Clone()
+
+    # if blinding in SR, leave uncommented
+    hc[k].Reset()
+
     #hc[k].SetLineColor(9)
     hc[k].SetFillStyle(0)
     hc[k].SetMarkerStyle(20)
@@ -71,6 +76,7 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     if ymax_ is not None and ymax_ > 0.:
         ymax = ymax_
     hc[k].GetYaxis().SetRangeUser(0.1, ymax)
+    hc[k].GetXaxis().SetRangeUser(0., 1.2)
 
     l, l2, hatch = {}, {}, {}
     legend = {}
@@ -104,7 +110,8 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     pDn.SetTicky()
     pDn.SetGridy()
 
-    fUnity = ROOT.TF1("fUnity","[0]",-0.4,1.2)
+    #fUnity = ROOT.TF1("fUnity","[0]",-0.4,1.2)
+    fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
     fUnity.GetXaxis().SetTitle("m_{a,pred} [GeV]")
@@ -137,7 +144,12 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     h[k].SetLineColor(9)
     h[k].Sumw2()
     h[k].SetStats(0)
-    h[k].Divide(h['sr_%s'%k_])
+
+    # if blinding in SR, leave commented
+    #h[k].Divide(h['sr_%s'%k_])
+    # if blinding in SR, leave uncommented
+    h[k].Divide(h[k])
+
     h[k].SetMarkerStyle(20)
     h[k].SetMarkerSize(0.85)
     h[k].SetMarkerColor(9)
@@ -175,6 +187,51 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
         pass
         #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
 
+def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
+
+    hc = {}
+    wd, ht = int(800*1), int(680*1)
+
+    #k = '%s_%s'%(r, k_)
+    k = 'sb2sr'+'_%s'%(k_)
+    c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+    #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
+    h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
+    ROOT.gPad.SetRightMargin(0.19)
+    ROOT.gPad.SetLeftMargin(0.14)
+    ROOT.gPad.SetTopMargin(0.05)
+    ROOT.gPad.SetBottomMargin(0.14)
+    ROOT.gStyle.SetPalette(55)#53
+    h[k].GetYaxis().SetTitleOffset(1.)
+    #h[k].GetZaxis().SetTitle("Events")
+    h[k].GetZaxis().SetTitle("Events / 25 MeV")
+    h[k].GetZaxis().SetTitleOffset(1.5)
+    h[k].GetZaxis().SetTitleSize(0.05)
+    h[k].GetZaxis().SetTitleFont(62)
+    h[k].GetZaxis().SetLabelSize(0.04)
+    h[k].GetZaxis().SetLabelFont(62)
+    h[k].GetXaxis().SetTitleOffset(1.)
+    h[k].GetXaxis().SetTitleSize(0.06)
+    h[k].GetYaxis().SetTitleSize(0.06)
+
+    if do_trunc:
+        h[k].GetXaxis().SetRangeUser(0., 1.2)
+        h[k].GetYaxis().SetRangeUser(0., 1.2)
+
+    h[k].Draw("COL Z")
+    #h[k].SetMaximum(350.)
+    #h[k].SetMaximum(680.)
+    #h[k].SetMaximum(175.)
+    #h[k].SetMaximum(340.)
+    c[k].Draw()
+    palette = h[k].GetListOfFunctions().FindObject("palette")
+    #palette.SetX1NDC(0.84)
+    #palette.SetX2NDC(0.89)
+    #palette.SetY1NDC(0.13)
+
+    c[k].Update()
+    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+
 def plot_srvsb_sb(sample, blind):
 
     hf, h = {}, {}
@@ -185,7 +242,8 @@ def plot_srvsb_sb(sample, blind):
     #regions = ['sbcombo2sr', 'sr']
     #keys = ['ma0vma1', 'maxy']
     #keys = ['maxy']
-    keys = ['maxy','ma0','ma1']
+    #keys = ['maxy','ma0','ma1']
+    keys = ['maxy','ma0','ma1','ma0vma1']
 
     for r in regions:
         hf[r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
@@ -218,6 +276,8 @@ def plot_srvsb_sb(sample, blind):
             draw_hist_1dma(k, h, c, sample, blind, -1)
             #draw_hist_1dma(k, h, c, sample, blind, 4.e3)
             #draw_hist_1dma(k, h, c, sample, blind)
+        if k == 'ma0vma1':
+            draw_hist_2dma(k, h, c, sample, blind, r, do_trunc=True)
         else:
             #draw_hist_1dma(k, h, c, sample, blind)
             draw_hist_1dma(k, h, c, sample, blind, -1)
