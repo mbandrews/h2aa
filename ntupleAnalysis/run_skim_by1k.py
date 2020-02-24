@@ -38,9 +38,9 @@ samples = ['Run2017%s'%s for s in samples]
 eos_basedir = '/store/group/lpcsusystealth/stealth2018Ntuples_with10210'
 samples = [
 #    'A'
-    'B'
-    ,'C'
-#    ,'D'
+#    'B'
+#    ,'C'
+    'D'
     ]
 samples = ['Run2018%s'%s for s in samples]
 
@@ -74,13 +74,14 @@ for s in samples:
     gg_inputs = [f for f in gg_inputs if 'ntuplizedOct2019' in f]
     print(len(gg_inputs))
 
-    # mass_eval_ntuples.py
-    #pyargs = 'skim_ntuple.py -s %s -i %s -o %s'%(s, ' '.join(gg_inputs), output_dir)
-    pyargs = 'skim_ntuple.py -s %s -b %s -o %s'%(s, eos_basedir, output_dir)
-    #print(pyargs)
-    #os.system('python %s'%pyargs)
-    processes.append(pyargs)
-    #break
+    for r in range(4,9):
+        # mass_eval_ntuples.py
+        #pyargs = 'skim_ntuple.py -s %s -b %s -o %s'%(s, eos_basedir, output_dir)
+        pyargs = 'skim_ntuple_by1k.py -s %s -b %s -o %s -r %d'%(s, eos_basedir, output_dir, r)
+        #print(pyargs)
+        #os.system('python %s'%pyargs)
+        processes.append(pyargs)
+        #break
 
 print(len(processes))
 pool = Pool(processes=len(processes))

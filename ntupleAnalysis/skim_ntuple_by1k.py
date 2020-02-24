@@ -20,6 +20,7 @@ parser.add_argument('-i', '--inputs', default=None, nargs='+', type=str, help='I
 parser.add_argument('-b', '--eos_basedir', default='/store/group/lpcsusystealth/stealth2018Ntuples_with9413', type=str, help='Input EOS basedir.')
 parser.add_argument('-t', '--treename', default='Data', type=str, help='MA TTree name prefix.')
 parser.add_argument('-o', '--outdir', default='.', type=str, help='Output directory.')
+parser.add_argument('-r', '--run', default=None, type=int, help='Input subdir.')
 args = parser.parse_args()
 
 sample = args.sample
@@ -35,6 +36,9 @@ counts = OrderedDict([(cut, 0) for cut in cuts])
 
 inputs = run_eosfind(eos_basedir, sample) if args.inputs is None else args.inputs
 inputs = [f for f in inputs if ('ntuplizedOct2019' in f) and ('failed' not in f)]
+if args.run is not None:
+    sample = sample+'_'+str(args.run)
+    inputs = [f for f in inputs if ('/000%d/'%args.run in f)]
 print('N ggntuple input files:',len(inputs))
 print('ggntuple file[0]:',inputs[0])
 print('ggntuple file[-1]:',inputs[-1])
