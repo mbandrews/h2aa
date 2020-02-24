@@ -108,7 +108,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
 
     # Get event weight
     #wgt = 1. if 'Data' in args.treename else tree.weight
-    wgt = 1.
+    wgt = 1. if tree.isData else tree.genWeight
+    #wgt = 1.
     #if region != 'sr' and do_pt_reweight:
     #if 'sb' in region and do_pt_reweight:
     if do_pt_reweight:
@@ -139,7 +140,7 @@ print('h[maxy].Integral():',hists['maxy'].Integral())
 
 # Initialize output ntuple
 write_hists(hists, "%s/%s_%s_blind_%s_templates.root"%(outdir, sample, region, blind))
-write_cut_hists(hists, "%s/%s_%s_cut_hists.root"%(outdir, sample, region))
+write_cut_hists(cut_hists, "%s/%s_%s_cut_hists.root"%(outdir, sample, region))
 
 # Print cut flow summary
 print_stats(counts, "%s/%s_%s_cut_stats.txt"%(outdir, sample, region))

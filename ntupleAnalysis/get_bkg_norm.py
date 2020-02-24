@@ -47,6 +47,7 @@ def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_rewe
     # [1] First run hgg, data mH-SB, data mH-SR with 2d-ma-SR blinded
     # These will output TH2F histograms into root files which will be picked up in [2]
     blind = 'sg'
+    #blind = None
 
     # Data mH-SB and mH-SR
     s = 'Run2017[B-F]'
@@ -522,9 +523,9 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     fhi = 4.91340e-01
 
     #bdt > -0.9
-    fgg = 0.
-    flo = 5.20326e-01
-    fhi = 4.79670e-01
+    #fgg = 0.
+    #flo = 5.20326e-01
+    #fhi = 4.79670e-01
 
     fgg = fgg/(fgg+flo+fhi)
     flo = flo/(fgg+flo+fhi)

@@ -44,7 +44,9 @@ def select_event(tree, cuts, hists, counts, outvars=None):
     cut = 'trg'
     if cut in cuts:
         #if tree.HLTPho>>14&1 == 0 and tree.HLTPho>>17&1 == 0: # HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90, HLT_Diphoton30EB_18EB_R9Id_OR_IsoCaloId_AND_HE_R9Id_DoublePixelVeto_Mass55_v
-        if tree.HLTPho>>37&1 == 0: #HLT_Diphoton30PV_18PV_R9Id_AND_IsoCaloId_AND_HE_R9Id_PixelVeto_Mass55_v
+        if (tree.HLTPho>>37&1 == 0) and (tree.HLTPho>>16&1 == 0):
+            #HLT_Diphoton30PV_18PV_R9Id_AND_IsoCaloId_AND_HE_R9Id_PixelVeto_Mass55_v
+            #HLT_Diphoton30PV_18PV_R9Id_AND_IsoCaloId_AND_HE_R9Id_DoublePixelVeto_Mass55_v
             return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
@@ -56,7 +58,8 @@ def select_event(tree, cuts, hists, counts, outvars=None):
         for i in range(tree.nPho):
             if not reco_pho(i, tree): continue
             phoRecoIdxs.append(i)
-        if len(phoRecoIdxs) != 2:
+        #if len(phoRecoIdxs) != 2:
+        if len(phoRecoIdxs) != 2 and len(phoRecoIdxs) != 3:
             return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
@@ -120,8 +123,8 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
 def bdt_passed(tree):
     #if tree.phoIDMVA[0] < -0.96: return False
     #if tree.phoIDMVA[1] < -0.96: return False
-    if tree.phoIDMVA[0] < -0.995: return False
-    if tree.phoIDMVA[1] < -0.995: return False
+    if tree.phoIDMVA[0] < -0.98: return False
+    if tree.phoIDMVA[1] < -0.98: return False
     return True
 
 def ptomGG_passed(tree):
@@ -145,7 +148,9 @@ def in_region(region, tree):
 
     #if region == 'sb' or region == 'sb2sr':
     #if 'sb' in region:
-    if 'sblo' in region:
+    if 'all' in region:
+        return True
+    elif 'sblo' in region:
         if in_sblo: return True
     elif 'sbhi' in region:
         if in_sbhi: return True

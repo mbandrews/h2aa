@@ -75,7 +75,8 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
 
     k = 'wgt'
-    h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
+    #h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
+    h[k] = ROOT.TH1F(k, k, 300, -600., 600.)
 
 def create_cut_hists(h, cuts):
 
@@ -116,7 +117,8 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
         h[cut+'sieie'].Fill(tree.phoSigmaIEtaIEtaFull5x5[i])
         h[cut+'hoe'].Fill(tree.phoHoverE[i])
         #h[cut+'HLTDipho_m90'].Fill(tree.HLTPho>>14&1)
-        h[cut+'HLTDiphoPV_m55'].Fill(tree.HLTPho>>37&1)
+        #h[cut+'HLTDiphoPV_m55'].Fill(tree.HLTPho>>37&1)
+        h[cut+'HLTDiphoPV_m55'].Fill((tree.HLTPho>>37&1) or (tree.HLTPho>>16&1))
 
     if outvars is not None:
         if 'mgg' in outvars.keys():
@@ -189,7 +191,7 @@ def write_cut_hists(h, out_filename):
         file_out.cd()
         file_out.mkdir(cut)
         file_out.cd(cut)
-        cut_keys = [k for k in h.keys() if cut in k]
+        cut_keys = [k for k in h.keys() if cut+'_' in k]
         for k in cut_keys:
             h[k].Write()
 
