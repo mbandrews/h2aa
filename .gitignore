@@ -3,6 +3,7 @@
 *.npz
 *.eps
 *.txt
+*.json
 ggSkims/*
 crab/crab_*
 ntupleAnalysis/__*
