@@ -2,6 +2,7 @@ import ROOT
 import numpy as np
 from array import array
 from hist_utils import *
+#from plot_2dma import draw_hist_2dma
 
 def draw_hist_1dma(k_, region, h, c, samples, blind, ymax_=None):
 
@@ -1087,6 +1088,51 @@ def draw_hist_1dmastacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
         pass
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(samples[0], blind))
 
+def draw_hist_2dma(k_, h, c, samples, blind, r, ymax_=None, do_trunc=True):
+
+    hc = {}
+    wd, ht = int(800*1), int(680*1)
+    print(h.keys())
+
+    k = 'mc'+'%s%s'%(r, k_)
+    c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+    #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
+    h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
+    ROOT.gPad.SetRightMargin(0.19)
+    ROOT.gPad.SetLeftMargin(0.14)
+    ROOT.gPad.SetTopMargin(0.05)
+    ROOT.gPad.SetBottomMargin(0.14)
+    ROOT.gStyle.SetPalette(55)#53
+    h[k].GetYaxis().SetTitleOffset(1.)
+    #h[k].GetZaxis().SetTitle("Events")
+    h[k].GetZaxis().SetTitle("Events / 25 MeV")
+    h[k].GetZaxis().SetTitleOffset(1.5)
+    h[k].GetZaxis().SetTitleSize(0.05)
+    h[k].GetZaxis().SetTitleFont(62)
+    h[k].GetZaxis().SetLabelSize(0.04)
+    h[k].GetZaxis().SetLabelFont(62)
+    h[k].GetXaxis().SetTitleOffset(1.)
+    h[k].GetXaxis().SetTitleSize(0.06)
+    h[k].GetYaxis().SetTitleSize(0.06)
+
+    if do_trunc:
+        h[k].GetXaxis().SetRangeUser(0., 1.2)
+        h[k].GetYaxis().SetRangeUser(0., 1.2)
+    h[k].Draw("COL Z")
+    #h[k].SetMaximum(350.)
+    #h[k].SetMaximum(680.)
+    #h[k].SetMaximum(175.)
+    #h[k].SetMaximum(340.)
+    c[k].Draw()
+    palette = h[k].GetListOfFunctions().FindObject("palette")
+    #palette.SetX1NDC(0.84)
+    #palette.SetX2NDC(0.89)
+    #palette.SetY1NDC(0.13)
+
+    c[k].Update()
+    samples_str = '_'.join(samples)
+    c[k].Print('Plots/%s_2dma_blind_%s_%s%s.eps'%(samples_str, blind, k, '_ext' if not do_trunc else ''))
+
 def plot_color(key):
     if 'QCD' in key:
         return 2 #red
@@ -1119,13 +1165,13 @@ def plot_datamc(samples, blind, norm):
 
     #regions = ['sb2sr', 'sr']
     #regions = ['sblo2sr', 'sbhi2sr', 'sr']
-    regions = ['sblo2sr']
-    #keys = ['ma0vma1', 'maxy']
+    #regions = ['sblo2sr']
+    regions = ['sblo']
+    #keys = ['ma0vma1']
     #keys = ['maxy']
     #keys = ['maxy','ma0','ma1']
     #keys = ['ptxy', 'maxy','mGG']
     keys = ['ptxy', 'maxy','mGG','bdtxy']
-    #keys = ['bdt0']
 
     for s in samples:
         for r in regions:
@@ -1133,7 +1179,9 @@ def plot_datamc(samples, blind, norm):
             for k in keys:
                 #srk = '%s_%s_%s'%(s, r, k)
                 h[s+r+k] = hf[s+r].Get(k)
+                print(s+r+k,h[s+r+k].GetEntries(),h[s+r+k].Integral())
                 h[s+r+k].Scale(norm[s])
+                print(s+r+k,h[s+r+k].GetEntries(),h[s+r+k].Integral())
 
     hsum = {}
     hsample = {}
@@ -1144,7 +1192,7 @@ def plot_datamc(samples, blind, norm):
                 # Clone struct of histogram without copying its contents
                 hsum[d+r+k] = h[samples[0]+r+k].Clone()
                 hsum[d+r+k].Reset()
-                print(hsum[d+r+k].Integral())
+                #print(hsum[d+r+k].Integral())
             for t in sample_types:
                 hsample[t+r+k] = h[samples[0]+r+k].Clone()
                 hsample[t+r+k].Reset()
@@ -1152,22 +1200,23 @@ def plot_datamc(samples, blind, norm):
             # Add up
             for s in samples:
                 d = 'data' if 'Run' in s else 'mc'
-                print(s, h[s+r+k].Integral())
+                #print(s, h[s+r+k].Integral())
                 hsum[d+r+k].Add(h[s+r+k])
-                print(hsum[d+r+k].Integral())
+                #print(hsum[d+r+k].Integral())
 
                 t = s.split('_')[0]
                 hsample[t+r+k].Add(h[s+r+k])
-                print(t,hsample[t+r+k].Integral())
+                #print(t,hsample[t+r+k].Integral())
 
             mcnorm = get_dataomc_norm(k, r, hsum)
-            print(mcnorm)
+            #print(mcnorm)
 
+            #'''
             if 'pt' in k:
                 print('pt')
                 draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [25., 100.], "p_{T,a} [GeV]")
-            if 'ma' in k:
+            if 'ma' in k and 'v' not in k:
                 print('max')
                 draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [-0.4, 1.2], "m_{a,pred} [GeV]")
@@ -1178,3 +1227,7 @@ def plot_datamc(samples, blind, norm):
             if 'bdt' in k:
                 print('bdt')
                 draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, None, mcnorm, [-1., 1.], "Photon ID")
+            if 'ma0vma1' in k:
+                print('ma0vma1')
+                draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)
+            #'''
