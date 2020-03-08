@@ -15,7 +15,9 @@ UNITSPERJOB = '__UNITSPERJOB__'
 #this_campaign = 'Era2017_17Dec2019_MINIAOD-skimv1'
 #this_campaign = 'Era2017_29Jan2020_MINIAOD-skimv1'
 #this_campaign = 'Era2017_20Feb2020_MINIAOD-skimv1'
-this_campaign = 'Era2017_23Feb2020_MINIAOD-skimv1'
+#this_campaign = 'Era2017_23Feb2020_MINIAOD-skimv1'
+#this_campaign = 'Era2017_23Feb2020_MINIAOD-skimv2'
+this_campaign = 'Era2017_23Feb2020_MINIAOD-skimv3'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
@@ -50,11 +52,12 @@ samples = {
 
 #'''
 run = 'Run2018'
-job_units = 800
+#job_units = 100
+job_units = 50 #D
 samples = {
-    '%sA'%run: "/EGamma/Run2018A-17Sep2018-v2/MINIAOD",
-    '%sB'%run: "/EGamma/Run2018B-17Sep2018-v1/MINIAOD",
-    '%sC'%run: "/EGamma/Run2018C-17Sep2018-v1/MINIAOD",
+    #'%sA'%run: "/EGamma/Run2018A-17Sep2018-v2/MINIAOD",
+    #'%sB'%run: "/EGamma/Run2018B-17Sep2018-v1/MINIAOD",
+    #'%sC'%run: "/EGamma/Run2018C-17Sep2018-v1/MINIAOD",
     '%sD'%run: "/EGamma/Run2018D-22Jan2019-v2/MINIAOD"
     }
 #'''
@@ -72,12 +75,18 @@ samples = {
 #job_units = 100
 job_units = 1000
 samples = {
-    'DiPhotonJets':    '/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
-    'GJet_Pt20To40':  '/GJet_Pt-20to40_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
-    'GJet_Pt40ToInf': '/GJet_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM',
-    'QCD_Pt30To40':   '/QCD_Pt-30to40_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
-    'QCD_Pt40ToInf':  '/QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
-    'GluGluHToGG':     '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
+#    'DiPhotonJets':
+#        '/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
+#    'GJet_Pt20To40':
+#        '/GJet_Pt-20to40_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
+#    'GJet_Pt40ToInf':
+#        '/GJet_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM',
+#    'QCD_Pt30To40':
+#        '/QCD_Pt-30to40_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
+#    'QCD_Pt40ToInf':
+#        '/QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
+    'GluGluHToGG':
+        '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'
     }
 '''
 
