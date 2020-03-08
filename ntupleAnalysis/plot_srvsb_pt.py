@@ -178,6 +178,7 @@ def plot_srvsb_pt(sample, blind, sb='sb2sr'):
 
     regions = [sb, 'sr']
     #regions = ['sbcombo2sr', 'sr']
+    regions = ['sblo2sr', 'sbhi2sr', 'sr']
     #keys = ['ma0vma1', 'maxy']
     #keys = ['maxy']
     keys = ['pt0','pt1']
@@ -189,6 +190,12 @@ def plot_srvsb_pt(sample, blind, sb='sb2sr'):
             #if rk == 'sr_maxy': c[rk] = ROOT.TCanvas("c%s"%rk,"c%s"%rk, wd, ht)
             h[rk] = hf[r].Get(k)
             #h[rk].Draw("")
+
+    #regions = ['sb2sr', 'sr']
+
+    for k in keys:
+        h['sb2sr_%s'%k] = h['sblo2sr_%s'%k].Clone()
+        h['sb2sr_%s'%k].Add(h['sbhi2sr_%s'%k])
 
     '''
     r = 'sb2sr'

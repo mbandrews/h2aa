@@ -12,15 +12,33 @@ LUMIMASK = '__LUMIMASK__'
 CAMPAIGN = '__CAMPAIGN__'
 UNITSPERJOB = '__UNITSPERJOB__'
 
-this_campaign = 'Era2017_17Dec2019_MINIAOD-skimv1'
+#this_campaign = 'Era2017_17Dec2019_MINIAOD-skimv1'
+#this_campaign = 'Era2017_29Jan2020_MINIAOD-skimv1'
+#this_campaign = 'Era2017_20Feb2020_MINIAOD-skimv1'
+this_campaign = 'Era2017_23Feb2020_MINIAOD-skimv1'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
     os.makedirs(crab_folder)
 
-#'''
-run = 'DoubleEG_2017'
-job_units = 1000
+'''
+run = 'Run2016'
+job_units = 800
+samples = {
+    '%sB'%run: "/DoubleEG/Run2016B-17Jul2018_ver2-v1/MINIAOD",
+    '%sC'%run: "/DoubleEG/Run2016C-17Jul2018-v1/MINIAOD",
+    '%sD'%run: "/DoubleEG/Run2016D-17Jul2018-v1/MINIAOD",
+    '%sE'%run: "/DoubleEG/Run2016E-17Jul2018-v1/MINIAOD",
+    '%sF'%run: "/DoubleEG/Run2016F-17Jul2018-v1/MINIAOD",
+    '%sG'%run: "/DoubleEG/Run2016G-17Jul2018-v1/MINIAOD",
+    '%sH'%run: "/DoubleEG/Run2016H-17Jul2018-v1/MINIAOD"
+    }
+'''
+
+'''
+#run = 'DoubleEG_2017'
+run = 'Run2017'
+job_units = 800
 samples = {
     '%sB'%run: '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD',
     '%sC'%run: '/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD',
@@ -28,8 +46,20 @@ samples = {
     '%sE'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
     '%sF'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'
     }
+'''
+
 #'''
+run = 'Run2018'
+job_units = 800
+samples = {
+    '%sA'%run: "/EGamma/Run2018A-17Sep2018-v2/MINIAOD",
+    '%sB'%run: "/EGamma/Run2018B-17Sep2018-v1/MINIAOD",
+    '%sC'%run: "/EGamma/Run2018C-17Sep2018-v1/MINIAOD",
+    '%sD'%run: "/EGamma/Run2018D-22Jan2019-v2/MINIAOD"
+    }
 #'''
+
+'''
 job_units = 500
 run = 'h24gamma_1j_1M'
 samples = {
@@ -37,8 +67,8 @@ samples = {
     '%s_400MeV'%run: '/h24gamma_01Nov2019-rhECAL/mandrews-h24gamma_1j_1M_400MeV_PU2017_MINIAODSIM_v2-919c80a76a70185609d372d13ecbc645/USER',
     '%s_1GeV'%run:   '/h24gamma_01Nov2019-rhECAL/mandrews-h24gamma_1j_1M_1GeV_PU2017_MINIAODSIM_v2-919c80a76a70185609d372d13ecbc645/USER',
     }
-#'''
-#'''
+'''
+'''
 #job_units = 100
 job_units = 1000
 samples = {
@@ -49,7 +79,7 @@ samples = {
     'QCD_Pt40ToInf':  '/QCD_Pt-40toInf_DoubleEMEnriched_MGG-80toInf_TuneCP5_13TeV_Pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
     'GluGluHToGG':     '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',
     }
-#'''
+'''
 
 for s,dset in samples.iteritems(): #python3: samples.items()
 
@@ -58,7 +88,8 @@ for s,dset in samples.iteritems(): #python3: samples.items()
     assert os.environ['CMSSW_BASE'] != ''
     base_dir = '%s/src'%os.environ['CMSSW_BASE']
 
-    evt_list = '%s/h2aa/evtsToProc/%s_2photons_ggskim_event_list.txt'%(base_dir, s.replace('-MINIAOD',''))
+    #evt_list = '%s/h2aa/evtsToProc/%s_2photons_ggskim_event_list.txt'%(base_dir, s.replace('-MINIAOD',''))
+    evt_list = '%s/h2aa/evtsToProc/%s_3photons_ggskim_event_list.txt'%(base_dir, s.replace('-MINIAOD',''))
     assert os.path.isfile(evt_list), '%s not found'%evt_list
 
     # Run edmPickEvents on filtered event list for this sample
@@ -69,7 +100,8 @@ for s,dset in samples.iteritems(): #python3: samples.items()
         raise Exception('edmPickEvents failed')
 
     # Copy generated lumi mask
-    lumi_list = '%s/h2aa/evtsToProc/%s_2photons_ggskim_lumi_list.json'%(base_dir, s.replace('-MINIAOD',''))
+    #lumi_list = '%s/h2aa/evtsToProc/%s_2photons_ggskim_lumi_list.json'%(base_dir, s.replace('-MINIAOD',''))
+    lumi_list = '%s/h2aa/evtsToProc/%s_3photons_ggskim_lumi_list.json'%(base_dir, s.replace('-MINIAOD',''))
     shutil.move('%s/pickevents.json'%os.getcwd(), '%s'%(lumi_list)) # shutil.move(src, dest)
 
     # Read in crabConfig template
@@ -87,5 +119,6 @@ for s,dset in samples.iteritems(): #python3: samples.items()
     file_data = file_data.replace(UNITSPERJOB, str(job_units))
 
     # Write out sample-specific crabConfig
-    with open('%s/crabConfig_pickEvents_%s.py'%(crab_folder, s), "w") as sample_file:
+    #with open('%s/crabConfig_pickEvents_%s.py'%(crab_folder, s), "w") as sample_file:
+    with open('%s/crabConfig_pickEvents_%s_3pho.py'%(crab_folder, s), "w") as sample_file:
         sample_file.write(file_data)

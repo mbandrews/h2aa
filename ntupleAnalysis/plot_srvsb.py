@@ -1,4 +1,5 @@
 import ROOT
+import numpy as np
 from array import array
 from hist_utils import *
 
@@ -62,7 +63,11 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     k = 'sr_%s'%k_
     ymax = 1.2*max(h[k].GetMaximum(), h['sb2sr_%s'%k_].GetMaximum())
     if ymax_ == -1 and hc[k].GetBinContent(2) > 0.:
-        ymax = 1.2*hc[k].GetBinContent(2)
+        #ymax = 1.2*hc[k].GetBinContent(2)
+        ymax = 1.2*max(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]),
+                       np.max([hc['sb2sr_%s'%k_].GetBinContent(ib) for ib in range(2, hc['sb2sr_%s'%k_].GetNbinsX()+2)]))
+        #ymax = 1.2*np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)])
+        #print(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]))
     if ymax_ is not None and ymax_ > 0.:
         ymax = ymax_
     hc[k].GetYaxis().SetRangeUser(0.1, ymax)
@@ -165,10 +170,10 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     c[k].Update()
     #c[k].Print('Plots/%s_sb2srvsr_blind_%s.eps'%(sample, blind))
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
+    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
     if 'ma1' in k_:
         pass
-        c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
-    #c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+        #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
 
 def plot_srvsb(sample, blind):
 
@@ -209,5 +214,6 @@ def plot_srvsb(sample, blind):
             #draw_hist_1dma(k, h, c, sample, blind, 4.e3)
             #draw_hist_1dma(k, h, c, sample, blind)
         else:
-            draw_hist_1dma(k, h, c, sample, blind)
+            #draw_hist_1dma(k, h, c, sample, blind)
+            draw_hist_1dma(k, h, c, sample, blind, -1)
 

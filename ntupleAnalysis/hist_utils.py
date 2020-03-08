@@ -37,13 +37,15 @@ def create_hists(h):
 
     pt_bins_ = {}
     dPt = 1
-    pt_bins_[0] = np.arange(26,100,dPt)
+    #pt_bins_[0] = np.arange(26,100,dPt)
+    pt_bins_[0] = np.arange(25,100,dPt)
     dPt = 5
     pt_bins_[1] = np.arange(100,120,dPt)
     dPt = 20
     pt_bins_[2] = np.arange(120,200,dPt)
     dPt = 750-200
     pt_bins_[3] = np.arange(200,750+dPt,dPt)
+
     pt_bins = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_.values()])
     n_pt_bins = len(pt_bins)-1
     pt_bins = array('d', list(pt_bins))
@@ -54,6 +56,8 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
     k = 'pt0vpt1'
     h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, n_pt_bins, pt_bins)
+    k = 'ptxy'
+    h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
 
     k = 'energy0'
     h[k] = ROOT.TH1F(k, k, 50, 20., 170.)
@@ -64,12 +68,15 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
     k = 'bdt1'
     h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    k = 'bdtxy'
+    h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
 
     k = 'mGG'
     h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
 
     k = 'wgt'
-    h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
+    #h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
+    h[k] = ROOT.TH1F(k, k, 300, -600., 600.)
 
 def create_cut_hists(h, cuts):
 
@@ -93,7 +100,7 @@ def create_cut_hists(h, cuts):
         #if 'mgg' in c:
         h[cut+'mgg'] = ROOT.TH1F(cut+'mgg', cut+'mgg', 50, 50., 200.)
 
-def fill_cut_hists(h, tree, cut_, outvars):
+def fill_cut_hists(h, tree, cut_, outvars=None):
 
     cut = cut_+'_'
 
@@ -110,10 +117,12 @@ def fill_cut_hists(h, tree, cut_, outvars):
         h[cut+'sieie'].Fill(tree.phoSigmaIEtaIEtaFull5x5[i])
         h[cut+'hoe'].Fill(tree.phoHoverE[i])
         #h[cut+'HLTDipho_m90'].Fill(tree.HLTPho>>14&1)
-        h[cut+'HLTDiphoPV_m55'].Fill(tree.HLTPho>>37&1)
+        #h[cut+'HLTDiphoPV_m55'].Fill(tree.HLTPho>>37&1)
+        h[cut+'HLTDiphoPV_m55'].Fill((tree.HLTPho>>37&1) or (tree.HLTPho>>16&1))
 
-    if 'mgg' in outvars.keys():
-        h[cut+'mgg'].Fill(outvars['mgg'])
+    if outvars is not None:
+        if 'mgg' in outvars.keys():
+            h[cut+'mgg'].Fill(outvars['mgg'])
 
 
 def fill_hists(h, tree, wgt):
@@ -142,12 +151,16 @@ def fill_hists(h, tree, wgt):
     h['pt0'].Fill(tree.phoEt[0], wgt)
     h['pt1'].Fill(tree.phoEt[1], wgt)
     h['pt0vpt1'].Fill(tree.phoEt[0], tree.phoEt[1], wgt)
+    h['ptxy'].Fill(tree.phoEt[0], wgt)
+    h['ptxy'].Fill(tree.phoEt[1], wgt)
 
     h['energy0'].Fill(tree.phoE[0], wgt)
     h['energy1'].Fill(tree.phoE[1], wgt)
 
     h['bdt0'].Fill(tree.phoIDMVA[0], wgt)
     h['bdt1'].Fill(tree.phoIDMVA[1], wgt)
+    h['bdtxy'].Fill(tree.phoIDMVA[0], wgt)
+    h['bdtxy'].Fill(tree.phoIDMVA[1], wgt)
 
     h['mGG'].Fill(tree.mgg, wgt)
 
@@ -178,7 +191,7 @@ def write_cut_hists(h, out_filename):
         file_out.cd()
         file_out.mkdir(cut)
         file_out.cd(cut)
-        cut_keys = [k for k in h.keys() if cut in k]
+        cut_keys = [k for k in h.keys() if cut+'_' in k]
         for k in cut_keys:
             h[k].Write()
 

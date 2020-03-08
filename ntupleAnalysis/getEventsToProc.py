@@ -21,7 +21,8 @@ for f_in in args.infiles:
     tree.Add(f_in)
 nEvts = tree.GetEntries()
 
-f = open("%s/%s_2photons_ggskim_event_list.txt"%(args.outdir, args.sample),"w+")
+#f = open("%s/%s_2photons_ggskim_event_list.txt"%(args.outdir, args.sample),"w+")
+f = open("%s/%s_3photons_ggskim_event_list.txt"%(args.outdir, args.sample),"w+")
 
 # Event range to process
 iEvtStart = 0

@@ -34,8 +34,10 @@ create_cut_hists(hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])
 
 inputs = run_eosfind(eos_basedir, sample) if args.inputs is None else args.inputs
+inputs = [f for f in inputs if ('ntuplizedOct2019' in f) and ('failed' not in f)]
 print('N ggntuple input files:',len(inputs))
 print('ggntuple file[0]:',inputs[0])
+print('ggntuple file[-1]:',inputs[-1])
 tree = ROOT.TChain('ggNtuplizer/EventTree')
 for i,fh in enumerate(inputs):
     tree.Add(fh)
