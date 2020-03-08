@@ -4,15 +4,37 @@ import os, glob
 import numpy as np
 import subprocess
 
+##2016
+#samples = [
+#    'B'
+#    ,'C'
+#    ,'D'
+#    ,'E'
+#    ,'F'
+#    ,'G'
+#    ,'H'
+#    ]
+#samples = ['Run2016%s'%s for s in samples]
+
+#2017
 samples = [
     'B'
     ,'C'
-    ,'D'
-    ,'E'
-    ,'F'
+    #,'D'
+    #,'E'
+    #,'F'
     ]
-samples = ['DoubleEG_2017%s'%s for s in samples]
-#samples = ['Run2017%s-MINIAOD'%s for s in samples]
+samples = ['Run2017%s'%s for s in samples]
+#samples = ['DoubleEG_2017%s'%s for s in samples] #v1, deprecated
+
+##2018
+#samples = [
+##    'A'
+#    'B'
+#    ,'C'
+##    ,'D'
+#    ]
+#samples = ['Run2018%s'%s for s in samples]
 
 #samples = [
 #    '100MeV'
@@ -21,17 +43,19 @@ samples = ['DoubleEG_2017%s'%s for s in samples]
 #    ]
 #samples = ['h24gamma_1j_1M_%s'%s for s in samples]
 
-samples = [
-    'DiPhotonJets'
-    ,'GJet_Pt20To40'
-    ,'GJet_Pt40ToInf'
-    ,'QCD_Pt30To40'
-    ,'QCD_Pt40ToInf'
-    ,'GluGluHToGG'
-    ]
+#samples = [
+#    'DiPhotonJets'
+#    ,'GJet_Pt20To40'
+#    ,'GJet_Pt40ToInf'
+#    ,'QCD_Pt30To40'
+#    ,'QCD_Pt40ToInf'
+#    'GluGluHToGG'
+#    ]
 
 # Inut IMG directory
-img_campaign = 'Era2017_17Dec2019_IMGv1'
+#img_campaign = 'Era2017_17Dec2019_IMGv1'
+#img_campaign = 'Era2017_23Feb2020_IMGv1'
+img_campaign = 'Era2017_23Feb2020_IMGv3'
 
 def get_img_dir(sample, campaign):
     if '2017' in sample:
@@ -73,7 +97,8 @@ for s in samples:
     gg_inputs = list(filter(None, gg_inputs)) # for py2.7: use filter(None, gg_inputs) without list()
     #gg_inputs = ['ggSkims/DoubleEG_2017B_ggskim.root']
     '''
-    gg_inputs = glob.glob('../ggSkims/%s*ggskim.root'%s)
+    #gg_inputs = glob.glob('../ggSkims/%s*ggskim.root'%s)
+    gg_inputs = glob.glob('../ggSkims/3pho/%s*ggskim.root'%s)
     print(gg_inputs[0])
     print('len(gg_inputs):',len(gg_inputs))
     assert len(gg_inputs) > 0
@@ -95,8 +120,14 @@ for s in samples:
     print('len(img_inputs):',len(img_inputs))
     assert len(img_inputs) > 0
 
+    img_inputs_filestr = 'img_inputs_%s.txt'%s
+    with open(img_inputs_filestr, 'w') as f:
+        for img_input in img_inputs:
+            f.write('%s\n'%img_input)
+
     # mass_eval_ntuples.py
-    pyargs = 'mass_ntuplizer.py -s %s -i %s -g %s -o %s'%(s, ' '.join(img_inputs), ' '.join(gg_inputs), output_dir)
+    #pyargs = 'mass_ntuplizer.py -s %s -i %s -g %s -o %s'%(s, ' '.join(img_inputs), ' '.join(gg_inputs), output_dir)
+    pyargs = 'mass_ntuplizer.py -s %s -i %s -g %s -o %s'%(s, img_inputs_filestr, ' '.join(gg_inputs), output_dir)
     #os.system('python %s'%pyargs)
     processes.append(pyargs)
     #break
