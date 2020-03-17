@@ -67,7 +67,9 @@ else:
 hists = {}
 create_hists(hists)
 
-cuts = [str(None), 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'bdt']
+#cuts = [str(None), 'npho', 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'npho', 'bdt']
+cuts = [str(None), 'npho', 'ptomGG'] if do_ptomGG else [str(None), 'npho']
+#cuts = [str(None), 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'bdt']
 #cuts = [str(None), 'ptomGG'] if do_ptomGG else [str(None)]
 cut_hists = OrderedDict()
 create_cut_hists(cut_hists, cuts)

@@ -58,8 +58,8 @@ def select_event(tree, cuts, hists, counts, outvars=None):
         for i in range(tree.nPho):
             if not reco_pho(i, tree): continue
             phoRecoIdxs.append(i)
-        #if len(phoRecoIdxs) != 2:
-        if len(phoRecoIdxs) != 2 and len(phoRecoIdxs) != 3:
+        #if len(phoRecoIdxs) != 2 and len(phoRecoIdxs) != 3:
+        if len(phoRecoIdxs) != 2:
             return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
