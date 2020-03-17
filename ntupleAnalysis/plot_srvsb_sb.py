@@ -40,7 +40,8 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     hc[k] = h[k].Clone()
 
     # if blinding in SR, leave uncommented
-    hc[k].Reset()
+    if blind == 'offdiag_lo_hi':
+        hc[k].Reset()
 
     #hc[k].SetLineColor(9)
     hc[k].SetFillStyle(0)
@@ -145,10 +146,12 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     h[k].Sumw2()
     h[k].SetStats(0)
 
-    # if blinding in SR, leave commented
-    #h[k].Divide(h['sr_%s'%k_])
-    # if blinding in SR, leave uncommented
-    h[k].Divide(h[k])
+    if blind == 'offdiag_lo_hi':
+        # if blinding in SR, leave uncommented
+        h[k].Divide(h[k])
+    else:
+        # if blinding in SR, leave commented
+        h[k].Divide(h['sr_%s'%k_])
 
     h[k].SetMarkerStyle(20)
     h[k].SetMarkerSize(0.85)
@@ -232,6 +235,51 @@ def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
     c[k].Update()
     c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
 
+def draw_hist_2dma_ratio(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
+
+    hc = {}
+    wd, ht = int(800*1), int(680*1)
+
+    #k = '%s_%s'%(r, k_)
+    k = 'sb2sr'+'_%s'%(k_)
+    c[k] = ROOT.TCanvas("c%s_ratio"%k,"c%s_ratio"%k,wd,ht)
+    #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
+    h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
+    h[k].Divide(h['sr_'+k_])
+    ROOT.gPad.SetRightMargin(0.19)
+    ROOT.gPad.SetLeftMargin(0.14)
+    ROOT.gPad.SetTopMargin(0.05)
+    ROOT.gPad.SetBottomMargin(0.14)
+    ROOT.gStyle.SetPalette(55)#53
+    h[k].GetYaxis().SetTitleOffset(1.)
+    #h[k].GetZaxis().SetTitle("Events")
+    #h[k].GetZaxis().SetTitle("Events / 25 MeV")
+    h[k].GetZaxis().SetTitle("(Bkg/Data) / 25 MeV")
+    h[k].GetZaxis().SetTitleOffset(1.5)
+    h[k].GetZaxis().SetTitleSize(0.05)
+    h[k].GetZaxis().SetTitleFont(62)
+    h[k].GetZaxis().SetLabelSize(0.04)
+    h[k].GetZaxis().SetLabelFont(62)
+    h[k].GetXaxis().SetTitleOffset(1.)
+    h[k].GetXaxis().SetTitleSize(0.06)
+    h[k].GetYaxis().SetTitleSize(0.06)
+
+    if do_trunc:
+        h[k].GetXaxis().SetRangeUser(0., 1.2)
+        h[k].GetYaxis().SetRangeUser(0., 1.2)
+
+    h[k].Draw("COL Z")
+    h[k].SetMaximum(2.)
+    h[k].SetMinimum(0.)
+    c[k].Draw()
+    palette = h[k].GetListOfFunctions().FindObject("palette")
+    #palette.SetX1NDC(0.84)
+    #palette.SetX2NDC(0.89)
+    #palette.SetY1NDC(0.13)
+
+    c[k].Update()
+    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s_ratio.eps'%(sample, blind, k))
+
 def plot_srvsb_sb(sample, blind):
 
     hf, h = {}, {}
@@ -253,9 +301,14 @@ def plot_srvsb_sb(sample, blind):
             h[rk] = hf[r].Get(k)
             #h[rk].Draw("")
 
+    tgt_region = 'sb2sr'
+    houtf = ROOT.TFile("Templates/%s_sb2sr_blind_%s_templates.root"%(sample, blind), "RECREATE")
     for k in keys:
-        h['sb2sr_%s'%k] = h['sblo2sr_%s'%k].Clone()
-        h['sb2sr_%s'%k].Add(h['sbhi2sr_%s'%k])
+        h[tgt_region+'_'+k] = h['sblo2sr_%s'%k].Clone()
+        h[tgt_region+'_'+k].Add(h['sbhi2sr_%s'%k])
+        h[tgt_region+'_'+k].Write()
+    houtf.Write()
+    #houtf.Close()
 
     '''
     r = 'sb2sr'
@@ -278,6 +331,7 @@ def plot_srvsb_sb(sample, blind):
             #draw_hist_1dma(k, h, c, sample, blind)
         if k == 'ma0vma1':
             draw_hist_2dma(k, h, c, sample, blind, r, do_trunc=True)
+            draw_hist_2dma_ratio(k, h, c, sample, blind, r, do_trunc=True)
         else:
             #draw_hist_1dma(k, h, c, sample, blind)
             draw_hist_1dma(k, h, c, sample, blind, -1)
