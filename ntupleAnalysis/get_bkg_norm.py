@@ -273,7 +273,7 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     # Write out weights to numpy file
     np.savez("%s/%s_%s2sr_blind_%s_ptwgts.npz"%(output_dir, sample, sb, blind), pt_edges=pt_edges, pt_wgts=ratio)
 
-def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False, do_ptomGG=False, run_bkg=True):
+def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', sr_sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False, do_ptomGG=False, run_bkg=True):
     '''
     Calculate relative normalization between data mH-SB templates and data mH-SR.
     sb: sb, sbcombo, sblo, sbhi
@@ -283,7 +283,7 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templat
         pass
         assert do_pt_reweight
 
-    regions = [sb, 'sr']
+    regions = [sb]
     #regions = ['sr']
     #if 'lo' in sb:
     #    regions.append('sblo')
@@ -295,19 +295,21 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templat
     # Run both SB and SR to bkg processes
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
     sample = sample.replace('[','').replace(']','')
+    sr_sample = sr_sample.replace('[','').replace(']','')
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
     if run_bkg:
-        #processes = [bkg_process(sample, r, blind, ma_inputs, workdir,\
-        #        do_combo_template=True if r == 'sbcombo' else False,\
-        #        do_ptomGG=do_ptomGG if r == sb else True,\
-        #        do_pt_reweight=do_pt_reweight if r == sb else False)\
-        #        for r in regions]
+        # For source SB or hgg process
         processes = [bkg_process(sample, r, blind, ma_inputs, workdir,\
                 #do_combo_template=True if r == 'sbcombo' else False,\
                 do_ptomGG=do_ptomGG if r == sb else True,\
                 do_pt_reweight=do_pt_reweight if r == sb else False)\
                 for r in regions]
+        # For target SR process
+        processes.append(bkg_process(sr_sample, 'sr', blind, ma_inputs, workdir,\
+                do_ptomGG=True,\
+                do_pt_reweight=False))
+
         # Run processes in parallel
         pool = Pool(processes=len(processes))
         pool.map(run_process, processes)
@@ -321,30 +323,30 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', workdir='Templat
 
     keys = ['maxy']
 
+    # Read in templates
+    hf[sr_sample+'sr'] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(workdir, sr_sample, 'sr', blind),"READ")
     for r in regions:
-        print("%s/%s_%s_blind_%s_templates.root"%(workdir, sample, r, blind))
-        hf[r] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(workdir, sample, r, blind),"READ")
+        hf[sample+r] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(workdir, sample, r, blind),"READ")
+    # Get integrals (i.e. wgtd nentries not in under/over-flow)
+    for s_r in hf.keys():
+        print(s_r)
         for k in keys:
-            rk = '%s_%s'%(r, k)
-            #print(rk)
-            #if rk == 'sr_maxy': c[rk] = ROOT.TCanvas("c%s"%rk,"c%s"%rk, wd, ht)
-            h[rk] = hf[r].Get(k)
-            #h[rk].Draw("")
-            entries[rk] = h[rk].GetEntries()
-            integral[rk] = h[rk].Integral()
+            s_r_k = s_r+k
+            h[s_r_k] = hf[s_r].Get(k)
+            entries[s_r_k] = h[s_r_k].GetEntries()
+            integral[s_r_k] = h[s_r_k].Integral()
+            print(integral[s_r_k])
 
-    for r_ in regions:
-        if r_ == 'sr': continue
-        #r = '%s2sr'%r_
-        r = r_
+    for r in regions:
         for k in keys:
             if k != 'maxy': continue
-            rk = '%s_%s'%(r, k)
+            #rk = '%s_%s'%(r, k)
             #print(rk)
-            h[rk] = h[rk].Clone()
+            #h[rk] = h[rk].Clone()
             #norm['%s2sr'%r] = integral['sr_%s'%k]/integral[rk]
             #print('%s2sr norm: %f'%(r, norm['%s2sr'%r]))
-            norm = integral['sr_%s'%k]/integral[rk]
+            #norm = integral['sr_%s'%k]/integral[rk]
+            norm = integral[sr_sample+'sr'+k]/integral[sample+r+k]
 
     return norm
 
@@ -453,13 +455,17 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     # 1st order: do TFractionFitter template fit -> converges but segfaults on exit
     # => need to put in values by hand after fit
     norm = {}
+    scale_num = 1.e3 #100., 1.
 
-    h['Run2017B-F_sr_ma0vma1'].Scale(1./h['Run2017B-F_sr_ma0vma1'].Integral())
+    #h['Run2017B-F_sr_ma0vma1'].Scale(1./h['Run2017B-F_sr_ma0vma1'].Integral())
+    h['Run2017B-F_sr_ma0vma1'].Scale(scale_num/h['Run2017B-F_sr_ma0vma1'].Integral())
 
     h['gg'] = h['GluGluHToGG_sr_ma0vma1'].Clone()
     #norm['gg'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg')/get_entries_cr(h['gg'], 'gg')
     #h['gg'].Scale(norm['gg'])
-    h['gg'].Scale(1./h['gg'].Integral())
+    #h['gg'].Scale(1./h['gg'].Integral())
+    h['gg'].Scale(scale_num/h['gg'].Integral())
+    h['gg'] = floor_hist(h['gg'])
     #print('gg:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg'), get_entries_cr(h['gg'], 'gg'))
     print('higgs-only, gg:%f, jj:%f'%(get_entries_cr(h['gg'], 'gg'), get_entries_cr(h['gg'], 'jj')))
 
@@ -473,7 +479,8 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     h['jjlo'] = h['Run2017B-F_sblo_ma0vma1'].Clone()
     #norm['jjlo'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jjlo'], 'jj')
     #h['jjlo'].Scale(norm['jjlo'])
-    h['jjlo'].Scale(1./h['jjlo'].Integral())
+    #h['jjlo'].Scale(1./h['jjlo'].Integral())
+    h['jjlo'].Scale(scale_num/h['jjlo'].Integral())
     #print('jjlo:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj'), get_entries_cr(h['jjlo'], 'jj'))
     print('sb-only, gg:%f, jjlo:%f'%(get_entries_cr(h['jjlo'], 'gg'), get_entries_cr(h['jjlo'], 'jj')))
     print('sr-obs, gg:%f, jjlo:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
@@ -481,7 +488,8 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     h['jjhi'] = h['Run2017B-F_sbhi_ma0vma1'].Clone()
     #norm['jjhi'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jjhi'], 'jj')
     #h['jjhi'].Scale(norm['jjhi'])
-    h['jjhi'].Scale(1./h['jjhi'].Integral())
+    #h['jjhi'].Scale(1./h['jjhi'].Integral())
+    h['jjhi'].Scale(scale_num/h['jjhi'].Integral())
     #print('jjhi:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj'), get_entries_cr(h['jjhi'], 'jj'))
     print('sb-only, gg:%f, jjhi:%f'%(get_entries_cr(h['jjhi'], 'gg'), get_entries_cr(h['jjhi'], 'jj')))
     print('sr-obs, gg:%f, jjhi:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
@@ -527,21 +535,31 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     #flo = 5.20326e-01
     #fhi = 4.79670e-01
 
+    #fgg = 4.22085e-03
+    #flo = 5.04898e-01
+    #fhi = 4.90865e-01
+
+    fgg = 3.04455e-02
+    flo = 4.91381e-01
+    fhi = 4.78163e-01
+
     fgg = fgg/(fgg+flo+fhi)
     flo = flo/(fgg+flo+fhi)
     fhi = fhi/(fgg+flo+fhi)
 
     if derive_fit:
         mc = ROOT.TObjArray()
-        #mc.Add(h['gg'])
+        mc.Add(h['gg'])
         mc.Add(h['jjlo'])
         mc.Add(h['jjhi'])
         fit = ROOT.TFractionFitter(h['Run2017B-F_sr_ma0vma1'], mc)
         fit.Constrain(0, 0., 1.)
         fit.Constrain(1, 0., 1.)
-        #fit.Constrain(2, 0., 1.)
+        fit.Constrain(2, 0., 1.)
         status = fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
-        print('fit status:',status)
+        #print('fit status:',status)
+        print('fit status:', int(status))
+        print('X^2 / ndf = %f / %d = %f'%(fit.GetChisquare(), fit.GetNDF(), fit.GetChisquare()/fit.GetNDF()))
 
     #'''
     k = 'Run2017B-F_sb2sr_ma0vma1'
@@ -841,3 +859,11 @@ def get_entries_cr(h, cr):
         return njj
     else:
         return 0.
+
+def floor_hist(h):
+
+    for ix in range(0,h.GetNbinsX()+1):
+        for iy in range(0,h.GetNbinsY()+1):
+            if h.GetBinContent(ix, iy) < 0.:
+                h.SetBinContent(ix, iy, 0.)
+    return h

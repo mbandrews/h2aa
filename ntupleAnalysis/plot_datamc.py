@@ -1153,7 +1153,7 @@ def get_dataomc_norm(k_, region, h):
     norm = h[kdata].Integral()/h[kmc].Integral()
     return norm
 
-def plot_datamc(samples, blind, norm):
+def plot_datamc(samples, blind, norm, regions):
 
     assert len(samples) > 0
     samples = [s.replace('[','').replace(']','') for s in samples]
@@ -1166,7 +1166,7 @@ def plot_datamc(samples, blind, norm):
     #regions = ['sb2sr', 'sr']
     #regions = ['sblo2sr', 'sbhi2sr', 'sr']
     #regions = ['sblo2sr']
-    regions = ['sblo']
+    #regions = ['sblo']
     #keys = ['ma0vma1']
     #keys = ['maxy']
     #keys = ['maxy','ma0','ma1']
@@ -1175,7 +1175,8 @@ def plot_datamc(samples, blind, norm):
 
     for s in samples:
         for r in regions:
-            hf[s+r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
+            #hf[s+r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
+            hf[s+r] = ROOT.TFile("Templates_datamc/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
             for k in keys:
                 #srk = '%s_%s_%s'%(s, r, k)
                 h[s+r+k] = hf[s+r].Get(k)

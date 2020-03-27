@@ -20,7 +20,8 @@ from array import array
 # Register command line options
 parser = argparse.ArgumentParser(description='Run STEALTH selection.')
 parser.add_argument('-s', '--sample', default='test', type=str, help='Sample name.')
-parser.add_argument('-i', '--img_inputs', default=['test.root'], nargs='+', type=str, help='Input IMG files.')
+#parser.add_argument('-i', '--img_inputs', default=['test.root'], nargs='+', type=str, help='Input IMG files.')
+parser.add_argument('-i', '--img_inputs', default='img_inputs.txt', type=str, help='List file of img inputs.')
 parser.add_argument('-g', '--gg_inputs', default=['h24gntuple_n631.root'], nargs='+', type=str, help='Input GG files.')
 #parser.add_argument('-t', '--gg_treename', default='', type=str, help='GG TTree name prefix.')
 parser.add_argument('-o', '--outdir', default='MAntuples', type=str, help='Output directory.')
@@ -136,12 +137,22 @@ def idxf_where_run_lumi_evt(tree, evtlistf):
     else:
         return evtlistf.flatten()[-1]
 
+
 # Load IMG ntuples as main TTree
+img_inputs = []
+print('Opening img input list:',args.img_inputs)
+with open(args.img_inputs, 'r') as img_file:
+    for img_input in img_file:
+        img_inputs.append(img_input[:-1])
+print(img_inputs[0])
+print('len(img_inputs):',len(img_inputs))
+assert len(img_inputs) > 0
+
 print('Setting IMG as main TTree')
-print('N IMG files:',len(args.img_inputs))
-print('IMG file[0]:',args.img_inputs[0])
+print('N IMG files:',len(img_inputs))
+print('IMG file[0]:',img_inputs[0])
 tree = ROOT.TChain("fevt/RHTree")
-for fi in args.img_inputs:
+for fi in img_inputs:
     tree.Add(fi)
     #break
 nEvts = tree.GetEntries()
@@ -249,7 +260,7 @@ h[k] = ROOT.TH2F(k, k, 48, 0., 1.2, 48, 0., 1.2)
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts
-#iEvtEnd   = 10000
+#iEvtEnd   = 15
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 
 def shapeEB(eb):
@@ -289,8 +300,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     if treef.mgg < 100. or treef.mgg > 180.: continue
 
     # Only keep events with photons within ieta image window
-    npho_roi = sum([0 if (tree.SC_ieta[i] < 15) or (tree.SC_ieta[i]+16 > 169) else 1 for i in range(2)])
-    if npho_roi != 2: continue
+    #npho_roi = sum([0 if (tree.SC_ieta[i] < 15) or (tree.SC_ieta[i]+16 > 169) else 1 for i in range(2)])
+    #if npho_roi != 2: continue
 
     #'''
     #print(treef.phoSeedPos1_z, treef.phoSeedPos1_row, treef.phoSeedPos1_col) # z,ieta,iphi
@@ -299,7 +310,17 @@ for iEvt in range(iEvtStart,iEvtEnd):
     p4 = {}
     pho_idx = {}
     #pho_idx[0], pho_idx[1] = treef.phoPreselIdxs[0], treef.phoPreselIdxs[1]
-    for i in range(2):
+    #print('%d:%d:%d'%(tree.runId, tree.lumiId, tree.eventId))
+    #print('presel idxs:',list(treef.phoPreselIdxs))
+    #print(list(treef.phoPreselIdxs))
+    #print(len(treef.phoEt))
+    #print(list(treef.phoEt))
+    #print('N imgs:',len(tree.SC_ieta))
+    #print('ietas:',list(tree.SC_ieta))
+    #print('iphis:',list(tree.SC_iphi))
+    #print(list(tree.SC_ieta))
+    #for i in range(2):
+    for i in range(len(treef.phoPreselIdxs)):
         pho_idx[i] = treef.phoPreselIdxs[i]
         #p4 = ROOT.Math.PtEtaPhiEVector(treef.phoEt[pho_idx[i]], treef.phoEta[pho_idx[i]], treef.phoPhi[pho_idx[i]], treef.phoE[pho_idx[i]])
         # ggntuple photon vector
@@ -314,6 +335,10 @@ for iEvt in range(iEvtStart,iEvtEnd):
         assert dR == 0.
         h['ieta'].Fill(tree.SC_ieta[pho_idx[i]])
         h['iphi'].Fill(tree.SC_iphi[pho_idx[i]])
+
+    # Only keep events with photons within ieta image window
+    npho_roi = sum([0 if (tree.SC_ieta[pho_idx[i]] < 15) or (tree.SC_ieta[pho_idx[i]]+16 > 169) else 1 for i in range(len(pho_idx))])
+    if npho_roi != 2: continue
 
     # Only keep events with barrel photons
     #assert((treef.phoSeedPos1_z == 0.) & (treef.phoSeedPos1_z == 0.))
@@ -333,17 +358,20 @@ for iEvt in range(iEvtStart,iEvtEnd):
     X_EBt = np.array(tree.EB_energyT).reshape(1,170,360)
     X_EBz = np.array(tree.EB_energyZ).reshape(1,170,360)
     X_cms = np.concatenate([X_EBt, X_EBz], axis=0)
-    for i in range(2):
+    for i in range(npho_roi):
         #X_EB = np.array(tree.EB_energy).reshape(1,170,360)
         #print(X_cms.shape)
         #ieta.append([treef.phoSeedPos1_row if i == 0 else treef.phoSeedPos2_row])
         #iphi.append([treef.phoSeedPos1_col if i == 0 else treef.phoSeedPos2_col])
         ieta.append([tree.SC_ieta[pho_idx[i]]])
         iphi.append([tree.SC_iphi[pho_idx[i]]])
+        #print(tree.SC_ieta[pho_idx[i]], ieta[-1])
+        #print(tree.SC_iphi[pho_idx[i]], iphi[-1])
         #ieta.append([100])
         #iphi.append([100])
         #print('ieta:%.f, iphi:%.f'%(ieta[-1][0], iphi[-1][0]))
         sc_cms.append(crop_EBshower(X_cms, ieta[-1], iphi[-1]))
+        #print(crop_EBshower(X_cms, ieta[-1], iphi[-1]).shape)
     #print(np.array(sc_cms).shape)
     #print(np.array(iphi).shape)
     #print(np.array(ieta).shape)

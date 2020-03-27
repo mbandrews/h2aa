@@ -44,23 +44,23 @@ samples = [
     ]
 samples = ['Run2018%s'%s for s in samples]
 
-#eos_basedir = '/store/user/lpcml/mandrews/2017/Era2017_17Dec2019_ggntuplev1/h24gamma_01Nov2019-rhECAL'
-#samples = [
-#    '100MeV'
-#    ,'400MeV'
-#    ,'1GeV'
-#    ]
-#samples = ['h24gamma_1j_1M_%s'%s for s in samples]
-#
-#eos_basedir = '/store/user/lpcsusystealth/stealth2018Ntuples_with10210'
-#samples = [
+eos_basedir = '/store/user/lpcml/mandrews/2017/Era2017_17Dec2019_ggntuplev1/h24gamma_01Nov2019-rhECAL'
+samples = [
+    '100MeV'
+    ,'400MeV'
+    ,'1GeV'
+    ]
+samples = ['h24gamma_1j_1M_%s'%s for s in samples]
+
+eos_basedir = '/store/user/lpcsusystealth/stealth2018Ntuples_with10210'
+samples = [
 #    'DiPhotonJets'
 #    ,'GJet_Pt20To40'
 #    ,'GJet_Pt40ToInf'
 #    ,'QCD_Pt30To40'
 #    ,'QCD_Pt40ToInf'
-#    ,'GluGluHToGG'
-#    ]
+    'GluGluHToGG'
+    ]
 
 output_dir = '../ggSkims'
 if not os.path.isdir(output_dir):
@@ -71,7 +71,8 @@ for s in samples:
 
     gg_inputs = run_eosfind(eos_basedir, s)
     #gg_inputs = gg_inputs[:1]
-    gg_inputs = [f for f in gg_inputs if 'ntuplizedOct2019' in f]
+    if 'lpcsusystealth' in s:
+        gg_inputs = [f for f in gg_inputs if 'ntuplizedOct2019' in f]
     print(len(gg_inputs))
 
     # mass_eval_ntuples.py

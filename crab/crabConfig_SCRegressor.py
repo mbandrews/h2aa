@@ -29,10 +29,12 @@ config.JobType.maxJobRuntimeMin = 2750 # mins
 config.Data.outputDatasetTag = config.General.requestName
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = int(UNITSPERJOB)
-#config.Data.lumiMask = LUMIMASK
+if 'json' in LUMIMASK:
+    config.Data.lumiMask = LUMIMASK
 
 config.Data.inputDataset = DATASET
-if 'DoubleEG' in SAMPLE or 'h24gamma' in SAMPLE:
+#if 'DoubleEG' in SAMPLE or 'h24gamma' in SAMPLE:
+if 'Run201' in SAMPLE or 'h24gamma' in SAMPLE:
     config.Data.secondaryInputDataset = SECONDARYDATASET
 config.Data.inputDBS = 'phys03' if '/USER' in DATASET or '/USER' in SECONDARYDATASET else 'global'
 

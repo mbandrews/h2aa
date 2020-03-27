@@ -34,7 +34,8 @@ create_cut_hists(hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])
 
 inputs = run_eosfind(eos_basedir, sample) if args.inputs is None else args.inputs
-inputs = [f for f in inputs if ('ntuplizedOct2019' in f) and ('failed' not in f)]
+if 'lpcsusystealth' in sample:
+    inputs = [f for f in inputs if ('ntuplizedOct2019' in f) and ('failed' not in f)]
 print('N ggntuple input files:',len(inputs))
 print('ggntuple file[0]:',inputs[0])
 print('ggntuple file[-1]:',inputs[-1])
@@ -76,7 +77,7 @@ sw.Start()
 for iEvt in range(iEvtStart,iEvtEnd):
 
     # Initialize event
-    if iEvt%100e3==0: print(iEvt,'/',nEvts)
+    if iEvt%100e3==0: print(iEvt,'/',iEvtEnd-iEvtStart)
     evt_statusf = tree.GetEntry(iEvt)
     if evt_statusf <= 0: continue
 

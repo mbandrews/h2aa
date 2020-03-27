@@ -21,7 +21,8 @@ config.General.transferLogs = False
 #config.JobType.pluginName = 'PrivateMC'
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '/cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_5_0/src/PhysicsTools/Utilities/configuration/copyPickMerge_cfg.py'
-#config.JobType.maxMemoryMB = 2800
+if SAMPLE == 'Run2018D':
+    config.JobType.maxMemoryMB = 2600
 config.JobType.pyCfgParams = ['eventsToProcess_load=%s'%EVTLIST]
 
 config.Data.outputDatasetTag = config.General.requestName
@@ -37,3 +38,4 @@ config.Data.publication = True
 
 #config.Site.storageSite = 'T2_CH_CERN'
 config.Site.storageSite = 'T3_US_FNALLPC'
+config.Site.ignoreGlobalBlacklist = True if 'GluGluHToGG' in SAMPLE else False
