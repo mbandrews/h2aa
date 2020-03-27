@@ -23,6 +23,8 @@ def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
     h = hf.Get('%s/%s'%(cut, key))
 
     nevts_gen = h.GetEntries()
+    if sample == 'DiPhotonJets':
+        nevts_gen = 1118685275.488525 # sum of weights
     print('xsec',xsec)
     print('nevts_gen',nevts_gen)
     norm = xsec*tgt_lumi/nevts_gen
@@ -49,7 +51,7 @@ def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
 #samples = ['h24gamma_1j_1M_%s'%s for s in samples]
 
 samples = [
-    #'DiPhotonJets',
+    'DiPhotonJets',
     'GJet_Pt20To40',
     'GJet_Pt40ToInf',
     'QCD_Pt30To40',
@@ -66,19 +68,19 @@ xsec = {
 #    'QCD_Pt40ToInf': 118100.0*0.0026,
 #    'GluGluHToGG': 44.14*2.27e-3,
 ##    'Run2017B-F': 1.
-    'DiPhotonJets': 134.3*.00001,
+    #'DiPhotonJets': 134.3*.00001,
     #'DiPhotonJets': 0.1,
-    #'DiPhotonJets': 134.3,
-    'GJet_Pt20To40': 232.8*0.0029,
+    'DiPhotonJets': 134.3,
+    'GJet_Pt20To40': 232.8,#*0.0029,
     #'GJet_Pt40ToInf': 0.1,
-    'GJet_Pt40ToInf': 872.8*0.0558,
-    'QCD_Pt30To40': 24750.0*0.0004*100.,
-    'QCD_Pt40ToInf': 117400.0*0.0026*100.,
+    'GJet_Pt40ToInf': 872.8,#*0.0558,
+    'QCD_Pt30To40': 24750.0,#*0.0004*100.,
+    'QCD_Pt40ToInf': 117400.0,#*0.0026*100.,
     'GluGluHToGG': 33.14*2.27e-3,
 #    'Run2017B-F': 1.
 }
 
-output_dir = 'Templates'
+output_dir = 'Templates_datamc'
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
@@ -121,7 +123,8 @@ for sample in samples:
     #blind = 'offdiag_lo_hi' # for actual limit setting
 
     # Run both SB and SR to bkg processes
-    ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
+    #ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
+    ma_inputs = glob.glob('MAntuples/2pho/%s_mantuple.root'%sample)
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
     sample = sample.replace('[','').replace(']','')
@@ -131,7 +134,8 @@ for sample in samples:
     #regions = ['sb2sr', 'sr']
     #regions = ['sblo2sr', 'sbhi2sr', 'sr']
     #regions = ['sblo2sr']
-    regions = ['sblo']
+    #regions = ['sblo']
+    regions = ['sb']
     for r in regions:
         processes.append(bkg_process(sample, r, blind, ma_inputs, output_dir,\
                 #do_combo_template=True if 'sb' in r else False,\
@@ -144,9 +148,9 @@ for sample in samples:
                 ))
 
 # Run processes in parallel
-#pool = Pool(processes=len(processes))
-#pool.map(run_process, processes)
-#pool.close()
-#pool.join()
+pool = Pool(processes=len(processes))
+pool.map(run_process, processes)
+pool.close()
+pool.join()
 
-plot_datamc(samples, blind, norm)
+plot_datamc(samples, blind, norm, regions)
