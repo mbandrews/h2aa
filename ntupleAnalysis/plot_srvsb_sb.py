@@ -15,7 +15,12 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     #ROOT.TGaxis.fgMaxDigits = 3
     ROOT.gStyle.SetErrorX(0)
 
-    k = 'sr_%s'%k_
+    #k = 'sr_%s'%k_
+    sr_k = sample+'sr'+k_
+    sb2sr_k = sample+'sb2sr'+k_
+    sb2srosr_k = sample+'sb2srosr'+k_
+
+    k = sr_k
     c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
 
     pUp = ROOT.TPad("upperPad", "upperPad",.005, .300, .995, .995) # (,,Double_t xlow, Double_t ylow, Double_t xup, Double_t yup,...)
@@ -55,7 +60,8 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     hc[k].GetYaxis().SetMaxDigits(3)
     #hc[k].Draw("hist same")
     hc[k].Draw("E")
-    k = 'sb2sr_%s'%k_
+    #k = 'sb2sr_%s'%k_
+    k = sb2sr_k
     h[k].SetLineColor(9)
     #h[k].Draw("hist SAME")
     h[k].SetFillColor(9)
@@ -66,12 +72,13 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     hc[k].SetFillStyle(0)
     hc[k].Draw("hist same")
 
-    k = 'sr_%s'%k_
-    ymax = 1.2*max(h[k].GetMaximum(), h['sb2sr_%s'%k_].GetMaximum())
+    #k = 'sr_%s'%k_
+    k = sr_k
+    ymax = 1.2*max(h[k].GetMaximum(), h[sb2sr_k].GetMaximum())
     if ymax_ == -1 and hc[k].GetBinContent(2) > 0.:
         #ymax = 1.2*hc[k].GetBinContent(2)
         ymax = 1.2*max(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]),
-                       np.max([hc['sb2sr_%s'%k_].GetBinContent(ib) for ib in range(2, hc['sb2sr_%s'%k_].GetNbinsX()+2)]))
+                       np.max([hc[sb2sr_k].GetBinContent(ib) for ib in range(2, hc[sb2sr_k].GetNbinsX()+2)]))
         #ymax = 1.2*np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)])
         #print(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]))
     if ymax_ is not None and ymax_ > 0.:
@@ -140,8 +147,9 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     fUnity.SetTitle("")
     fUnity.Draw()
 
-    k = 'sb2srosr_%s'%k_
-    h[k] = h['sb2sr_%s'%k_].Clone()
+    #k = 'sb2srosr_%s'%k_
+    k = sb2srosr_k
+    h[k] = h[sb2sr_k].Clone()
     h[k].SetLineColor(9)
     h[k].Sumw2()
     h[k].SetStats(0)
@@ -151,7 +159,7 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
         h[k].Divide(h[k])
     else:
         # if blinding in SR, leave commented
-        h[k].Divide(h['sr_%s'%k_])
+        h[k].Divide(h[sr_k])
 
     h[k].SetMarkerStyle(20)
     h[k].SetMarkerSize(0.85)
@@ -180,7 +188,8 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None):
     #h[k].SetLineStyle(4)
     #h[k].SetTitle("")
 
-    k = 'sr_%s'%k_
+    #k = 'sr_%s'%k_
+    k = sr_k
     c[k].Draw()
     c[k].Update()
     #c[k].Print('Plots/%s_sb2srvsr_blind_%s.eps'%(sample, blind))
@@ -195,8 +204,12 @@ def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
     hc = {}
     wd, ht = int(800*1), int(680*1)
 
+    sr_k = sample+'sr'+k_
+    sb2sr_k = sample+'sb2sr'+k_
+
     #k = '%s_%s'%(r, k_)
-    k = 'sb2sr'+'_%s'%(k_)
+    #k = 'sb2sr'+'_%s'%(k_)
+    k = sb2sr_k
     c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
     h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
@@ -240,12 +253,17 @@ def draw_hist_2dma_ratio(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
     hc = {}
     wd, ht = int(800*1), int(680*1)
 
+    sr_k = sample+'sr'+k_
+    sb2sr_k = sample+'sb2sr'+k_
+
     #k = '%s_%s'%(r, k_)
-    k = 'sb2sr'+'_%s'%(k_)
+    #k = 'sb2sr'+'_%s'%(k_)
+    k = sb2sr_k
     c[k] = ROOT.TCanvas("c%s_ratio"%k,"c%s_ratio"%k,wd,ht)
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
     h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
-    h[k].Divide(h['sr_'+k_])
+    #h[k].Divide(h['sr_'+k_])
+    h[k].Divide(h[sr_k])
     ROOT.gPad.SetRightMargin(0.19)
     ROOT.gPad.SetLeftMargin(0.14)
     ROOT.gPad.SetTopMargin(0.05)
@@ -294,19 +312,28 @@ def plot_srvsb_sb(sample, blind):
     keys = ['maxy','ma0','ma1','ma0vma1']
 
     for r in regions:
-        hf[r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
-        for k in keys:
-            rk = '%s_%s'%(r, k)
-            #if rk == 'sr_maxy': c[rk] = ROOT.TCanvas("c%s"%rk,"c%s"%rk, wd, ht)
-            h[rk] = hf[r].Get(k)
-            #h[rk].Draw("")
+        s_r = sample+r
+        hf[s_r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
 
+    s_hgg = 'GluGluHToGG'
+    r_hgg = 'sr'
+    hf[s_hgg+r_hgg] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s_hgg, r_hgg, blind),"READ")
+    for s_r in hf.keys():
+        for k in keys:
+            s_r_k = s_r+k
+            h[s_r_k] = hf[s_r].Get(k)
+
+    # h[data sr].Add(scale*sg)
     tgt_region = 'sb2sr'
-    houtf = ROOT.TFile("Templates/%s_sb2sr_blind_%s_templates.root"%(sample, blind), "RECREATE")
+    houtf = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, tgt_region, blind), "RECREATE")
     for k in keys:
-        h[tgt_region+'_'+k] = h['sblo2sr_%s'%k].Clone()
-        h[tgt_region+'_'+k].Add(h['sbhi2sr_%s'%k])
-        h[tgt_region+'_'+k].Write()
+        s_r_k_tgt = sample+tgt_region+k
+        #r_k_tgt = tgt_region+'_'+k
+        #s_r_k_tgt = r_k_tgt
+        h[s_r_k_tgt] = h[sample+'sblo2sr'+k].Clone()
+        h[s_r_k_tgt].Add(h[sample+'sbhi2sr'+k])
+        h[s_r_k_tgt].Add(h[s_hgg+r_hgg+k])
+        h[s_r_k_tgt].Write()
     houtf.Write()
     #houtf.Close()
 

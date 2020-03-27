@@ -77,7 +77,7 @@ sw.Start()
 for iEvt in range(iEvtStart,iEvtEnd):
 
     # Initialize event
-    if iEvt%100e3==0: print(iEvt,'/',nEvts)
+    if iEvt%100e3==0: print(iEvt,'/',iEvtEnd-iEvtStart)
     evt_statusf = tree.GetEntry(iEvt)
     if evt_statusf <= 0: continue
 
