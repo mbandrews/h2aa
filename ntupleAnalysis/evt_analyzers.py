@@ -58,9 +58,58 @@ def select_event(tree, cuts, hists, counts, outvars=None):
         for i in range(tree.nPho):
             if not reco_pho(i, tree): continue
             phoRecoIdxs.append(i)
-        #if len(phoRecoIdxs) != 2 and len(phoRecoIdxs) != 3:
-        if len(phoRecoIdxs) != 2:
+        #if len(phoRecoIdxs) != 2:
+        if len(phoRecoIdxs) != 2 and len(phoRecoIdxs) != 3:
             return False
+        #'''
+        if len(phoRecoIdxs) == 3:
+
+            # Find reco idx not preselected
+            nonPreselIdx = [idx for idx in range(tree.nPho) if idx not in tree.phoPreselIdxs]
+            assert len(nonPreselIdx) == 1
+            nonPreselIdx = nonPreselIdx[0]
+            #print(list(tree.phoPreselIdxs))
+            #print(nonPreselIdx)
+
+            p4_nonPresel = ROOT.TVector3()
+            p4_nonPresel.SetPtEtaPhi(tree.phoEt[nonPreselIdx], tree.phoEta[nonPreselIdx], tree.phoPhi[nonPreselIdx])
+            #print('%d nonpresel: %f, %f, %f'%(nonPreselIdx, tree.phoEt[nonPreselIdx], tree.phoEta[nonPreselIdx], tree.phoPhi[nonPreselIdx]))
+
+            minDR = 10.
+            p4_presel = ROOT.TVector3()
+            for preselIdx in tree.phoPreselIdxs:
+
+                # presel photon vector
+                p4_presel.SetPtEtaPhi(tree.phoEt[preselIdx], tree.phoEta[preselIdx], tree.phoPhi[preselIdx])
+                #print('%d presel: %f, %f, %f'%(preselIdx, tree.phoEt[preselIdx], tree.phoEta[preselIdx], tree.phoPhi[preselIdx]))
+
+                # Ensure photons are alike
+                dR = ROOT.Math.VectorUtil.DeltaR(p4_presel, p4_nonPresel)
+                #print('dR: %f'%dR)
+
+                if dR < minDR:
+                    minDR = dR
+
+            outvars['dR'] = minDR
+
+        else:
+
+            outvars['dR'] = -1.*0.0174
+
+            #print('pass')
+        #'''
+        fill_cut_hists(hists, tree, cut, outvars)
+        counts[cut] += 1
+
+    # dR(presel photon, reco photon)
+    cut = 'dR'
+    if cut in cuts:
+
+        assert 'dR' in outvars.keys()
+
+        if outvars['dR'] > 0.3:
+            return False
+
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
@@ -101,6 +150,13 @@ def select_event(tree, cuts, hists, counts, outvars=None):
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
+    # chgIso cut
+    cut = 'chgiso'
+    if cut in cuts:
+        if not chgiso_passed(tree): return False
+        fill_cut_hists(hists, tree, cut, outvars)
+        counts[cut] += 1
+
     # bdt cut
     cut = 'bdt'
     if cut in cuts:
@@ -123,17 +179,26 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
 def bdt_passed(tree):
     #if tree.phoIDMVA[0] < -0.96: return False
     #if tree.phoIDMVA[1] < -0.96: return False
-    if tree.phoIDMVA[0] < -0.98: return False
-    if tree.phoIDMVA[1] < -0.98: return False
+    #if tree.phoIDMVA[0] < -0.98: return False
+    #if tree.phoIDMVA[1] < -0.98: return False
+    if tree.phoIDMVA[tree.phoPreselIdxs[0]] < -0.98: return False
+    if tree.phoIDMVA[tree.phoPreselIdxs[1]] < -0.98: return False
+    return True
+
+def chgiso_passed(tree):
+    #if tree.phoPFChIso[tree.phoPreselIdxs[0]] > 3.: return False
+    #if tree.phoPFChIso[tree.phoPreselIdxs[1]] > 3.: return False
+    if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) > 0.05: return False
+    if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) > 0.05: return False
     return True
 
 def ptomGG_passed(tree):
 
   #if tree.pho1_pt/tree.pho12_m < 1./3.: return False
   #if tree.pho2_pt/tree.pho12_m < 1./4.: return False
-  assert tree.phoEt[0] > tree.phoEt[1]
-  if tree.phoEt[0]/tree.mgg < 1./3.: return False
-  if tree.phoEt[1]/tree.mgg < 1./4.: return False
+  assert tree.phoEt[tree.phoPreselIdxs[0]] > tree.phoEt[tree.phoPreselIdxs[1]]
+  if tree.phoEt[tree.phoPreselIdxs[0]]/tree.mgg < 1./3.: return False
+  if tree.phoEt[tree.phoPreselIdxs[1]]/tree.mgg < 1./4.: return False
 
   return True
 

@@ -90,6 +90,7 @@ def create_cut_hists(h, cuts):
         h[cut+'bdt'] = ROOT.TH1F(cut+'bdt', cut+'bdt', 50, -1., 1.)
         h[cut+'phoIso'] = ROOT.TH1F(cut+'phoIso', cut+'phoIso', 50, 0., 10.)
         h[cut+'chgIso'] = ROOT.TH1F(cut+'chgIso', cut+'chgIso', 50, 0., 10.)
+        h[cut+'relChgIso'] = ROOT.TH1F(cut+'relChgIso', cut+'relChgIso', 50, 0., 0.05)
         h[cut+'r9'] = ROOT.TH1F(cut+'r9', cut+'r9', 50, 0., 1.2)
         h[cut+'sieie'] = ROOT.TH1F(cut+'sieie', cut+'sieie', 50, 0., 0.1)
         h[cut+'hoe'] = ROOT.TH1F(cut+'hoe', cut+'hoe', 50, 0., 0.2)
@@ -99,6 +100,7 @@ def create_cut_hists(h, cuts):
 
         #if 'mgg' in c:
         h[cut+'mgg'] = ROOT.TH1F(cut+'mgg', cut+'mgg', 50, 50., 200.)
+        h[cut+'dR'] = ROOT.TH1F(cut+'dR', cut+'dR', 86, -0.0174, 85*0.0174)
 
 def fill_cut_hists(h, tree, cut_, outvars=None):
 
@@ -113,6 +115,7 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
         h[cut+'bdt'].Fill(tree.phoIDMVA[i])
         h[cut+'phoIso'].Fill(tree.phoPFPhoIso[i])
         h[cut+'chgIso'].Fill(tree.phoPFChIso[i])
+        h[cut+'relChgIso'].Fill(tree.phoPFChIso[i]/tree.phoEt[i])
         h[cut+'r9'].Fill(tree.phoR9Full5x5[i])
         h[cut+'sieie'].Fill(tree.phoSigmaIEtaIEtaFull5x5[i])
         h[cut+'hoe'].Fill(tree.phoHoverE[i])
@@ -123,6 +126,8 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
     if outvars is not None:
         if 'mgg' in outvars.keys():
             h[cut+'mgg'].Fill(outvars['mgg'])
+        if 'dR' in outvars.keys():
+            h[cut+'dR'].Fill(outvars['dR'])
 
 
 def fill_hists(h, tree, wgt):

@@ -67,9 +67,13 @@ else:
 hists = {}
 create_hists(hists)
 
+#cuts = [str(None), 'npho', 'dR', 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'npho', 'dR', 'bdt']
+#cuts = [str(None), 'npho', 'ptomGG'] if do_ptomGG else [str(None), 'npho']
 #cuts = [str(None), 'npho', 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'npho', 'bdt']
-cuts = [str(None), 'npho', 'ptomGG'] if do_ptomGG else [str(None), 'npho']
+#cuts = [str(None), 'npho', 'ptomGG'] if do_ptomGG else [str(None), 'npho']
 #cuts = [str(None), 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'bdt']
+cuts = [str(None), 'ptomGG', 'chgiso', 'bdt'] if do_ptomGG else [str(None), 'chgiso', 'bdt']
+#cuts = [str(None), 'ptomGG', 'chgiso'] if do_ptomGG else [str(None), 'chgiso']
 #cuts = [str(None), 'ptomGG'] if do_ptomGG else [str(None)]
 cut_hists = OrderedDict()
 create_cut_hists(cut_hists, cuts)
@@ -98,12 +102,13 @@ sw.Start()
 for iEvt in range(iEvtStart,iEvtEnd):
 
     # Initialize event
-    if iEvt%10e3==0: print(iEvt,'/',nEvts)
+    if iEvt%10e3==0: print(iEvt,'/',iEvtEnd-iEvtStart)
     evt_statusf = tree.GetEntry(iEvt)
     if evt_statusf <= 0: continue
 
     # Apply event selection
-    if not select_event(tree, cuts, cut_hists, counts): continue
+    outvars = {}
+    if not select_event(tree, cuts, cut_hists, counts, outvars): continue
 
     # Analyze event
     if not analyze_event(tree, region, blind, do_ptomGG): continue
