@@ -75,6 +75,7 @@ for sample in samples:
     #s = sample.replace('[','').replace(']','')
     #plot_srvsb_pt(s, blind=None, sb='sb')
 
+    #'''
     derive_fit = True
     #derive_fit = False
     frac = {}
@@ -89,6 +90,8 @@ for sample in samples:
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 1.e-02, 4.90150e-01, 4.78847e-01 # TEST, 3pho, nobdt
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 6.07102e-03, 5.08034e-01, 4.85880e-01 # scale_num=1.e3, 3pho, nobdt
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 6.06678e-03, 5.08018e-01, 4.85915e-01 # scale_num=1.e3, 3pho, nobdt, run2
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 7.74656e-03, 5.08153e-01, 4.84109e-01 # scale_num=1.e3, 3pho, nobdt, 400MeV@BRx1.e-2
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 7.74743e-03, 5.08152e-01, 4.84110e-01 # scale_num=1.e3, 3pho, nobdt, 400MeV@BRx0.
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 5.80278e-03, 5.47802e-01, 4.46405e-01 # scale_num=1.e3, 3pho, nobdt, chgiso<3
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 5.47038e-03, 5.60021e-01, 4.34507e-01 # scale_num=1.e3, 3pho, nobdt, chgiso<2
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 7.95171e-03, 5.38586e-01, 4.53448e-01 # scale_num=1.e3, 3pho, nobdt, chgiso<4
@@ -98,6 +101,17 @@ for sample in samples:
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 1.05010e-02, 5.59225e-01, 4.30274e-01 # scale_num=1.e3, 3pho, bdt>-0.99, relchgiso<0.05
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 8.45170e-03, 5.45209e-01, 4.46332e-01 # scale_num=1.e3, 3pho, bdt>-0.999, relchgiso<0.05
         frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 1.28215e-02, 5.69404e-01, 4.17747e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05
+        #----
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 1.62840e-02, 5.66072e-01, 4.17630e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05, mA100MeV@BRx1.e-2
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 6.27249e-03, 5.71591e-01, 4.22125e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05, mA400MeV@BRx1.e-2
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 1.06912e-02, 5.69350e-01, 4.19974e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05, mA1GeV@BRx1.e-2
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 1.50632e-10, 5.72059e-01, 4.27947e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05, mA1GeV@BRx1.e-1
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 6.95173e-11, 5.72757e-01, 4.27246e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05, mA400MeV@BRx1.e-1
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 4.06724e-02, 5.49263e-01, 4.10066e-01 # scale_num=1.e3, 3pho, bdt>-0.98, relchgiso<0.05, mA100MeV@BRx1.e-1
+        #----
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 2.63308e-02, 5.01437e-01, 4.72234e-01 # scale_num=1.e3, 3pho, nobdt, norelchgiso, mA100MeV@BRx1.e-1
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 4.03618e-03, 5.12896e-01, 4.83067e-01  # scale_num=1.e3, 3pho, nobdt, norelchgiso, mA400MeV@BRx1.e-1
+        #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 6.17651e-03, 5.07647e-01, 4.86186e-01 # scale_num=1.e3, 3pho, nobdt, norelchgiso, mA1GeV@BRx1.e-1
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 7.85507e-03, 5.18011e-01, 4.74137e-01 # scale_num=1.e3, 3pho, bdt>-0.98
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 7.93939e-03, 5.23483e-01, 4.68587e-01 # scale_num=1.e3, 3phodR, bdt>-0.98
         #frac['hgg2sr'], frac['sblo2sr'], frac['sbhi2sr'] = 0., 5.28354e-01, 4.71647e-01 # scale_num=1.e3, 3phodR, bdt>-0.98
@@ -132,6 +146,18 @@ for sample in samples:
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
+
+    '''
+    # Run sg injection
+    ma = '100MeV'
+    h24g_sample = 'h24gamma_1j_1M_%s'%ma
+    h24g_inputs = glob.glob('MAntuples/%s_mantuple.root'%h24g_sample)
+    print('len(h24g_inputs):',len(h24g_inputs))
+    assert len(h24g_inputs) > 0
+    ma_inputs = ma_inputs + h24g_inputs
+    print('len(ma_inputs):',len(ma_inputs))
+    '''
+
     s = sample.replace('[','').replace(']','')
     #regions = ['sb2sr', 'sr']
     #regions = ['sblo2sr', 'sbhi2sr']
@@ -157,6 +183,7 @@ for sample in samples:
     pool.join()
     #'''
 
+    #'''
     s = sample.replace('[','').replace(']','')
     plot_srvsb_sb(s, blind)
     #plot_srvsb(s, blind)

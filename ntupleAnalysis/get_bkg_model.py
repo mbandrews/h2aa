@@ -95,6 +95,17 @@ iEvtStart = 0
 iEvtEnd   = nEvts if args.events == -1 else args.events
 #iEvtEnd   = 10000
 
+'''
+# Inject sg
+sgbr = 1.e-1 # *xsec(h)
+ma = '100MeV'
+h24g_sample = 'h24gamma_1j_1M_%s'%ma
+sginj_wgt = sgbr*get_sg_norm(h24g_sample)
+#sginj_wgt = 1. # no sg scaling
+print('sginj_wgt:',sginj_wgt)
+'''
+sginj_wgt = 0. # no sg injection
+
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0
 sw = ROOT.TStopwatch()
@@ -124,6 +135,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     if do_combined_template:
         wgt = wgt*get_combined_template_wgt(tree, nfma['ma_edges'], nfma['wgts'])
         #print(wgt)
+    if 'Run20' in sample and not tree.isData:
+        wgt = wgt*sginj_wgt
 
     #if nWrite > 10:break
     # Fill histograms with appropriate weight
@@ -132,7 +145,7 @@ for iEvt in range(iEvtStart,iEvtEnd):
     nWrite += 1
 
 sw.Stop()
-print(">> N events written: %d / %d"%(nWrite, nEvts))
+print(">> N events written: %d / %d"%(nWrite, iEvtEnd-iEvtStart))
 print(">> Real time:",sw.RealTime()/60.,"minutes")
 print(">> CPU time: ",sw.CpuTime() /60.,"minutes")
 

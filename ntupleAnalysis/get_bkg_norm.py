@@ -55,6 +55,17 @@ def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_rewe
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
 
+    '''
+    # Run sg injection
+    ma = '100MeV'
+    h24g_sample = 'h24gamma_1j_1M_%s'%ma
+    h24g_inputs = glob.glob('MAntuples/%s_mantuple.root'%h24g_sample)
+    print('len(h24g_inputs):',len(h24g_inputs))
+    assert len(h24g_inputs) > 0
+    ma_inputs = ma_inputs + h24g_inputs
+    print('len(ma_inputs):',len(ma_inputs))
+    '''
+
     s = s.replace('[','').replace(']','')
     #regions = ['sb', 'sr']
     regions = ['sblo', 'sbhi', 'sr']
@@ -86,6 +97,7 @@ def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_rewe
     fgg, flo, fhi = fit_templates_sb(blind, output_dir, derive_fit)
 
     return fgg, flo, fhi
+    #return 1., 0., 0.
 
 def run_combined_template(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False, do_ptomGG=False):
 
@@ -215,12 +227,26 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     Calculate normalization for the mapping of 2d-ma data mH-SB template(s) to data mH-SR.
     '''
 
+    regions = [sb, 'sr']
+
     # Run both SB and SR to bkg processes
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
+    #ma_inputs = [ma_inputs[0]]
+
+    '''
+    # Run sg injection
+    ma = '100MeV'
+    h24g_sample = 'h24gamma_1j_1M_%s'%ma
+    h24g_inputs = glob.glob('MAntuples/%s_mantuple.root'%h24g_sample)
+    print('len(h24g_inputs):',len(h24g_inputs))
+    assert len(h24g_inputs) > 0
+    ma_inputs = ma_inputs + h24g_inputs
+    print('len(ma_inputs):',len(ma_inputs))
+    '''
+
     sample = sample.replace('[','').replace(']','')
-    regions = [sb, 'sr']
     processes = [bkg_process(sample, r, blind, ma_inputs, workdir, do_ptomGG=do_ptomGG if r == sb else True) for r in regions]
 
     # Run processes in parallel
@@ -238,6 +264,7 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     print(h.keys())
 
     k = keys[0]
+    # Ratio is SR/SB
     h['%s_ratio'%k] = h['%s_sr_%s'%(sample, k)].Clone()
     h['%s_ratio'%k].Divide(h['%s_%s_%s'%(sample, sb, k)])
 
@@ -321,7 +348,8 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', sr_sample='Run20
     integral = {}
     #norm = {}
 
-    keys = ['maxy']
+    #keys = ['maxy']
+    keys = ['ma0vma1']
 
     # Read in templates
     hf[sr_sample+'sr'] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(workdir, sr_sample, 'sr', blind),"READ")
@@ -339,7 +367,8 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', sr_sample='Run20
 
     for r in regions:
         for k in keys:
-            if k != 'maxy': continue
+            #if k != 'maxy': continue
+            if k != 'ma0vma1': continue
             #rk = '%s_%s'%(r, k)
             #print(rk)
             #h[rk] = h[rk].Clone()
@@ -347,6 +376,7 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', sr_sample='Run20
             #print('%s2sr norm: %f'%(r, norm['%s2sr'%r]))
             #norm = integral['sr_%s'%k]/integral[rk]
             norm = integral[sr_sample+'sr'+k]/integral[sample+r+k]
+            #norm = (integral[sr_sample+'sr'+k] + integral[sg])/integral[sample+r+k]
 
     return norm
 
