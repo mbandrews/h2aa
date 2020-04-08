@@ -897,3 +897,26 @@ def floor_hist(h):
             if h.GetBinContent(ix, iy) < 0.:
                 h.SetBinContent(ix, iy, 0.)
     return h
+
+def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
+
+    #gg_cutflow = glob.glob('../ggSkims/%s_cut_hists.root'%sample)
+    gg_cutflow = glob.glob('../ggSkims/3pho/%s_cut_hists.root'%sample)
+    assert len(gg_cutflow) == 1
+
+    cut = str(None)
+    var = 'npho'
+    key = cut+'_'+var
+    hf = ROOT.TFile(gg_cutflow[0], "READ")
+    h = hf.Get('%s/%s'%(cut, key))
+
+    nevts_gen = h.GetEntries()
+    # Sum of wgts
+    if sample == 'DiPhotonJets':
+        nevts_gen = 1118685275.488525
+    elif sample == 'GluGluHToGG':
+        nevts_gen = 214099989.445038
+    print(nevts_gen)
+    norm = xsec*tgt_lumi/nevts_gen
+    #print(norm)
+    return norm

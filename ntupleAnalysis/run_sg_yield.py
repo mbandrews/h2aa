@@ -19,32 +19,13 @@ output_dir = 'Templates'
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
-def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
-
-    #gg_cutflow = glob.glob('../ggSkims/%s_cut_hists.root'%sample)
-    gg_cutflow = glob.glob('../ggSkims/3pho/%s_cut_hists.root'%sample)
-    assert len(gg_cutflow) == 1
-
-    cut = str(None)
-    var = 'npho'
-    key = cut+'_'+var
-    hf = ROOT.TFile(gg_cutflow[0], "READ")
-    h = hf.Get('%s/%s'%(cut, key))
-
-    nevts_gen = h.GetEntries()
-    if sample == 'DiPhotonJets':
-        nevts_gen = 1118685275.488525 # sum of weights
-    #print(nevts_gen)
-    norm = xsec*tgt_lumi/nevts_gen
-    #print(norm)
-    return norm
-
 regions = ['sr']
 
 for s in samples:
 
     #blind = 'sg'
     #blind = None
+    #blind = 'diag_lo_hi'
     blind = 'offdiag_lo_hi'
 
     # Do data
