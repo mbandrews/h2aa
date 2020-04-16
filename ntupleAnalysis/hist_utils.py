@@ -78,6 +78,9 @@ def create_hists(h):
     #h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
     h[k] = ROOT.TH1F(k, k, 300, -600., 600.)
 
+    for k in h.keys():
+        h[k].Sumw2()
+
 def create_cut_hists(h, cuts):
 
     for c in cuts:

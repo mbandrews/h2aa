@@ -12,7 +12,9 @@ process         h4g_$MA  bkg
 process         0          1
 rate            -1         -1
 --------------------------------
-#lumi     lnN    1.10       1.0
+lumi    lnN     1.025    -
+stat    shape   1        1          # stat uncertainty ~ sqrt(N)
+shape   shape   -        1          # uncertainty on background shape
 #bgnorm   lnN    1.00       1.3
 #alpha  shapeN2    -           1   uncertainty on background shape and normalization
 #sigma  shapeN2    0.5         -   uncertainty on signal resolution. Assume the histogram is a 2 sigma shift,

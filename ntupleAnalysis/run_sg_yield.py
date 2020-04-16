@@ -48,6 +48,7 @@ for s in samples:
     pool.close()
     pool.join()
 
+    '''
     #norm = 41.e3 # /pb 2017 int lumi
     #norm = 41. # /fb 2017 int lumi
     #norm = norm
@@ -55,6 +56,7 @@ for s in samples:
     scale = 1.e-3
     norm = get_sg_norm(s)*scale
     #norm = get_sg_norm(s)*scale if 'HToGG' not in s else get_sg_norm(s)*2.7e-3
+    print(norm)
 
     # Rerun data with fixed normalization
     r = 'sr'
@@ -64,4 +66,5 @@ for s in samples:
     os.system('python %s'%pyargs)
 
     #plot_srvsb(s, blind)
+    '''
 

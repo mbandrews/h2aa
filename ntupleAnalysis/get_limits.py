@@ -19,7 +19,11 @@ samples = [
     ] # GeV
 
 fitalgo = 'AsymptoticLimits'
-processes = ['-M %s Datacards/h4g_MA_.txt --keyword-value MA=%sGeV'%(fitalgo, s) for s in samples]
+#fitalgo = 'HybridNew'
+#fitalgo = 'Significance'
+#processes = ['-M %s Datacards/h4g_MA_.txt --keyword-value MA=%sGeV'%(fitalgo, s) for s in samples]
+processes = ['-M %s Datacards/h4g_MA_.txt --keyword-value MA=%sGeV --rAbsAcc 5.e-6'%(fitalgo, s) for s in samples]
+#processes = ['-M %s Datacards/h4g_MA_.txt --keyword-value MA=%sGeV -t -1 --expectSignal=0.0046'%(fitalgo, s) for s in samples]
 
 do_fit = not args.no_fit
 if do_fit:
@@ -35,7 +39,8 @@ def get_limitfile_mass(f):
 
 # NOTE: an extra `scale` needed to be applied when running `run_sg_yield.py` for limit setting here to converge.
 # => Need to undo this `scale` when making the actual plots!!!
-def get_limits(f, scale=1.e-3):
+#def get_limits(f, scale=1.e-3):
+def get_limits(f, scale=1.):
 
     tree = ROOT.TChain("limit")
     tree.Add(f)
