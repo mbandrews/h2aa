@@ -21,6 +21,7 @@ if not os.path.isdir(output_dir):
 
 regions = ['sr']
 
+processes = []
 for s in samples:
 
     #blind = 'sg'
@@ -32,7 +33,6 @@ for s in samples:
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%s)
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
-    processes = []
     s = s.replace('[','').replace(']','')
     regions = ['sr']
     for r in regions:
@@ -43,12 +43,12 @@ for s in samples:
         print('Doing: %s'%pyargs)
         processes.append(pyargs)
         #break
+    '''
     pool = Pool(processes=len(processes))
     pool.map(run_process, processes)
     pool.close()
     pool.join()
 
-    '''
     #norm = 41.e3 # /pb 2017 int lumi
     #norm = 41. # /fb 2017 int lumi
     #norm = norm
@@ -67,4 +67,9 @@ for s in samples:
 
     #plot_srvsb(s, blind)
     '''
+
+pool = Pool(processes=len(processes))
+pool.map(run_process, processes)
+pool.close()
+pool.join()
 
