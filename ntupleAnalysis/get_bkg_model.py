@@ -23,6 +23,7 @@ parser.add_argument('-b', '--blind', default=None, type=str, help='Regions to bl
 parser.add_argument('--do_ptomGG', action='store_true', help='Switch to apply pt/mGG cuts.')
 parser.add_argument('--do_pt_reweight', action='store_true', help='Switch to apply 2d pt re-weighting.')
 parser.add_argument('--do_combined_template', action='store_true', help='Switch to apply 2d ma re-weighting corresponding to combined hgg SR + data SB template.')
+parser.add_argument('--do_mini2aod', action='store_true', help='Switch to apply mini2oad wgts.')
 parser.add_argument('-n', '--norm', default=None, type=float, help='SB to SR normalization.')
 parser.add_argument('-e', '--events', default=-1, type=int, help='Number of evts to process.')
 args = parser.parse_args()
@@ -64,6 +65,12 @@ else:
     assert region != 'sr'
     #assert do_pt_reweight
 
+do_mini2aod = args.do_mini2aod
+if do_mini2aod:
+    assert 'GluGluHToGG' in sample
+    print('Using mini2oad wgts')
+    nfmini2aod = np.load("Weights/Photon_Pt25To100_mAn0p4To1p6_mini2aod_ptmawgts.npz")
+
 hists = {}
 create_hists(hists)
 
@@ -97,8 +104,17 @@ iEvtEnd   = nEvts if args.events == -1 else args.events
 
 '''
 # Inject sg
-sgbr = 1.e-1 # *xsec(h)
-ma = '100MeV'
+#sgbr = 1.e-1 # *xsec(h)
+#sgbr = 0. # *xsec(h)
+#sgbr = 0.0047 # *xsec(h)
+#sgbr = 0.0079 # *xsec(h)
+#ma = '100MeV'
+##sgbr = 0.0014 # *xsec(h)
+#sgbr = 0.0024 # *xsec(h)
+#ma = '400MeV'
+#sgbr = 0.0026 # *xsec(h)
+#sgbr = 0.0046 # *xsec(h)
+#ma = '1GeV'
 h24g_sample = 'h24gamma_1j_1M_%s'%ma
 sginj_wgt = sgbr*get_sg_norm(h24g_sample)
 #sginj_wgt = 1. # no sg scaling
@@ -135,6 +151,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     if do_combined_template:
         wgt = wgt*get_combined_template_wgt(tree, nfma['ma_edges'], nfma['wgts'])
         #print(wgt)
+    if do_mini2aod:
+        wgt = wgt*get_mini2aod_wgt(tree, nfmini2aod['ma_edges'], nfmini2aod['pt_edges'], nfmini2aod['wgts'])
     if 'Run20' in sample and not tree.isData:
         wgt = wgt*sginj_wgt
 

@@ -6,7 +6,7 @@ import os, glob
 from root_numpy import hist2array
 from data_utils import *
 
-def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1):
+def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False):
     '''
     Convenience fn for running the background modeling event loop.
     Returns a string for the python command arguments to be executed.
@@ -20,11 +20,13 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
         pyargs += ' --do_ptomGG'
     if do_pt_reweight:
         pyargs += ' --do_pt_reweight'
+    if do_mini2aod:
+        pyargs += ' --do_mini2aod'
     print('cmd: %s'%pyargs)
 
     return pyargs
 
-def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False, do_ptomGG=False):
+def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_reweight=False, do_ptomGG=False, blind='sg'):
 
     '''
     do_pt_reweight: boolean applied to SB regions only!
@@ -46,7 +48,8 @@ def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_rewe
 
     # [1] First run hgg, data mH-SB, data mH-SR with 2d-ma-SR blinded
     # These will output TH2F histograms into root files which will be picked up in [2]
-    blind = 'sg'
+    #blind = 'sg'
+    blind = blind
     #blind = None
 
     # Data mH-SB and mH-SR
@@ -82,6 +85,7 @@ def run_combined_sbfit(fgg=None, fjj=None, norm=1., derive_fit=False, do_pt_rewe
 
     r = 'sr'
     processes.append(bkg_process(s, r, blind, ma_inputs, output_dir))
+    #processes.append(bkg_process(s, r, blind, ma_inputs, output_dir, do_mini2aod=True))
     #processes.append(bkg_process(s, r, blind, ma_inputs, output_dir, do_pt_reweight=do_pt_reweight))
 
     # Run processes in parallel
@@ -331,6 +335,8 @@ def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', sr_sample='Run20
                 #do_combo_template=True if r == 'sbcombo' else False,\
                 do_ptomGG=do_ptomGG if r == sb else True,\
                 do_pt_reweight=do_pt_reweight if r == sb else False)\
+                #do_pt_reweight=do_pt_reweight if r == sb else False,\
+                #do_mini2oad=True if 'GluGluHToGG' in sample else False)
                 for r in regions]
         # For target SR process
         processes.append(bkg_process(sr_sample, 'sr', blind, ma_inputs, workdir,\
@@ -485,7 +491,8 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     # 1st order: do TFractionFitter template fit -> converges but segfaults on exit
     # => need to put in values by hand after fit
     norm = {}
-    scale_num = 1.e3 #100., 1.
+    #scale_num = 1.e3 #100., 1.
+    scale_num = 5.e3 #100., 1.
 
     #h['Run2017B-F_sr_ma0vma1'].Scale(1./h['Run2017B-F_sr_ma0vma1'].Integral())
     h['Run2017B-F_sr_ma0vma1'].Scale(scale_num/h['Run2017B-F_sr_ma0vma1'].Integral())
@@ -586,12 +593,20 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
         fit.Constrain(0, 0., 1.)
         fit.Constrain(1, 0., 1.)
         fit.Constrain(2, 0., 1.)
-        status = fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
-        #print('fit status:',status)
-        print('fit status:', int(status))
-        print('X^2 / ndf = %f / %d = %f'%(fit.GetChisquare(), fit.GetNDF(), fit.GetChisquare()/fit.GetNDF()))
+        fitResult = fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
+        print('fit status:', int(fitResult))
+        chi2 = fit.GetChisquare()
+        ndof = fit.GetNDF()
+        pval = fit.GetProb()
+        print('chi2 / ndf: %f / %f = %f'%(chi2, ndof, chi2/ndof))
+        #print('chi2 / (ndf-nDiag): %f / %f = %f'%(chi2, ndof-nDiag, chi2/(ndof-nDiag)))
+        print('p-val:',pval)
+        cor = fitResult.GetCorrelationMatrix()
+        cov = fitResult.GetCovarianceMatrix()
+        cor.Print()
+        cov.Print()
 
-    #'''
+    '''
     k = 'Run2017B-F_sb2sr_ma0vma1'
     #h[k] = h['gg'].Clone()
     #h[k].Scale(fgg)
@@ -609,7 +624,7 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     h[k].Scale(norm['sb2sr'])
     print('sb2sr, gg:%f, jj:%f'%(get_entries_cr(h[k], 'gg'), get_entries_cr(h[k], 'jj')))
     print('gg ratio:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg')/get_entries_cr(h[k], 'gg'))
-    #'''
+    '''
 
     print('fgg: %f, flo:%f, fhi:%f'%(fgg, flo, fhi))
     #return fgg, fjj, norm
@@ -844,7 +859,7 @@ def get_pt_wgt(tree, pt_edges, wgts):
     Convenience fn for returning 2d-pt wgt for an event loaded into `tree`
     '''
     assert tree.phoEt[0] > tree.phoEt[1]
-    return get_weight_2d(tree.phoEt[0], tree.phoEt[1], pt_edges, wgts)
+    return get_weight_2d(tree.phoEt[0], tree.phoEt[1], pt_edges, pt_edges, wgts)
 
 def get_combined_template_wgt(tree, ma_edges, wgts):
     '''
@@ -852,17 +867,26 @@ def get_combined_template_wgt(tree, ma_edges, wgts):
     '''
     return get_weight_2d(tree.ma0, tree.ma1, ma_edges, wgts)
 
-def get_weight_2d(q_lead, q_sublead, q_edges, wgts):
+def get_weight_2d(q_lead, q_sublead, q_edges_lead, q_edges_sublead, wgts):
     '''
     Returns wgt corresponding to (q_lead, q_sublead) in 2d-q plane
     '''
     # NOTE: assumes wgts corresponds to
     # row:sublead, col:lead
-    iq_lead = get_weight_idx(q_lead, q_edges)
-    iq_sublead = get_weight_idx(q_sublead, q_edges)
+    iq_lead = get_weight_idx(q_lead, q_edges_lead)
+    iq_sublead = get_weight_idx(q_sublead, q_edges_sublead)
 
     #print(iq_sublead, iq_lead)
     return wgts[iq_sublead, iq_lead]
+
+def get_mini2aod_wgt(tree, ma_edges, pt_edges, wgts):
+    wgt = 1.
+    # ma0
+    wgt = wgt*get_weight_2d(tree.ma0, tree.phoEt[0], ma_edges, pt_edges, wgts)
+    # ma1
+    wgt = wgt*get_weight_2d(tree.ma1, tree.phoEt[1], ma_edges, pt_edges, wgts)
+
+    return wgt
 
 def get_entries_cr(h, cr):
     '''
