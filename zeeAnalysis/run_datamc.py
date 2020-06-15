@@ -36,15 +36,14 @@ def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
     return norm
 
 samples = [
-    'DYToEE'
-    #'DiPhotonJets',
-    #'GJet_Pt20To40',
-    #'GJet_Pt40ToInf',
-    #'QCD_Pt30To40',
-    #'QCD_Pt40ToInf',
-    #'GluGluHToGG'
+    'B'
+    ,'C'
+    ,'D'
+    ,'E'
+#    ,'F'
     ]
-samples.append('Run2017[B-F]')
+samples = ['Run2017%s'%s for s in samples]
+samples.append('DYToEE')
 
 xsec = {
     'DiPhotonJets': 134.3,

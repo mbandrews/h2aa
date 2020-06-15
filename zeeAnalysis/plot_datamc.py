@@ -1,4 +1,6 @@
+from __future__ import print_function
 import ROOT
+import re
 import numpy as np
 from array import array
 from hist_utils_zee import *
@@ -962,16 +964,10 @@ def draw_hist_1dmastacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
 
     #k = 'sr_%s'%k_
     k = kdata
-    ymax = 1.2*max(h[kdata].GetMaximum(), h[kmc].GetMaximum())
-    #ymax = 1.2*h[k].GetMaximum()
+    #ymax = 1.2*max(h[kdata].GetMaximum(), h[kmc].GetMaximum())
     if ymax_ == -1 and hc[k].GetBinContent(2) > 0.:
-        #ymax = 1.2*hc[k].GetBinContent(2)
         ymax = 1.2*max(np.max([hc[kdata].GetBinContent(ib) for ib in range(2, hc[kdata].GetNbinsX()+2)]),
                        np.max([hc[kmc].GetBinContent(ib) for ib in range(2, hc[kmc].GetNbinsX()+2)]))
-        #ymax = 1.2*np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)])
-        #print(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]))
-    #if ymax_ is not None and ymax_ > 0.:
-    #    ymax = ymax_
     #hc[kdata].GetYaxis().SetRangeUser(0.1, ymax)
     #hc[kdata].GetXaxis().SetRangeUser(0., 100.)
     hdummy.GetYaxis().SetRangeUser(0.1, ymax)
@@ -1158,12 +1154,21 @@ def get_dataomc_norm(k_, region, h):
     norm = h[kdata].Integral()/h[kmc].Integral()
     return norm
 
+def get_sample_type(s):
+    s = s.split('_')[0]
+    if 'Run' in s:
+        sample = re.search('(Run201[0-9])', s).group(1)
+    else:
+        sample = s
+    #print(sample)
+    return sample
+
 def plot_datamc(samples, blind, norm, regions):
 
     assert len(samples) > 0
     samples = [s.replace('[','').replace(']','') for s in samples]
 
-    sample_types = [s.split('_')[0] for s in samples]
+    sample_types = list(set([get_sample_type(s) for s in samples]))
 
     hf, h = {}, {}
     c = {}
@@ -1171,64 +1176,69 @@ def plot_datamc(samples, blind, norm, regions):
     #keys = ['ptxy', 'maxy','mee','bdtxy']
     #keys = ['pt1', 'ma1','mee','bdt1']
     keys = ['pt1corr', 'elePt1corr', 'ma1', 'ma1phoEcorr', 'ma1eleEcorr' ,'mee', 'bdt1']
+    #keys = ['ma1']
 
     for s in samples:
         for r in regions:
+            print('sample: %s, region: %s'%(s, r))
             #hf[s+r] = ROOT.TFile("Templates/%s_templates.root"%(s),"READ")
             hf[s+r] = ROOT.TFile("Templates/%s_rewgt_templates.root"%(s),"READ")
-            #hf[s+r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
-            #hf[s+r] = ROOT.TFile("Templates_datamc/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
             for k in keys:
-                #srk = '%s_%s_%s'%(s, r, k)
                 h[s+r+k] = hf[s+r].Get(k)
-                print(s+r+k,h[s+r+k].GetEntries(),h[s+r+k].Integral())
                 h[s+r+k].Scale(norm[s])
-                print(s+r+k,h[s+r+k].GetEntries(),h[s+r+k].Integral())
+                print('key: %s: GetEntries: %.f, Integral: %.f @ scale: %.2f'\
+                    %(k, h[s+r+k].GetEntries(), h[s+r+k].Integral(), norm[s]))
 
     hsum = {}
     hsample = {}
     for k in keys:
         for r in regions:
+            print('key: %s, region: %s'%(k, r))
             # Initialize
             for d in ['data', 'mc']:
                 # Clone struct of histogram without copying its contents
                 hsum[d+r+k] = h[samples[0]+r+k].Clone()
                 hsum[d+r+k].Reset()
-                #print(hsum[d+r+k].Integral())
-            for t in sample_types:
-                hsample[t+r+k] = h[samples[0]+r+k].Clone()
-                hsample[t+r+k].Reset()
+                print('Initializing hsum: %s'%(d+r+k))
 
             # Add up
             for s in samples:
                 d = 'data' if 'Run' in s else 'mc'
-                #print(s, h[s+r+k].Integral())
                 hsum[d+r+k].Add(h[s+r+k])
-                #print(hsum[d+r+k].Integral())
+                print('For hsum[%s], adding %s -> Integral: %.f'%(d+r+k, s+r+k, hsum[d+r+k].Integral()))
 
-                t = s.split('_')[0]
+    for k in keys:
+        for r in regions:
+            print('key: %s, region: %s'%(k, r))
+            # Initialize
+            for t in sample_types:
+                hsample[t+r+k] = h[samples[0]+r+k].Clone()
+                hsample[t+r+k].Reset()
+                print('Initializing hsample: %s'%(t+r+k))
+            for s in samples:
+                t = get_sample_type(s)
                 hsample[t+r+k].Add(h[s+r+k])
-                #print(t,hsample[t+r+k].Integral())
+                print('For hsample[%s], adding %s -> Integral: %.f'%(t+r+k, s+r+k, hsample[t+r+k].Integral()))
 
             mcnorm = get_dataomc_norm(k, r, hsum)
-            #print(mcnorm)
+            print('key %s: MC to Data norm: %.4f'%(k+r, mcnorm))
 
             #'''
             if 'pt' in k or 'Pt' in k:
                 print('pt')
                 #draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [20., 100.], "p_{T,a} [GeV]")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, sample_types, blind, -1, mcnorm, [20., 100.], "p_{T,a} [GeV]")
             if 'ma' in k and 'v' not in k:
                 print('max')
                 #draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [-0.4, 1.2], "m_{a,pred} [GeV]")
+                draw_hist_1dmastacked(k, r, [hsum, hsample], c, sample_types, blind, -1, mcnorm, [-0.4, 1.2], "m_{a,pred} [GeV]")
             if 'mee' in k:
                 print('mee')
                 #draw_hist_1dmee(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [60., 120.], "m_{#gamma,#gamma} [GeV]")
-            if 'bdt' in k:
-                print('bdt')
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, None, mcnorm, [-1., 1.], "Photon ID")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, sample_types, blind, -1, mcnorm, [60., 120.], "m_{#gamma,#gamma} [GeV]")
+            #if 'bdt' in k:
+            #    print('bdt')
+            #    draw_hist_1dptstacked(k, r, [hsum, hsample], c, sample_types, blind, None, mcnorm, [-1., 1.], "Photon ID")
             #if 'ma0vma1' in k:
             #    print('ma0vma1')
             #    draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)

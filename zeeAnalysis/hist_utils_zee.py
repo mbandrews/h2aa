@@ -2,6 +2,8 @@ import ROOT
 import numpy as np
 from array import array
 
+ma_shift = 0.002
+
 def create_hists(h):
 
     ma_bins = list(range(0,1200+25,25))
@@ -166,7 +168,7 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
 
 
 #def fill_hists(h, tree, wgt, outvars=None):
-def fill_hists(h, tree, wgt, outvars=None, pt_wgts=None, pt_edges=None):
+def fill_hists(h, tree, wgt, outvars=None, pt_wgts=None, pt_edges=None, fma=None):
 
     h['wgt'].Fill(wgt)
 
@@ -224,8 +226,12 @@ def fill_hists(h, tree, wgt, outvars=None, pt_wgts=None, pt_edges=None):
         if 'phoProbeIdxs' in outvars.keys():
             for i,idx in enumerate(outvars['phoProbeIdxs']):
                 tot_wgt = wgt*get_weight_1d(tree.phoCalibEt[idx], pt_edges['pt1corr'], pt_wgts['pt1corr']) if pt_wgts is not None else wgt
+                #inptwindow = (tree.phoCalibEt[idx] > 60.) and (tree.phoCalibEt[idx] < 100.)
                 h['tagIdx'].Fill(idx, tot_wgt)
+                #if inptwindow:
                 h['ma1'].Fill(tree.ma[idx], tot_wgt)
+                #h['ma1'].Fill(tree.ma[idx]+ma_shift, tot_wgt)
+                fma.write('%f:%f\n'%(tree.ma[idx], tot_wgt))
                 h['maxy'].Fill(tree.ma[idx], tot_wgt)
                 h['pt1'].Fill(tree.phoEt[idx], tot_wgt)
                 h['ptxy'].Fill(tree.phoEt[idx], tot_wgt)
@@ -236,6 +242,7 @@ def fill_hists(h, tree, wgt, outvars=None, pt_wgts=None, pt_edges=None):
                 h['bdtxy'].Fill(tree.phoIDMVA[idx], tot_wgt)
                 phoEcorr_ = tree.phoCalibEt[idx]/tree.phoEt[idx]
                 h['phoEcorr'].Fill(phoEcorr_, tot_wgt)
+                #if inptwindow:
                 h['ma1phoEcorr'].Fill(tree.ma[idx]*phoEcorr_, tot_wgt)
                 h['maxyphoEcorr'].Fill(tree.ma[idx]*phoEcorr_, tot_wgt)
                 h['pt1corr'].Fill(tree.phoCalibEt[idx], tot_wgt)
@@ -245,6 +252,7 @@ def fill_hists(h, tree, wgt, outvars=None, pt_wgts=None, pt_edges=None):
                     eleIdx_ = outvars['eleProbeIdxs'][i]
                     eleEcorr_ = tree.eleCalibPt[eleIdx_]/tree.elePt[eleIdx_]
                     tot_wgt = wgt*get_weight_1d(tree.eleCalibPt[eleIdx_], pt_edges['elePt1corr'], pt_wgts['elePt1corr']) if pt_wgts is not None else wgt
+                    #if inptwindow:
                     h['ma1eleEcorr'].Fill(tree.ma[idx]*eleEcorr_, tot_wgt)
                     h['maxyeleEcorr'].Fill(tree.ma[idx]*eleEcorr_, tot_wgt)
                     h['ma1velePt1corr'].Fill(tree.eleCalibPt[eleIdx_], tree.ma[idx], tot_wgt)

@@ -93,6 +93,9 @@ def select_event(tree, cuts, hists, counts, outvars=None):
     if cut in cuts:
         if tree.nEle < 2:
             return False
+        nEle = sum([1 for i in range(tree.nEle) if tree.eleCalibPt[i] > 15.])
+        if nEle < 2:
+            return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
@@ -244,14 +247,14 @@ def select_event(tree, cuts, hists, counts, outvars=None):
     # chgIso cut
     cut = 'chgiso'
     if cut in cuts:
-        if not chgiso_passed(tree): return False
+        if not chgiso_passed(tree, outvars['phoProbeIdxs']): return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
     # bdt cut
     cut = 'bdt'
     if cut in cuts:
-        if not bdt_passed(tree): return False
+        if not bdt_passed(tree, outvars['phoProbeIdxs']): return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
@@ -267,20 +270,14 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
 
     return True
 
-def bdt_passed(tree):
-    #if tree.phoIDMVA[0] < -0.96: return False
-    #if tree.phoIDMVA[1] < -0.96: return False
-    #if tree.phoIDMVA[0] < -0.98: return False
-    #if tree.phoIDMVA[1] < -0.98: return False
-    if tree.phoIDMVA[tree.phoPreselIdxs[0]] < -0.98: return False
-    if tree.phoIDMVA[tree.phoPreselIdxs[1]] < -0.98: return False
+def bdt_passed(tree, phoProbeIdxs):
+    for idx in phoProbeIdxs:
+        if tree.phoIDMVA[idx] < -0.98: return False
     return True
 
-def chgiso_passed(tree):
-    #if tree.phoPFChIso[tree.phoPreselIdxs[0]] > 3.: return False
-    #if tree.phoPFChIso[tree.phoPreselIdxs[1]] > 3.: return False
-    if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) > 0.05: return False
-    if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) > 0.05: return False
+def chgiso_passed(tree, phoProbeIdxs):
+    for idx in phoProbeIdxs:
+        if (tree.phoPFChIso[idx]/tree.phoEt[idx]) > 0.05: return False
     return True
 
 def ptomGG_passed(tree):
@@ -373,21 +370,31 @@ def load_hists(h, hf, samples, keys, input_dir):
         for k in keys:
             h[s+k] = hf[s].Get(k)
 
-def get_ptweights(sample_src='DYToEE', sample_tgt='Run2017B-F', workdir='Templates'):
+def get_ptweights(sample_src='DYToEE', sample_tgt='Run2017', workdir='Templates'):
 
     h, hf = {}, {}
-    samples = [sample_src, sample_tgt]
+    sample_tgts = glob.glob('%s/%s?_templates.root'%(workdir, sample_tgt))
+    sample_tgts = [s.split('/')[-1].split('_')[0] for s in sample_tgts]
+    #print(sample_tgts)
+    samples = [sample_src]+sample_tgts
+    #print(samples)
     keys = ['pt1corr', 'elePt1corr']
     load_hists(h, hf, samples, keys, workdir)
-    print(h.keys())
+    #print(h.keys())
 
     for k in keys:
 
         # Ratio is SR/SB
         kratio = k+'ratio'
-        h[kratio] = h[sample_tgt+k].Clone()
+        for i,s in enumerate(sample_tgts):
+            if i == 0:
+                h[kratio] = h[s+k].Clone()
+            else:
+                h[kratio].Add(h[s+k])
+
         h[kratio].Divide(h[sample_src+k])
 
+        #'''
         # Save all histograms for reference
         # Actual weights to be used during event loop are written to separate file below
         output_dir = 'Weights'
@@ -415,8 +422,8 @@ def get_ptweights(sample_src='DYToEE', sample_tgt='Run2017B-F', workdir='Templat
         # Remove unphysical values
         #ratio[ratio==0.] = 0.
         ratio[np.isnan(ratio)] = 1.
-        print('pt-ratio:')
-        print(ratio.min(), ratio.max(), np.mean(ratio), np.std(ratio))
+        #print('pt-ratio:')
+        #print(ratio.min(), ratio.max(), np.mean(ratio), np.std(ratio))
 
         # Write out weights to numpy file
         np.savez("%s/%s2%s_%s_ptwgts.npz"%(output_dir, sample_src, sample_tgt, k), pt_edges=pt_edges, pt_wgts=ratio)
