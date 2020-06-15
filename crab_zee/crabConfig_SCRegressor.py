@@ -1,5 +1,5 @@
 import os
-from CRABClient.UserUtilities import config
+from CRABClient.UserUtilities import config, getUsernameFromSiteDB
 config = config()
 #from Utilities.General.cmssw_das_client import get_data as das_query
 
@@ -22,7 +22,7 @@ config.General.transferLogs = False
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '/uscms/home/mba2012/nobackup/h2aa/CMSSW_10_5_0/src/MLAnalyzer/RecHitAnalyzer/python/SCRegressor_cfg.py'#%os.environ['CMSSW_BASE']
 #config.JobType.psetName = '/cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_10_5_0/src/PhysicsTools/Utilities/configuration/copyPickMerge_cfg.py'
-#config.JobType.maxMemoryMB = 2800
+config.JobType.maxMemoryMB = 2600
 #config.JobType.pyCfgParams = ['eventsToProcess_load=%s'%EVTLIST]
 config.JobType.maxJobRuntimeMin = 2750 # mins
 
@@ -34,8 +34,7 @@ if 'json' in LUMIMASK:
 
 config.Data.inputDataset = DATASET
 #if 'DoubleEG' in SAMPLE or 'h24gamma' in SAMPLE:
-#if 'Run201' in SAMPLE or 'h24gamma' in SAMPLE:
-if '_AOD' in SECONDARYDATASET or '/AOD' in SECONDARYDATASET:
+if 'Run201' in SAMPLE or 'h24gamma' in SAMPLE:
     config.Data.secondaryInputDataset = SECONDARYDATASET
 config.Data.inputDBS = 'phys03' if '/USER' in DATASET or '/USER' in SECONDARYDATASET else 'global'
 

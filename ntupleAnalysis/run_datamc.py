@@ -23,8 +23,11 @@ def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
     h = hf.Get('%s/%s'%(cut, key))
 
     nevts_gen = h.GetEntries()
+    # Sum of wgts
     if sample == 'DiPhotonJets':
-        nevts_gen = 1118685275.488525 # sum of weights
+        nevts_gen = 1118685275.488525
+    elif sample == 'GluGluHToGG':
+        nevts_gen = 214099989.445038
     print('xsec',xsec)
     print('nevts_gen',nevts_gen)
     norm = xsec*tgt_lumi/nevts_gen
@@ -115,11 +118,11 @@ for sample in samples:
     '''
 
     # Rerun data with fixed normalization
-    blind = 'notgjet'
+    #blind = 'notgjet'
     #blind = 'notgg'
     #blind = 'sg'
     #blind = None
-    #blind = 'diag_lo_hi'
+    blind = 'diag_lo_hi'
     #blind = 'offdiag_lo_hi' # for actual limit setting
 
     # Run both SB and SR to bkg processes

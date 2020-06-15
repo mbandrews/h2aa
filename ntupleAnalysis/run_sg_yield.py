@@ -19,39 +19,20 @@ output_dir = 'Templates'
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
-def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
-
-    #gg_cutflow = glob.glob('../ggSkims/%s_cut_hists.root'%sample)
-    gg_cutflow = glob.glob('../ggSkims/3pho/%s_cut_hists.root'%sample)
-    assert len(gg_cutflow) == 1
-
-    cut = str(None)
-    var = 'npho'
-    key = cut+'_'+var
-    hf = ROOT.TFile(gg_cutflow[0], "READ")
-    h = hf.Get('%s/%s'%(cut, key))
-
-    nevts_gen = h.GetEntries()
-    if sample == 'DiPhotonJets':
-        nevts_gen = 1118685275.488525 # sum of weights
-    #print(nevts_gen)
-    norm = xsec*tgt_lumi/nevts_gen
-    #print(norm)
-    return norm
-
 regions = ['sr']
 
+processes = []
 for s in samples:
 
     #blind = 'sg'
     #blind = None
+    #blind = 'diag_lo_hi'
     blind = 'offdiag_lo_hi'
 
     # Do data
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%s)
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
-    processes = []
     s = s.replace('[','').replace(']','')
     regions = ['sr']
     for r in regions:
@@ -62,6 +43,7 @@ for s in samples:
         print('Doing: %s'%pyargs)
         processes.append(pyargs)
         #break
+    '''
     pool = Pool(processes=len(processes))
     pool.map(run_process, processes)
     pool.close()
@@ -74,6 +56,7 @@ for s in samples:
     scale = 1.e-3
     norm = get_sg_norm(s)*scale
     #norm = get_sg_norm(s)*scale if 'HToGG' not in s else get_sg_norm(s)*2.7e-3
+    print(norm)
 
     # Rerun data with fixed normalization
     r = 'sr'
@@ -83,4 +66,10 @@ for s in samples:
     os.system('python %s'%pyargs)
 
     #plot_srvsb(s, blind)
+    '''
+
+pool = Pool(processes=len(processes))
+pool.map(run_process, processes)
+pool.close()
+pool.join()
 

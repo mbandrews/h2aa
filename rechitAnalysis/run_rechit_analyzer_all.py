@@ -19,13 +19,12 @@ import subprocess
 #2017
 samples = [
     'B'
-    #,'C'
-    #,'D'
-    #,'E'
-    #,'F'
+    ,'C'
+    ,'D'
+    ,'E'
+    ,'F'
     ]
 samples = ['Run2017%s'%s for s in samples]
-#samples = ['DoubleEG_2017%s'%s for s in samples] #v1, deprecated
 
 ##2018
 #samples = [
@@ -42,23 +41,21 @@ samples = ['Run2017%s'%s for s in samples]
 #    ,'1GeV'
 #    ]
 #samples = ['h24gamma_1j_1M_%s'%s for s in samples]
-#samples.append('Run2017B')
 
-samples = [
+#samples = [
 #    'DiPhotonJets'
 #    ,'GJet_Pt20To40'
 #    ,'GJet_Pt40ToInf'
 #    ,'QCD_Pt30To40'
 #    ,'QCD_Pt40ToInf'
-    'GluGluHToGG'
-    ]
+#    'GluGluHToGG'
+#    ]
 
 # Inut IMG directory
 #img_campaign = 'Era2017_17Dec2019_IMGv1'
 #img_campaign = 'Era2017_23Feb2020_IMGv1'
 #img_campaign = 'Era2017_23Feb2020_IMGv3'
-#img_campaign = 'Era2017_07Apr2020_IMGv1'
-img_campaign = 'Era2017_11May2020_AOD-IMGv2'
+img_campaign = 'Era2017_07Apr2020_IMGv1'
 
 def get_img_dir(sample, campaign):
     if '2017' in sample:
@@ -72,9 +69,10 @@ def get_img_dir(sample, campaign):
 def run_process(process):
     os.system('python %s'%process)
 
-output_dir = 'MAntuples'
+output_dir = 'Hists'
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
+
 list_dir = 'Lists'
 if not os.path.isdir(list_dir):
     os.makedirs(list_dir)
@@ -83,32 +81,21 @@ if not os.path.isdir(list_dir):
 eosls = 'eos root://cmseos.fnal.gov ls'
 #eosfind = 'eos root://cmseos.fnal.gov find /store/user/lpcml/mandrews/2017/Era2017_18Nov2019_IMGv1/DoubleEG/Run2017B_Era2017_18Nov2019_IMGv1_IMG/ | grep root'
 eosfind = 'eos root://cmseos.fnal.gov find'
-#eos_basedir = '/store/user/lpcml/mandrews/2017'
-eos_basedir = '/store/user/lpchaa4g/mandrews/2017'
+eos_basedir = '/store/user/lpcml/mandrews/2017'
 processes = []
+gg_inputs_all, img_inputs_all = [], []
+
 for s in samples:
 
     print('For sample:',s)
 
-    # Get gg ntuples
-    cmd = '%s %s/%s/'%(eosfind, eos_basedir, 'ggSkims/3pho') # GG ntuple same for miniaod or aod IMG ntuple
-    print(cmd)
-    gg_inputs = subprocess.check_output(cmd, shell=True)
-    # subprocess.check_output() returns a byte-string => decode into str then split into files
-    gg_inputs = gg_inputs.decode("utf-8").split('\n')
-    # eosfind returns directories as well, keep only root files from correct sample and add fnal redir
-    gg_inputs = [f for f in gg_inputs if 'ggskim.root' in f]
-    gg_inputs = [f.replace('/eos/uscms','root://cmseos.fnal.gov/') for f in gg_inputs]
-    gg_inputs = [f for f in gg_inputs if s.replace('-MINIAOD','') in f]
-    # clean up empty elements:
-    gg_inputs = list(filter(None, gg_inputs)) # for py2.7: use filter(None, gg_inputs) without list()
-    '''
+    # Get H4G ntuples
     #gg_inputs = glob.glob('../ggSkims/%s*ggskim.root'%s)
     gg_inputs = glob.glob('../ggSkims/3pho/%s*ggskim.root'%s)
-    '''
     print(gg_inputs[0])
     print('len(gg_inputs):',len(gg_inputs))
     assert len(gg_inputs) > 0
+    gg_inputs_all.append(gg_inputs)
 
     # Get IMG ntuples
     cmd = '%s %s/%s/'%(eosfind, eos_basedir, get_img_dir(s, img_campaign))
@@ -126,18 +113,23 @@ for s in samples:
     print(img_inputs[0])
     print('len(img_inputs):',len(img_inputs))
     assert len(img_inputs) > 0
+    img_inputs_all.append(img_inputs)
 
-    img_inputs_filestr = '%s/img_inputs_%s.txt'%(list_dir, s)
-    with open(img_inputs_filestr, 'w') as f:
-        for img_input in img_inputs:
-            f.write('%s\n'%img_input)
+sample_all = 'Run2017'
+gg_inputs_all = np.concatenate(gg_inputs_all).flatten()
+img_inputs_all = np.concatenate(img_inputs_all).flatten()
+print('len(gg_inputs_all):',len(gg_inputs_all))
+print('len(img_inputs_all):',len(img_inputs_all))
 
-    # mass_eval_ntuples.py
-    #pyargs = 'mass_ntuplizer.py -s %s -i %s -g %s -o %s'%(s, ' '.join(img_inputs), ' '.join(gg_inputs), output_dir)
-    pyargs = 'mass_ntuplizer.py -s %s -i %s -g %s -o %s'%(s, img_inputs_filestr, ' '.join(gg_inputs), output_dir)
-    #os.system('python %s'%pyargs)
-    processes.append(pyargs)
-    #break
+img_inputs_filestr = '%s/img_inputs_%s.txt'%(list_dir, sample_all)
+with open(img_inputs_filestr, 'w') as f:
+    for img_input in img_inputs_all:
+        f.write('%s\n'%img_input)
+
+# mass_eval_ntuples.py
+pyargs = 'rechit_analyzer.py -s %s -i %s -g %s -o %s'%(sample_all, img_inputs_filestr, ' '.join(gg_inputs), output_dir)
+processes.append(pyargs)
+#break
 
 pool = Pool(processes=len(processes))
 pool.map(run_process, processes)

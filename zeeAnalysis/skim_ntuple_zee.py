@@ -6,8 +6,8 @@ import os, glob
 import time
 import argparse
 from array import array
-from hist_utils import *
-from evt_analyzers import *
+from hist_utils_zee import *
+from evt_analyzers_zee import *
 from data_utils import *
 #from get_bkg_norm import *
 
@@ -27,8 +27,8 @@ outdir = args.outdir
 #inputs = args.inputs
 eos_basedir = args.eos_basedir
 
-cuts = [str(None), 'trg', 'npho', 'presel', 'mgg']
-#cuts = [str(None), 'npho', 'presel', 'mgg']
+cuts = [str(None), 'trg', 'nele']
+#cuts = [str(None), 'trg', 'nele', 'presel', 'tag', 'mee']
 hists = OrderedDict()
 create_cut_hists(hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])
@@ -44,7 +44,7 @@ for i,fh in enumerate(inputs):
     tree.Add(fh)
     #break
 tree.SetBranchStatus('pfMET*', 0)
-tree.SetBranchStatus('ele*', 0)
+#tree.SetBranchStatus('ele*', 0)
 tree.SetBranchStatus('mu*', 0)
 tree.SetBranchStatus('jet*', 0)
 nEvts = tree.GetEntries()
@@ -63,12 +63,12 @@ tree_out = tree.CloneTree(0)
 
 # Initialize branches for the m_as as single floats
 # [PyROOT boilerplate for single float branches]
-mgg = np.zeros(1, dtype='float32')
-#phoPreselIdxs = np.zeros(2, dtype='float32')
-phoPreselIdxs = np.zeros(2, dtype='int32')
-tree_out.Branch('mgg', mgg, 'mgg/F')
-#tree_out.Branch('phoPreselIdxs', phoPreselIdxs, 'phoPreselIdxs[2]/F')
-tree_out.Branch('phoPreselIdxs', phoPreselIdxs, 'phoPreselIdxs[2]/I')
+#mee = np.zeros(1, dtype='float32')
+#phoPreselIdxs = np.zeros(2, dtype='int32')
+#phoPreselEleIdxs = np.zeros(2, dtype='int32')
+#tree_out.Branch('mee', mee, 'mee/F')
+#tree_out.Branch('phoPreselIdxs', phoPreselIdxs, 'phoPreselIdxs[2]/I')
+#tree_out.Branch('phoPreselEleIdxs', phoPreselEleIdxs, 'phoPreselEleIdxs[2]/I')
 
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0
@@ -84,12 +84,13 @@ for iEvt in range(iEvtStart,iEvtEnd):
     #if tree.run != 297114: continue
     #if tree.lumis != 14: continue
     # Analyze event
-    outvars = {}
-    if not select_event(tree, cuts, hists, counts, outvars): continue
+    #outvars = {}
+    #if not select_event(tree, cuts, hists, counts, outvars): continue
+    if not select_event(tree, cuts, hists, counts): continue
 
-    mgg[0] = outvars['mgg']
-    phoPreselIdxs[0] = outvars['phoPreselIdxs'][0]
-    phoPreselIdxs[1] = outvars['phoPreselIdxs'][1]
+    #mee[0] = outvars['mee']
+    #phoPreselIdxs[0], phoPreselIdxs[1] = outvars['phoPreselIdxs'][0], outvars['phoPreselIdxs'][1]
+    #phoPreselEleIdxs[0], phoPreselEleIdxs[1] = outvars['phoPreselEleIdxs'][0], outvars['phoPreselEleIdxs'][1]
     #leadIdx = outvars['phoPreselIdxs'][0]
     #subLeadIdx = outvars['phoPreselIdxs'][1]
     #print(tree.run, tree.lumis, tree.event)

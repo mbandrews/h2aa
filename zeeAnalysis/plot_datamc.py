@@ -1,7 +1,7 @@
 import ROOT
 import numpy as np
 from array import array
-from hist_utils import *
+from hist_utils_zee import *
 #from plot_2dma import draw_hist_2dma
 
 def draw_hist_1dma(k_, region, h, c, samples, blind, ymax_=None):
@@ -336,7 +336,7 @@ def draw_hist_1dpt(k_, region, h, c, samples, blind, ymax_=None):
         pass
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(samples[0], blind))
 
-def draw_hist_1dmGG(k_, region, h, c, samples, blind, ymax_=None):
+def draw_hist_1dmee(k_, region, h, c, samples, blind, ymax_=None):
 
     print(h.keys())
     kdata = 'data'+region+k_
@@ -412,7 +412,8 @@ def draw_hist_1dmGG(k_, region, h, c, samples, blind, ymax_=None):
     #if ymax_ is not None and ymax_ > 0.:
     #    ymax = ymax_
     hc[kdata].GetYaxis().SetRangeUser(0.1, ymax)
-    hc[kdata].GetXaxis().SetRangeUser(100., 180.)
+    #hc[kdata].GetXaxis().SetRangeUser(100., 180.)
+    hc[kdata].GetXaxis().SetRangeUser(60., 120.)
 
     #l, l2, hatch = {}, {}, {}
     #legend = {}
@@ -429,8 +430,8 @@ def draw_hist_1dmGG(k_, region, h, c, samples, blind, ymax_=None):
     pDn.SetTicky()
     pDn.SetGridy()
 
-    #fUnity = ROOT.TF1("fUnity","[0]",-0.4,1.2)
-    fUnity = ROOT.TF1("fUnity","[0]",100.,180.)
+    #fUnity = ROOT.TF1("fUnity","[0]",100.,180.)
+    fUnity = ROOT.TF1("fUnity","[0]",60.,120.)
     fUnity.SetParameter( 0,1. )
 
     fUnity.GetXaxis().SetTitle("m_{#gamma,#gamma} [GeV]")
@@ -1018,6 +1019,8 @@ def draw_hist_1dmastacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
+    fUnity.GetXaxis().ChangeLabel(1,-1, 0,-1,-1,-1,"")
+    fUnity.GetXaxis().ChangeLabel(2,-1,-1,-1,-1,-1,"#font[22]{#gamma_{veto}}")
 
     dY = 0.199
     dY = 0.399
@@ -1033,8 +1036,6 @@ def draw_hist_1dmastacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     fUnity.GetYaxis().SetTitleOffset(.4)
     fUnity.GetYaxis().SetTitleSize(0.16)
     fUnity.GetYaxis().SetLabelSize(0.14)
-    fUnity.GetXaxis().ChangeLabel(1,-1, 0,-1,-1,-1,"")
-    fUnity.GetXaxis().ChangeLabel(2,-1,-1,-1,-1,-1,"#font[22]{#gamma_{veto}}")
 
     fUnity.SetLineColor(9)
     fUnity.SetLineWidth(1)
@@ -1141,7 +1142,8 @@ def plot_color(key):
         return 2 #red
     elif 'GJet' in key:
         return 4 #blue
-    elif 'DiPhoton' in key:
+    #elif 'DiPhoton' in key:
+    elif 'DiPhoton' in key or 'DYToEE' in key:
         return 3 #green
     else:
         return 5 # yellow
@@ -1166,20 +1168,16 @@ def plot_datamc(samples, blind, norm, regions):
     hf, h = {}, {}
     c = {}
 
-    #regions = ['sb2sr', 'sr']
-    #regions = ['sblo2sr', 'sbhi2sr', 'sr']
-    #regions = ['sblo2sr']
-    #regions = ['sblo']
-    #keys = ['ma0vma1']
-    #keys = ['maxy']
-    #keys = ['maxy','ma0','ma1']
-    #keys = ['ptxy', 'maxy','mGG']
-    keys = ['ptxy', 'maxy','mGG','bdtxy']
+    #keys = ['ptxy', 'maxy','mee','bdtxy']
+    #keys = ['pt1', 'ma1','mee','bdt1']
+    keys = ['pt1corr', 'elePt1corr', 'ma1', 'ma1phoEcorr', 'ma1eleEcorr' ,'mee', 'bdt1']
 
     for s in samples:
         for r in regions:
+            #hf[s+r] = ROOT.TFile("Templates/%s_templates.root"%(s),"READ")
+            hf[s+r] = ROOT.TFile("Templates/%s_rewgt_templates.root"%(s),"READ")
             #hf[s+r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
-            hf[s+r] = ROOT.TFile("Templates_datamc/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
+            #hf[s+r] = ROOT.TFile("Templates_datamc/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
             for k in keys:
                 #srk = '%s_%s_%s'%(s, r, k)
                 h[s+r+k] = hf[s+r].Get(k)
@@ -1216,22 +1214,22 @@ def plot_datamc(samples, blind, norm, regions):
             #print(mcnorm)
 
             #'''
-            if 'pt' in k:
+            if 'pt' in k or 'Pt' in k:
                 print('pt')
                 #draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [25., 100.], "p_{T,a} [GeV]")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [20., 100.], "p_{T,a} [GeV]")
             if 'ma' in k and 'v' not in k:
                 print('max')
                 #draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [-0.4, 1.2], "m_{a,pred} [GeV]")
-            if 'mGG' in k:
-                print('mGG')
-                #draw_hist_1dmGG(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [100., 180.], "m_{#gamma,#gamma} [GeV]")
+            if 'mee' in k:
+                print('mee')
+                #draw_hist_1dmee(k, r, hsum, c, samples, blind, -1)
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [60., 120.], "m_{#gamma,#gamma} [GeV]")
             if 'bdt' in k:
                 print('bdt')
                 draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, None, mcnorm, [-1., 1.], "Photon ID")
-            if 'ma0vma1' in k:
-                print('ma0vma1')
-                draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)
+            #if 'ma0vma1' in k:
+            #    print('ma0vma1')
+            #    draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)
             #'''

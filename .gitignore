@@ -2,8 +2,10 @@
 *.root
 *.npz
 *.eps
+*.png
+*.bak
 *.txt
 *.json
-ggSkims/*
-crab/crab_*
+ggSkims*/*
+crab*/crab_*
 ntupleAnalysis/__*
