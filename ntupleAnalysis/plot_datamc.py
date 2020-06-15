@@ -1033,6 +1033,8 @@ def draw_hist_1dmastacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     fUnity.GetYaxis().SetTitleOffset(.4)
     fUnity.GetYaxis().SetTitleSize(0.16)
     fUnity.GetYaxis().SetLabelSize(0.14)
+    fUnity.GetXaxis().ChangeLabel(1,-1, 0,-1,-1,-1,"")
+    fUnity.GetXaxis().ChangeLabel(2,-1,-1,-1,-1,-1,"#font[22]{#gamma_{veto}}")
 
     fUnity.SetLineColor(9)
     fUnity.SetLineWidth(1)
@@ -1084,6 +1086,7 @@ def draw_hist_1dmastacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(samples, blind))
     samples_str = '_'.join(samples)
     c[k].Print('Plots/%s_dataomc_blind_%s_%s.eps'%(samples_str, blind, k))
+    c[k].Print('Plots/%s_dataomc_blind_%s_%s.png'%(samples_str, blind, k))
     if 'ma1' in k_ or 'pt1' in k_:
         pass
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(samples[0], blind))
@@ -1215,15 +1218,15 @@ def plot_datamc(samples, blind, norm, regions):
             #'''
             if 'pt' in k:
                 print('pt')
-                draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
+                #draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [25., 100.], "p_{T,a} [GeV]")
             if 'ma' in k and 'v' not in k:
                 print('max')
-                draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
+                #draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [-0.4, 1.2], "m_{a,pred} [GeV]")
             if 'mGG' in k:
                 print('mGG')
-                draw_hist_1dmGG(k, r, hsum, c, samples, blind, -1)
+                #draw_hist_1dmGG(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [100., 180.], "m_{#gamma,#gamma} [GeV]")
             if 'bdt' in k:
                 print('bdt')
