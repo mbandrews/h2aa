@@ -102,7 +102,7 @@ for iEvt in range(iEvtStart,iEvtEnd):
     nWrite += 1
 
 sw.Stop()
-print(">> N events written: %d / %d"%(nWrite, nEvts))
+print(">> N events written: %d / %d"%(nWrite, iEvtEnd-iEvtStart))
 print(">> Real time:",sw.RealTime()/60.,"minutes")
 print(">> CPU time: ",sw.CpuTime() /60.,"minutes")
 

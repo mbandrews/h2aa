@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 np.random.seed(0)
 import os, glob
@@ -244,13 +245,33 @@ k = 'ieta'
 h[k] = ROOT.TH1F(k, k, 170//5, 0., 170)
 
 k = 'ma0'
-#c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
 h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
 #h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
 k = 'ma1'
-#c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
 h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
 #h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
+
+'''
+k = 'ma0dn'
+c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
+#h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
+k = 'ma1dn'
+c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
+#h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
+
+k = 'ma0up'
+c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
+#h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
+k = 'ma1up'
+c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
+h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
+#h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
+'''
 
 k = 'ma0vma1'
 #c[k] = ROOT.TCanvas("c","c",wd,ht)
@@ -260,7 +281,7 @@ h[k] = ROOT.TH2F(k, k, 48, 0., 1.2, 48, 0., 1.2)
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts
-#iEvtEnd   = 15
+#iEvtEnd   = 10#50000#10
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 
 def shapeEB(eb):
@@ -272,7 +293,7 @@ sw.Start()
 for iEvt in range(iEvtStart,iEvtEnd):
 
     # Initialize event
-    if iEvt%10e3==0: print(iEvt,'/',nEvts)
+    if iEvt%10e3==0: print(iEvt,'/',iEvtEnd-iEvtStart)
     evt_status = tree.GetEntry(iEvt)
     if evt_status <= 0: continue
     #evt_idx = idx_where_eventId(evtlistf, tree)
@@ -358,6 +379,7 @@ for iEvt in range(iEvtStart,iEvtEnd):
     X_EBt = np.array(tree.EB_energyT).reshape(1,170,360)
     X_EBz = np.array(tree.EB_energyZ).reshape(1,170,360)
     X_cms = np.concatenate([X_EBt, X_EBz], axis=0)
+    #X_EBerr = np.array(tree.EB_energyErr).reshape(1,170,360)
     for i in range(npho_roi):
         #X_EB = np.array(tree.EB_energy).reshape(1,170,360)
         #print(X_cms.shape)
@@ -370,8 +392,49 @@ for iEvt in range(iEvtStart,iEvtEnd):
         #ieta.append([100])
         #iphi.append([100])
         #print('ieta:%.f, iphi:%.f'%(ieta[-1][0], iphi[-1][0]))
-        sc_cms.append(crop_EBshower(X_cms, ieta[-1], iphi[-1]))
+        #sc_cms.append(crop_EBshower(X_cms, ieta[-1], iphi[-1]))
         #print(crop_EBshower(X_cms, ieta[-1], iphi[-1]).shape)
+        sc_cms_ = crop_EBshower(X_cms, ieta[-1], iphi[-1])
+        sc_cms.append(sc_cms_)
+        #print(sc_cms_.shape)
+        '''
+        # Calculate energy +/- err
+        sc_err_ = crop_EBshower(X_EBerr, ieta[-1], iphi[-1])
+        #print(sc_err_.shape)
+        # Only have total energy err but need to decompose it into i = t,z components
+        # to associate with Et and Ez layers. ith component is then
+        # err_i = err * (\hat{E} dot \hat{E_i})
+        #       = err * (E_i/E)
+        sc_energy_ = np.sqrt(sc_cms_[:1]*sc_cms_[:1] + sc_cms_[1:]*sc_cms_[1:])# E = sqrt( Et^2 + Ez^2 )
+        #print(sc_energy_.shape)
+        # Avoid dividing by zero energy in empty hits
+        zero_en = (sc_energy_ == 0.)
+        zero_err = (sc_err_ == 0.)
+        #assert np.array_equal(zero_en, zero_err), '%d vs. %d'%(len(sc_energy_[zero_en]), len(sc_err_[zero_err]))
+        #sc_energy_[sc_energy_ == 0.] = 1. # value of 1 arbitrary but will result in 0 err anyway
+        assert np.array_equal(len(sc_energy_[(zero_en | zero_err)]), len(sc_err_[zero_err])),\
+                 '%d vs. %d'%(len(sc_energy_[(zero_en | zero_err)]), len(sc_err_[zero_err]))
+        sc_energy_[sc_err_ == 0.] = 1. # value of 1 arbitrary but will result in 0 err anyway
+        #print(sc_err_[0,15,15], sc_energy_[0,15,15], sc_cms_[:,15,15])
+        #print((sc_err_[0,15,15]/sc_energy_[0,15,15])*sc_cms_[0,15,15], (sc_err_[0,15,15]/sc_energy_[0,15,15])*sc_cms_[1,15,15])
+        sc_cms_err_ = (sc_err_/sc_energy_)*sc_cms_ # err/E will be broadcast: err_i = (err/E)*E_i
+        #print(sc_cms_err_[:,15,15])
+        # energy down
+        mean_ferr = np.mean(sc_cms_err_[sc_cms_>0.]/sc_cms_[sc_cms_>0.])
+        print(np.mean(sc_cms_err_[sc_cms_>0.]))
+        print(np.mean(sc_cms_[sc_cms_>0.]))
+        print(mean_ferr)
+        ieta.append([tree.SC_ieta[pho_idx[i]]])
+        iphi.append([tree.SC_iphi[pho_idx[i]]])
+        #sc_cms.append(sc_cms_-sc_cms_err_)
+        sc_cms.append(sc_cms_*(1.-mean_ferr))
+        # energy up
+        ieta.append([tree.SC_ieta[pho_idx[i]]])
+        iphi.append([tree.SC_iphi[pho_idx[i]]])
+        #sc_cms.append(sc_cms_+sc_cms_err_)
+        sc_cms.append(sc_cms_*(1.+mean_ferr))
+        #print(sc_cms_[:,15,15],sc_cms_err_[:,15,15])
+        '''
     #print(np.array(sc_cms).shape)
     #print(np.array(iphi).shape)
     #print(np.array(ieta).shape)
@@ -380,8 +443,11 @@ for iEvt in range(iEvtStart,iEvtEnd):
                                torch.Tensor(ieta).cuda()/170.
                               ])).tolist()
     #'''
+    #print(np.array(ma).shape)
+    #print(ma)
     #'''
     ma0_, ma1_ = ma[0][0], ma[1][0]
+    #ma0_, ma0dn_, ma0up_, ma1_, ma1dn_, ma1up_ = np.array(ma)[:,0]
     #print(ma)
     #print(ma0_, ma1_)
     ma0[0] = ma0_
@@ -390,12 +456,17 @@ for iEvt in range(iEvtStart,iEvtEnd):
     h['ma0'].Fill(ma0_)
     h['ma1'].Fill(ma1_)
     h['ma0vma1'].Fill(ma0_, ma1_)
+
+    #h['ma0dn'].Fill(ma0dn_)
+    #h['ma1dn'].Fill(ma1dn_)
+    #h['ma0up'].Fill(ma0up_)
+    #h['ma1up'].Fill(ma1up_)
     #'''
     #break
     nWrite += 1
 
 sw.Stop()
-print(">> N events written: %d / %d"%(nWrite, nEvts))
+print(">> N events written: %d / %d"%(nWrite, iEvtEnd-iEvtStart))
 print(">> Real time:",sw.RealTime()/60.,"minutes")
 print(">> CPU time: ",sw.CpuTime() /60.,"minutes")
 
@@ -407,8 +478,6 @@ for k in h.keys():
     #h[k].Write()
 
 '''
-file_out.Write()
-file_out.Close()
 
 
 # In[9]:
@@ -483,31 +552,72 @@ mass_line = 0.
 
 #######################################################
 '''
-k = 'ma0'
-c[k].cd()
-h[k], c[k] = set_hist(h[k], c[k], "m_{a,pred} [GeV]", "N_{a}", "m_{a,pred}")
-h[k].SetLineColor(9)
-h[k].Draw("hist")
-k = 'ma1'
-h[k].SetLineColor(2)
-h[k].Draw("hist SAME")
+#for shift in ['', 'dn', 'up']:
+    k = 'ma0'+shift
+    print(k, h.keys(), c.keys())
+    assert k in h.keys()
+    print(type(h[k]), type(c[k]))
+    c[k].cd()
+    h[k], c[k] = set_hist(h[k], c[k], "m_{a,pred} [GeV]", "N_{a}", "")
+    h[k].SetLineColor(9)
+    h[k].Draw("hist")
+    k = 'ma1'+shift
+    h[k].SetLineColor(2)
+    h[k].Draw("hist SAME")
 
-ymax = 1.2*max(h['ma0'].GetMaximum(), h['ma1'].GetMaximum())
-h['ma0'].GetYaxis().SetRangeUser(0., ymax)
+    ymax = 1.2*max(h['ma0'+shift].GetMaximum(), h['ma1'+shift].GetMaximum())
+    h['ma0'+shift].GetYaxis().SetRangeUser(0., ymax)
 
-l = ROOT.TLine(mass_line, 0., mass_line, ymax) # x0,y0, x1,y1
-l.SetLineColor(14)
-l.SetLineStyle(7)
-l.Draw("same")
-hatch = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
-hatch.SetLineColor(14)
-hatch.SetLineWidth(2001)
-hatch.SetFillStyle(3004)
-hatch.SetFillColor(14)
-hatch.Draw("same")
+    #l = ROOT.TLine(mass_line, 0., mass_line, ymax) # x0,y0, x1,y1
+    #l.SetLineColor(14)
+    #l.SetLineStyle(7)
+    #l.Draw("same")
+    hatch = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
+    hatch.SetLineColor(14)
+    hatch.SetLineWidth(2001)
+    hatch.SetFillStyle(3004)
+    hatch.SetFillColor(14)
+    hatch.Draw("same")
 
-#c[k].SetGrid()
-c['ma0'].Draw()
+    #c[k].SetGrid()
+    c['ma0'+shift].Draw()
+    c['ma0'+shift].Update()
+    c['ma0'+shift].Print('Plots/h%s.eps'%k)
+'''
+'''
+for im in ['ma0', 'ma1']:
+    k = im
+    c[k].cd()
+    h[k], c[k] = set_hist(h[k], c[k], "m_{a,pred} [GeV]", "N_{a}", "")
+    h[k].SetLineColor(1)
+    h[k].Draw("hist")
+    k = im+'dn'
+    h[k].SetLineColor(2)
+    h[k].Draw("hist SAME")
+    k = im+'up'
+    h[k].SetLineColor(9)
+    h[k].Draw("hist SAME")
+
+    ymax = 1.2*h[im].GetMaximum()
+    h[im].GetYaxis().SetRangeUser(0., ymax)
+
+    #l = ROOT.TLine(mass_line, 0., mass_line, ymax) # x0,y0, x1,y1
+    #l.SetLineColor(14)
+    #l.SetLineStyle(7)
+    #l.Draw("same")
+    hatch = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
+    hatch.SetLineColor(14)
+    hatch.SetLineWidth(2001)
+    hatch.SetFillStyle(3004)
+    hatch.SetFillColor(14)
+    hatch.Draw("same")
+
+    #c[k].SetGrid()
+    c[im].Draw()
+    c[im].Update()
+    c[im].Print('Plots/h%s_%s_nomdnup.eps'%(args.sample, im))
+'''
+'''
 ##############################
 k = 'iphi'
 c[k].cd()
@@ -548,3 +658,5 @@ palette.SetY1NDC(0.13)
 #blue: leading
 #red: sub-leading
 
+file_out.Write()
+file_out.Close()
