@@ -18,7 +18,10 @@ UNITSPERJOB = '__UNITSPERJOB__'
 #this_campaign = 'Era2017_17Dec2019_IMGv1'
 #this_campaign = 'Era2017_23Feb2020_IMGv1'
 #this_campaign = 'Era2017_23Feb2020_IMGv2'
-this_campaign = 'Era2017_23Feb2020_IMGv3'
+#this_campaign = 'Era2017_23Feb2020_IMGv3'
+#this_campaign = 'Era2017_07Apr2020_IMGv1'
+#this_campaign = 'Era2017_11May2020_AOD-IMGv1'
+this_campaign = 'Era2017_11May2020_AOD-IMGv2'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
@@ -70,9 +73,10 @@ samples = {
     '%sF-MINIAOD'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'
     }
 '''
-#'''
+'''
 #job_units = 50
-job_units = 100
+#job_units = 100
+job_units = 250
 run = 'h24gamma_1j_1M'
 samples = {
     '%s_100MeV'%run: [
@@ -88,9 +92,10 @@ samples = {
             '/h24gamma_01Nov2019-rhECAL/mandrews-h24gamma_1j_1M_1GeV_Era2017_23Feb2020_MINIAOD-skimv1-919c80a76a70185609d372d13ecbc645/USER',
             '/h24gamma_01Nov2019-rhECAL/mandrews-h24gamma_1j_1M_1GeV_PU2017_MINIAODSIM_v2-919c80a76a70185609d372d13ecbc645/USER'],
     }
-#'''
 '''
-job_units = 500
+#'''
+#job_units = 500
+job_units = 50
 samples = {
     #'DiPhotonJets':   [
     #    '/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8/mandrews-DiPhotonJets_Era2017_17Dec2019_MINIAOD-skimv1-18783c0a07109245951450a1a4f55409/USER',
@@ -110,9 +115,11 @@ samples = {
     'GluGluHToGG':    [
         #'/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/mandrews-GluGluHToGG_Era2017_17Dec2019_MINIAOD-skimv1-18783c0a07109245951450a1a4f55409/USER',
         '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/mandrews-GluGluHToGG_Era2017_23Feb2020_MINIAOD-skimv1-18783c0a07109245951450a1a4f55409/USER',
-        '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+        '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/mandrews-GluGluHToGG_Era2017_18May2020_AODslim-ecal_v1-351414bbda2cdc38d49da1680cef2a3f/USER'],
+        #'/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM'],
+        #'/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
     }
-'''
+#'''
 
 for s,dset in samples.iteritems(): #python3: samples.items()
 
