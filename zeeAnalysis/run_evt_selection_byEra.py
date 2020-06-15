@@ -28,15 +28,16 @@ samples = ['Run2016%s'%s for s in samples]
 #'''
 #2017
 eos_basedir = '/store/group/lpchaa4g/mandrews/2017/MAntuples_zee'
-#samples = [
-#    'B'
-#    #,'C'
-#    #,'D'
-#    #,'E'
-#    #,'F'
-#    ]
-#samples = ['Run2017%s'%s for s in samples]
-samples = ['Run2017[B-F]']
+samples = [
+    'B'
+    ,'C'
+    ,'D'
+    ,'E'
+#    ,'F'
+    ]
+samples = ['Run2017%s'%s for s in samples]
+#samples = ['Run2017[B-F]']
+#samples = []
 #'''
 
 '''
@@ -74,6 +75,10 @@ if not os.path.isdir(output_dir):
 procs = []
 procs_rewgt = []
 
+nEvtsData = 800000
+#nEvtsData = 800
+nEvtsMC = nEvtsData*5
+
 for s in samples:
 
     print(s)
@@ -86,6 +91,7 @@ for s in samples:
     ma_inputs = ma_inputs.decode("utf-8").split('\n')
     # eosfind returns directories as well, keep only root files from correct sample and add fnal redir
     ma_inputs = [f for f in ma_inputs if 'mantuple.root' in f]
+    ma_inputs = [f for f in ma_inputs if 'ARCHIVE/' not in f]
     ma_inputs = [f.replace('/eos/uscms','root://cmseos.fnal.gov/') for f in ma_inputs]
     #ma_inputs = [f for f in ma_inputs if s in f]
     ma_inputs = [f for f in ma_inputs if re.search(s, f) is not None]
@@ -100,13 +106,15 @@ for s in samples:
     print('len(ma_inputs):',len(ma_inputs))
     assert len(ma_inputs) > 0
     '''
-
     s = s.replace('[','').replace(']','')
-    pyargs = 'evt_selector.py -s %s -i %s -o %s'%(s, ' '.join(ma_inputs), output_dir)
+    pyargs = 'evt_selector.py -s %s -i %s -o %s -e %d'\
+            %(s, ' '.join(ma_inputs), output_dir, nEvtsData if 'Run' in s else nEvtsMC)
     procs.append(pyargs)
-    #break
+
     if 'Run' in s: continue
-    pyargs = 'evt_selector.py -s %s -i %s -o %s --do_pt_reweight'%(s, ' '.join(ma_inputs), output_dir)
+
+    pyargs = 'evt_selector.py -s %s -i %s -o %s --do_pt_reweight -e %d'\
+            %(s, ' '.join(ma_inputs), output_dir, nEvtsData if 'Run' in s else nEvtsMC)
     procs_rewgt.append(pyargs)
 
 print(len(procs))
@@ -115,8 +123,7 @@ pool.map(run_process, procs)
 pool.close()
 pool.join()
 
-#'''
-get_ptweights()
+get_ptweights(sample_tgt='Run2017')
 
 print(len(procs_rewgt))
 pool = Pool(processes=len(procs_rewgt))
@@ -124,7 +131,6 @@ pool.map(run_process, procs_rewgt)
 pool.close()
 pool.join()
 
-assert 'Run' in samples[0]
-s = samples[0].replace('[','').replace(']','')
-shutil.copyfile('Templates/%s_templates.root'%s, 'Templates/%s_rewgt_templates.root'%s)
-#'''
+for s in samples:
+    if 'Run' not in s: continue
+    shutil.copyfile('Templates/%s_templates.root'%s, 'Templates/%s_rewgt_templates.root'%s)
