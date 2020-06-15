@@ -15,7 +15,10 @@ LUMIMASK = '__LUMIMASK__'
 CAMPAIGN = '__CAMPAIGN__'
 UNITSPERJOB = '__UNITSPERJOB__'
 
-this_campaign = 'Era2017_16Apr2020_IMGv1'
+#this_campaign = 'Era2017_16Apr2020_IMGv1'
+#this_campaign = 'Era2017_11May2020_MINIAOD-IMGv1'
+#this_campaign = 'Era2017_11May2020_AOD-IMGv1'
+this_campaign = 'Era2017_27May2020_AOD-IMGv2'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
@@ -23,32 +26,87 @@ if not os.path.isdir(crab_folder):
 
 '''
 run = 'Run2017'
-job_units = 50
+#job_units = 400 #miniaod
+job_units = 50 #aod
 # key: [<primary dset>, <secondary dset>]
 samples = {
-    #'%sB'%run: [
-    #            '/DoubleEG/mandrews-Run2017B_Era2017_16Apr2020_MINIAOD-skimzeev3-84d4062339350c0b82cf1392552beb97/USER',
-    #            '/DoubleEG/mandrews-Run2017B_17Nov2017-v1_AOD_slim-ext_v2-3bfee02a0afb4bfd03fd5261a90623cd/USER'],
-    #'%sC0'%run: [
-    #            '/DoubleEG/mandrews-Run2017C0_Era2017_16Apr2020_MINIAOD-skimzeev3-84d4062339350c0b82cf1392552beb97/USER',
-    #            '/DoubleEG/mandrews-Run2017C_17Nov2017-v1_AOD_slim-ext_v2-3bfee02a0afb4bfd03fd5261a90623cd/USER'],
-    #'%sC1'%run: [
-    #            '/DoubleEG/mandrews-Run2017C1_Era2017_16Apr2020_MINIAOD-skimzeev3-84d4062339350c0b82cf1392552beb97/USER',
-    #            '/DoubleEG/mandrews-Run2017C_17Nov2017-v1_AOD_slim-ext_v2-3bfee02a0afb4bfd03fd5261a90623cd/USER'],
-    #'%sD'%run: [
-    #            '/DoubleEG/mandrews-Run2017D_Era2017_16Apr2020_MINIAOD-skimzeev3-84d4062339350c0b82cf1392552beb97/USER',
-    #            '/DoubleEG/mandrews-Run2017D_17Nov2017-v1_AOD_slim-ext-3bfee02a0afb4bfd03fd5261a90623cd/USER'],
-    #'%sE'%run: [
-    #            '/DoubleEG/mandrews-Run2017E_Era2017_16Apr2020_MINIAOD-skimzeev3-84d4062339350c0b82cf1392552beb97/USER',
-    #            '/DoubleEG/mandrews-Run2017E_17Nov2017-v1_AOD_slim-ext_v2-3bfee02a0afb4bfd03fd5261a90623cd/USER'],
-    '%sF'%run: [
-                '/DoubleEG/mandrews-Run2017F_Era2017_16Apr2020_MINIAOD-skimzeev3-84d4062339350c0b82cf1392552beb97/USER',
-                '/DoubleEG/mandrews-Run2017F_17Nov2017-v1_AOD_slim-ext_v2-964eedbb4080135606054ba835f474dc/USER']
+#    '%sB0'%run: [
+#                '/DoubleEG/mandrews-Run2017B0_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+#                '/DoubleEG/mandrews-DoubleEG_2017B_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+#                ],
+    '%sB1'%run: [
+                '/DoubleEG/mandrews-Run2017B1_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017B_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sB2'%run: [
+                '/DoubleEG/mandrews-Run2017B2_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017B_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+
+    '%sC0'%run: [
+                '/DoubleEG/mandrews-Run2017C0_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017C_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sC1'%run: [
+                '/DoubleEG/mandrews-Run2017C1_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017C_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sC2'%run: [
+                '/DoubleEG/mandrews-Run2017C2_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017C_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sC3'%run: [
+                '/DoubleEG/mandrews-Run2017C3_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017C_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+
+    '%sD0'%run: [
+                '/DoubleEG/mandrews-Run2017D0_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017D_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sD1'%run: [
+                '/DoubleEG/mandrews-Run2017D1_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017D_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+
+    '%sE0'%run: [
+                '/DoubleEG/mandrews-Run2017E0_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017E_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sE1'%run: [
+                '/DoubleEG/mandrews-Run2017E1_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017E_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sE2'%run: [
+                '/DoubleEG/mandrews-Run2017E2_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017E_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+    '%sE3'%run: [
+                '/DoubleEG/mandrews-Run2017E3_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017E_Era2017_18May2020_AODslim-ecal_v1-3bfee02a0afb4bfd03fd5261a90623cd/USER',
+                ],
+
+    '%sF0'%run: [
+                '/DoubleEG/mandrews-Run2017F0_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017F_Era2017_18May2020_AODslim-ecal_v1-964eedbb4080135606054ba835f474dc/USER',
+                ],
+    '%sF1'%run: [
+                '/DoubleEG/mandrews-Run2017F1_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017F_Era2017_18May2020_AODslim-ecal_v1-964eedbb4080135606054ba835f474dc/USER',
+                ],
+    '%sF2'%run: [
+                '/DoubleEG/mandrews-Run2017F2_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017F_Era2017_18May2020_AODslim-ecal_v1-964eedbb4080135606054ba835f474dc/USER',
+                ],
+    '%sF3'%run: [
+                '/DoubleEG/mandrews-Run2017F3_Era2017_27May2020_MINIAOD-skimzeev1-84d4062339350c0b82cf1392552beb97/USER',
+                '/DoubleEG/mandrews-DoubleEG_2017F_Era2017_18May2020_AODslim-ecal_v1-964eedbb4080135606054ba835f474dc/USER',
+                ]
     }
 '''
 #'''
-#job_units = 500
-job_units = 400
+#job_units = 400 #miniaod
+job_units = 50 #aod
 samples = {
     #'DiPhotonJets':   [
     #    '/DiPhotonJets_MGG-80toInf_13TeV_amcatnloFXFX_pythia8/mandrews-DiPhotonJets_Era2017_17Dec2019_MINIAOD-skimv1-18783c0a07109245951450a1a4f55409/USER',
@@ -68,9 +126,11 @@ samples = {
     #'GluGluHToGG':    [
     #    '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/mandrews-GluGluHToGG_Era2017_23Feb2020_MINIAOD-skimv1-18783c0a07109245951450a1a4f55409/USER',
     #    '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
-    'DYtoEE':    [
-        '/DYToEE_M-50_NNPDF31_13TeV-powheg-pythia8/mandrews-DYToEE_Era2017_16Apr2020_MINIAOD-skimzeev4-18783c0a07109245951450a1a4f55409/USER',
-        '/DYToEE_M-50_NNPDF31_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'],
+    'DYtoEE': [
+        '/DYToEE_M-50_NNPDF31_13TeV-powheg-pythia8/mandrews-DYToEE_Era2017_27May2020_MINIAOD-skimzeev1-18783c0a07109245951450a1a4f55409/USER',
+        '/DYToEE_M-50_NNPDF31_13TeV-powheg-pythia8/mandrews-DYToEE_Era2017_27May2020_AODslim-ecal_v1-3e98cc8e83f1853b5c5f781f2307a57e/USER'
+        #'/DYToEE_M-50_NNPDF31_13TeV-powheg-pythia8/mandrews-DYToEE_Era2017_27May2020_AODslim-ecal_pick_v1-443f35f23358d50dd133f8dcb9fe30d9/USER'
+        ]
     }
 #'''
 
@@ -113,11 +173,13 @@ for s,dset in samples.iteritems(): #python3: samples.items()
     file_data = file_data.replace(DATASET, dset[0])
     file_data = file_data.replace(SECONDARYDATASET, dset[1])
     #file_data = file_data.replace(EVTLIST, evt_list)
+    '''
     if 'Run2017' in s:
         #lumi_list = '%s/h2aa/evtsToProc/%s_3photons_imgskim_lumi_list.json'%(base_dir, s.replace('-MINIAOD',''))
         lumi_list = '%s/h2aa/evtsToProc/%s_3photons_imgskim_lumi_list.json'%(base_dir, re.sub('(201[6-8][A-Z])[0-9]','\\1',s.replace('-MINIAOD','')))
         assert os.path.isfile(lumi_list)
         file_data = file_data.replace(LUMIMASK, lumi_list)
+    '''
     file_data = file_data.replace(CAMPAIGN, this_campaign)
     file_data = file_data.replace(UNITSPERJOB, str(job_units))
 

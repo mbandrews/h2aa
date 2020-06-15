@@ -26,8 +26,8 @@ parser.add_argument('-i', '--img_inputs', default='img_inputs.txt', type=str, he
 parser.add_argument('-g', '--gg_inputs', default=['h24gntuple_n631.root'], nargs='+', type=str, help='Input GG files.')
 #parser.add_argument('-t', '--gg_treename', default='', type=str, help='GG TTree name prefix.')
 parser.add_argument('-o', '--outdir', default='MAntuples', type=str, help='Output directory.')
-parser.add_argument('-j', '--job', default=None, type=int, help='Output directory.')
-parser.add_argument('-n', '--njobs', default=None, type=int, help='Output directory.')
+parser.add_argument('-j', '--job', default=0, type=int, help='Output directory.')
+parser.add_argument('-n', '--njobs', default=1, type=int, help='Output directory.')
 args = parser.parse_args()
 
 # Crop out EB shower from full EB image
@@ -67,7 +67,7 @@ def get_evtlist(tree, ish24g=True):
     for iEvt in range(nEvts):
         # Initialize event
         tree.GetEntry(iEvt)
-        if iEvt%100e3==0: print(iEvt,'/',nEvts)
+        if iEvt%1e6==0: print(iEvt,'/',nEvts)
         if ish24g:
             eventId = [tree.run, tree.lumis, tree.event, iEvt]
         else:
@@ -203,10 +203,10 @@ print('...done')
 # Merges GG variables + regressed m_a
 if not os.path.isdir(args.outdir):
     os.makedirs(args.outdir)
-if args.njobs is None:
-    file_out = ROOT.TFile("%s/%s_mantuple.root"%(args.outdir, args.sample), "RECREATE")
-else:
+if args.njobs > 1:
     file_out = ROOT.TFile("%s/%s%d_mantuple.root"%(args.outdir, args.sample, args.job), "RECREATE")
+else:
+    file_out = ROOT.TFile("%s/%s_mantuple.root"%(args.outdir, args.sample), "RECREATE")
 file_out.mkdir("ggNtuplizer")
 file_out.cd("ggNtuplizer")
 # Clone TTree structure of GG ntuple

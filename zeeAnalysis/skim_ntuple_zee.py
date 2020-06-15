@@ -27,8 +27,8 @@ outdir = args.outdir
 #inputs = args.inputs
 eos_basedir = args.eos_basedir
 
-cuts = [str(None), 'trg', 'nele']
-#cuts = [str(None), 'trg', 'nele', 'presel', 'tag', 'mee']
+#cuts = [str(None), 'trg', 'nele']
+cuts = [str(None), 'nele']
 hists = OrderedDict()
 create_cut_hists(hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])

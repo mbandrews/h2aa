@@ -15,7 +15,8 @@ UNITSPERJOB = '__UNITSPERJOB__'
 #this_campaign = 'Era2017_16Apr2020_MINIAOD-skimzeev1'
 #this_campaign = 'Era2017_16Apr2020_MINIAOD-skimzeev2'
 #this_campaign = 'Era2017_16Apr2020_MINIAOD-skimzeev3'
-this_campaign = 'Era2017_16Apr2020_MINIAOD-skimzeev4'
+#this_campaign = 'Era2017_16Apr2020_MINIAOD-skimzeev4'
+this_campaign = 'Era2017_27May2020_MINIAOD-skimzeev1'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
@@ -35,22 +36,37 @@ samples = {
     }
 '''
 
-#'''
+'''
 #run = 'DoubleEG_2017'
 run = 'Run2017'
 #job_units = 500
 #job_units = 300
 job_units = 200
 samples = {
-    '%sB'%run: '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD',
+    #'%sB'%run: '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD',
+    '%sB0'%run: '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD',
+    '%sB1'%run: '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD',
+    '%sB2'%run: '/DoubleEG/Run2017B-31Mar2018-v1/MINIAOD',
     #'%sC'%run: '/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD',
     '%sC0'%run: '/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD',
     '%sC1'%run: '/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD',
-    '%sD'%run: '/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD',
-    '%sE'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
-    '%sF'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'
+    '%sC2'%run: '/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD',
+    '%sC3'%run: '/DoubleEG/Run2017C-31Mar2018-v1/MINIAOD',
+    #'%sD'%run: '/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD',
+    '%sD0'%run: '/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD',
+    '%sD1'%run: '/DoubleEG/Run2017D-31Mar2018-v1/MINIAOD',
+    #'%sE'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
+    '%sE0'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
+    '%sE1'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
+    '%sE2'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
+    '%sE3'%run: '/DoubleEG/Run2017E-31Mar2018-v1/MINIAOD',
+    #'%sF'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'
+    '%sF0'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD',
+    '%sF1'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD',
+    '%sF2'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD',
+    '%sF3'%run: '/DoubleEG/Run2017F-31Mar2018-v1/MINIAOD'
     }
-#'''
+'''
 
 '''
 run = 'Run2018'

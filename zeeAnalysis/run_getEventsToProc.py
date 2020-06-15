@@ -43,15 +43,15 @@ samples = [
 samples = ['h24gamma_1j_1M_%s'%s for s in samples]
 '''
 
-samples = [
+#samples = [
 #    'DiPhotonJets'
 #    ,'GJet_Pt20To40'
 #    ,'GJet_Pt40ToInf'
 #    ,'QCD_Pt30To40'
 #    ,'QCD_Pt40ToInf'
 #    'GluGluHToGG'
-    'DYToEE'
-    ]
+#    'DYToEE'
+#    ]
 
 output_dir = '../evtsToProc_zee'
 if not os.path.isdir(output_dir):

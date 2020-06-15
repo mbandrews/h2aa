@@ -18,11 +18,11 @@ import subprocess
 
 #2017
 samples = [
-    'B'
-    ,'C'
-    ,'D'
-    ,'E'
-    ,'F'
+#    'B'
+#    ,'C'
+#    ,'D'
+#    ,'E'
+    'F'
     ]
 samples = ['Run2017%s'%s for s in samples]
 
@@ -50,10 +50,13 @@ samples = ['Run2017%s'%s for s in samples]
 #    ,'QCD_Pt30To40'
 #    ,'QCD_Pt40ToInf'
 #    'GluGluHToGG'
+#    'DYToEE'
 #    ]
 
 # Inut IMG directory
-img_campaign = 'Era2017_16Apr2020_IMGv1'
+#img_campaign = 'Era2017_16Apr2020_IMGv1'
+#img_campaign = 'Era2017_11May2020_MINIAOD-IMGv1'
+img_campaign = 'Era2017_27May2020_AOD-IMGv1'
 
 def get_img_dir(sample, campaign):
     if '2017' in sample:
@@ -94,6 +97,7 @@ for s in samples:
     gg_inputs = gg_inputs.decode("utf-8").split('\n')
     # eosfind returns directories as well, keep only root files from correct sample and add fnal redir
     gg_inputs = [f for f in gg_inputs if 'ggskim.root' in f]
+    gg_inputs = [f for f in gg_inputs if 'ARCHIVE' not in f]
     gg_inputs = [f.replace('/eos/uscms','root://cmseos.fnal.gov/') for f in gg_inputs]
     gg_inputs = [f for f in gg_inputs if s in f]
     # clean up empty elements:
@@ -131,9 +135,15 @@ for s in samples:
         for img_input in img_inputs:
             f.write('%s\n'%img_input)
 
+    njobs = 4# 2 if 'DYToEE' in s else 1
     pyargs = 'mass_ntuplizer.py -s %s -i %s -g %s -o %s'%(s, img_inputs_filestr, ' '.join(gg_inputs), output_dir)
+    if njobs > 1:
+        for j in range(njobs):
+            processes.append('%s -j %d -n %d'%(pyargs, j, njobs))
+    else:
+        processes.append(pyargs)
     #os.system('python %s'%pyargs)
-    processes.append(pyargs)
+    #processes.append(pyargs)
     #break
 
 pool = Pool(processes=len(processes))

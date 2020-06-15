@@ -16,7 +16,7 @@ config = Configuration()
 ##  Once the Configuration object is created, it is possible to add new sections into it with corresponding parameters
 config.section_("General")
 config.General.requestName = 'pickEvents'
-config.General.workArea = 'crab_pickevents_20200419_210417'
+config.General.workArea = 'crab_pickevents_20200530_221751'
 
 
 config.section_("JobType")

@@ -1,5 +1,5 @@
 import os
-from CRABClient.UserUtilities import config, getUsernameFromSiteDB
+from CRABClient.UserUtilities import config
 config = config()
 #from Utilities.General.cmssw_das_client import get_data as das_query
 
@@ -34,7 +34,8 @@ if 'json' in LUMIMASK:
 
 config.Data.inputDataset = DATASET
 #if 'DoubleEG' in SAMPLE or 'h24gamma' in SAMPLE:
-if 'Run201' in SAMPLE or 'h24gamma' in SAMPLE:
+#if 'Run201' in SAMPLE or 'h24gamma' in SAMPLE:
+if '_AOD' in SECONDARYDATASET or '/AOD' in SECONDARYDATASET:
     config.Data.secondaryInputDataset = SECONDARYDATASET
 config.Data.inputDBS = 'phys03' if '/USER' in DATASET or '/USER' in SECONDARYDATASET else 'global'
 
