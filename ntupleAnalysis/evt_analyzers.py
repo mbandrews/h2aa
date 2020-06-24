@@ -189,7 +189,15 @@ def chgiso_passed(tree):
     #if tree.phoPFChIso[tree.phoPreselIdxs[0]] > 3.: return False
     #if tree.phoPFChIso[tree.phoPreselIdxs[1]] > 3.: return False
     if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) > 0.05: return False
-    if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) > 0.05: return False
+    #if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) > 0.05: return False
+    # Inverted
+    #if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) < 0.05: return False
+    if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) < 0.05: return False
+    # Inverted, any 1
+    #nIso = 0
+    #if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) < 0.05: nIso += 1
+    #if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) < 0.05: nIso += 1
+    #if nIso != 1: return False
     return True
 
 def ptomGG_passed(tree):
@@ -249,9 +257,13 @@ def is_blinded(blind, tree):
     is_lo = not ((ma0_flr >= 0.) and (ma1_flr >= 0.))
     is_gjet = (ma0_flr < 0.) and (ma1_flr >= 0.)
     is_gg = (ma0_flr < 0.) and (ma1_flr < 0.)
+    #is_diag_neg = (ma0_flr < 0. and ma1_flr < diag_w) or (ma1_flr < 0. and ma0_flr < diag_w)
+    is_diag_neg = (ma0_flr < diag_w and ma0_flr >= -diag_w) and\
+                  (ma1_flr < diag_w and ma1_flr >= -diag_w)
 
     if 'sg' in blind:
         if (is_diag and not is_lo and not is_hi): return True
+        #if (is_diag or is_diag_neg and not is_hi): return True
 
     # Diagonal blinding:
     if 'offdiag' in blind:
