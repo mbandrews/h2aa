@@ -8,25 +8,27 @@ def create_hists(h):
 
     ma_bins = list(range(0,1200+25,25))
     ma_bins = [-400]+ma_bins
+    #ma_bins = [-400, -200]+ma_bins
     ma_bins = [float(m)/1.e3 for m in ma_bins]
     #print(len(ma_bins))
+    n_ma_bins = len(ma_bins)-1
     ma_bins = array('d', ma_bins)
     #print(ma_bins)
 
     #h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
     #h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
-    h[k] = ROOT.TH1F(k, k, 49, ma_bins)
+    h[k] = ROOT.TH1F(k, k, n_ma_bins, ma_bins)
     k = 'ma1'
     #h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
     #h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
-    h[k] = ROOT.TH1F(k, k, 49, ma_bins)
+    h[k] = ROOT.TH1F(k, k, n_ma_bins, ma_bins)
     k = 'ma0vma1'
     #h[k] = ROOT.TH2F(k, k, 48, 0., 1.2, 48, 0., 1.2)
     #h[k] = ROOT.TH2F(k, k, 56, -0.2, 1.2, 56, -0.2, 1.2)
-    h[k] = ROOT.TH2F(k, k, 49, ma_bins, 49, ma_bins)
+    h[k] = ROOT.TH2F(k, k, n_ma_bins, ma_bins, n_ma_bins, ma_bins)
     k = 'maxy'
     #h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
-    h[k] = ROOT.TH1F(k, k, 49, ma_bins)
+    h[k] = ROOT.TH1F(k, k, n_ma_bins, ma_bins)
 
     #k = 'pt0'
     #h[k] = ROOT.TH1F(k, k, 50, 20., 170.)
@@ -43,8 +45,8 @@ def create_hists(h):
     pt_bins_[1] = np.arange(100,120,dPt)
     dPt = 20
     pt_bins_[2] = np.arange(120,200,dPt)
-    dPt = 750-200
-    pt_bins_[3] = np.arange(200,750+dPt,dPt)
+    #dPt = 750-200
+    #pt_bins_[3] = np.arange(200,750+dPt,dPt)
 
     pt_bins = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_.values()])
     n_pt_bins = len(pt_bins)-1
@@ -54,8 +56,6 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
     k = 'pt1'
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
-    k = 'pt0vpt1'
-    h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, n_pt_bins, pt_bins)
     k = 'ptxy'
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
 
@@ -63,6 +63,35 @@ def create_hists(h):
     h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, 49, ma_bins)
     k = 'ma1vpt1'
     h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, 49, ma_bins)
+
+    pt_bins_x_ = {}
+    dPt = 1
+    pt_bins_x_[0] = np.arange(25,100,dPt)
+    dPt = 5
+    pt_bins_x_[1] = np.arange(100,120,dPt)
+    dPt = 20
+    pt_bins_x_[2] = np.arange(120,200,dPt)
+    dPt = 750-200
+    pt_bins_x_[3] = np.arange(200,750+dPt,dPt)
+    pt_bins_x = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_x_.values()])
+    n_pt_bins_x = len(pt_bins_x)-1
+    pt_bins_x = array('d', list(pt_bins_x))
+
+    pt_bins_y_ = {}
+    dPt = 1
+    pt_bins_y_[0] = np.arange(25,60,dPt)
+    dPt = 5
+    pt_bins_y_[1] = np.arange(60,120,dPt)
+    dPt = 20
+    pt_bins_y_[2] = np.arange(120,200,dPt)
+    dPt = 750-200
+    pt_bins_y_[3] = np.arange(200,750+dPt,dPt)
+    pt_bins_y = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_y_.values()])
+    n_pt_bins_y = len(pt_bins_y)-1
+    pt_bins_y = array('d', list(pt_bins_y))
+
+    k = 'pt0vpt1'
+    h[k] = ROOT.TH2F(k, k, n_pt_bins_x, pt_bins_x, n_pt_bins_y, pt_bins_y)
 
     k = 'energy0'
     h[k] = ROOT.TH1F(k, k, 50, 20., 170.)

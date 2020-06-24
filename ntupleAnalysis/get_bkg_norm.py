@@ -6,7 +6,7 @@ import os, glob
 from root_numpy import hist2array
 from data_utils import *
 
-def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False):
+def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False, write_pts=False):
     '''
     Convenience fn for running the background modeling event loop.
     Returns a string for the python command arguments to be executed.
@@ -22,6 +22,8 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
         pyargs += ' --do_pt_reweight'
     if do_mini2aod:
         pyargs += ' --do_mini2aod'
+    if write_pts:
+        pyargs += ' --write_pts'
     print('cmd: %s'%pyargs)
 
     return pyargs
@@ -251,7 +253,10 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     '''
 
     sample = sample.replace('[','').replace(']','')
-    processes = [bkg_process(sample, r, blind, ma_inputs, workdir, do_ptomGG=do_ptomGG if r == sb else True) for r in regions]
+    processes = [bkg_process(sample, r, blind, ma_inputs, workdir, do_ptomGG=do_ptomGG if r == sb else True, write_pts=True) for r in regions]
+
+    for r in ['sblo', 'sbhi']:
+        processes.append(bkg_process(sample, r, blind, ma_inputs, workdir, do_ptomGG=True, write_pts=True))
 
     # Run processes in parallel
     pool = Pool(processes=len(processes))
@@ -263,46 +268,60 @@ def run_ptweights(blind=None, sb='sb', sample='Run2017[B-F]', workdir='Templates
     sample = sample.replace('[','').replace(']','')
     samples = [sample]
     #regions = ['sb', 'sr']
+    regions.append('sblo')
+    regions.append('sbhi')
     keys = ['pt0vpt1']
     load_hists(h, hf, samples, regions, keys, blind, workdir)
     print(h.keys())
 
-    k = keys[0]
-    # Ratio is SR/SB
-    h['%s_ratio'%k] = h['%s_sr_%s'%(sample, k)].Clone()
-    h['%s_ratio'%k].Divide(h['%s_%s_%s'%(sample, sb, k)])
-
-    # Save all histograms for reference
-    # Actual weights to be used during event loop are written to separate file below
     output_dir = 'Weights'
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
-    hf['ratios'] = ROOT.TFile("%s/%s_%s_blind_%s_ptwgts.root"%(output_dir, sample, r, blind), "RECREATE")
-    h['%s_sr_%s'%(sample, k)].SetName('%s_sr_%s'%(sample, k))
-    h['%s_sr_%s'%(sample, k)].Write()
-    h['%s_%s_%s'%(sample, sb, k)].SetName('%s_%s_%s'%(sample, sb, k))
-    h['%s_%s_%s'%(sample, sb, k)].Write()
-    h['%s_ratio'%k].SetName('%s_ratio'%k)
-    h['%s_ratio'%k].Write()
-    hf['ratios'].Close()
 
-    # TH2 origin @ lower left + (ix, iy)
-    # x:lead, y:sublead
+    k = keys[0]
+    #for tgt in ['sblo', 'sr', 'sbhi']:
+    for tgt in ['sr']:
 
-    # hist2array().T origin @ lower left + (row, col) <=> (iy, ix)
-    # NOTE: hist2array() drops uflow and ovflow bins => idx -> idx-1
-    # row:sublead, col:lead
-    ratio, pt_edges = hist2array(h['%s_ratio'%k], return_edges=True)
-    ratio, pt_edges = ratio.T, pt_edges[0]
+        # Ratio is SR/SB
+        #h[tgt+'%s_ratio'%k] = h['%s_%s_%s'%(sample, tgt, k)].Clone()
+        #h[tgt+'%s_ratio'%k].Divide(h['%s_%s_%s'%(sample, sb, k)])
+        h['%s_%s_%s'%(sample, tgt, k)].Scale(150.e3/h['%s_%s_%s'%(sample, tgt, k)].Integral())
+        h['%s_%s_%s'%(sample, sb, k)].Scale(150.e3/h['%s_%s_%s'%(sample, sb, k)].Integral())
+        h[tgt+'%s_ratio'%k] = h['%s_%s_%s'%(sample, tgt, k)].Clone()
+        h[tgt+'%s_ratio'%k].Divide(h['%s_%s_%s'%(sample, sb, k)])
 
-    # Remove unphysical values
-    #ratio[ratio==0.] = 0.
-    ratio[np.isnan(ratio)] = 1.
-    print('pt-ratio:')
-    print(ratio.min(), ratio.max(), np.mean(ratio), np.std(ratio))
+        # Save all histograms for reference
+        # Actual weights to be used during event loop are written to separate file below
+        hf[tgt+'ratios'] = ROOT.TFile("%s/%s_%s2%s_blind_%s_ptwgts.root"%(output_dir, sample, sb, tgt, blind), "RECREATE")
+        h['%s_%s_%s'%(sample, tgt, k)].SetName('%s_%s_%s'%(sample, tgt, k))
+        h['%s_%s_%s'%(sample, tgt, k)].Write()
+        h['%s_%s_%s'%(sample, sb, k)].SetName('%s_%s_%s'%(sample, sb, k))
+        h['%s_%s_%s'%(sample, sb, k)].Write()
+        h[tgt+'%s_ratio'%k].SetName('%s_ratio'%k)
+        h[tgt+'%s_ratio'%k].Write()
+        hf[tgt+'ratios'].Close()
 
-    # Write out weights to numpy file
-    np.savez("%s/%s_%s2sr_blind_%s_ptwgts.npz"%(output_dir, sample, sb, blind), pt_edges=pt_edges, pt_wgts=ratio)
+        # TH2 origin @ lower left + (ix, iy)
+        # x:lead, y:sublead
+
+        # hist2array().T origin @ lower left + (row, col) <=> (iy, ix)
+        # NOTE: hist2array() drops uflow and ovflow bins => idx -> idx-1
+        # row:sublead, col:lead
+        ratio, pt_edges = hist2array(h[tgt+'%s_ratio'%k], return_edges=True)
+        ratio, pt_edges_lead, pt_edges_sublead = ratio.T, pt_edges[0], pt_edges[1]
+        #print(len(pt_edges_lead), len(pt_edges_sublead))
+
+        # Remove unphysical values
+        #ratio[ratio==0.] = 0.
+        ratio[np.isnan(ratio)] = 1.
+        ratio[ratio>10.] = 10.
+        print('pt-ratio:')
+        print(ratio.min(), ratio.max(), np.mean(ratio), np.std(ratio))
+
+        # Write out weights to numpy file
+        #np.savez("%s/%s_%s2%s_blind_%s_ptwgts.npz"%(output_dir, sample, sb, tgt, blind), pt_edges=pt_edges, pt_wgts=ratio)
+        np.savez("%s/%s_%s2%s_blind_%s_ptwgts.npz"\
+                %(output_dir, sample, sb, tgt, blind), pt_edges_lead=pt_edges_lead, pt_edges_sublead=pt_edges_sublead, pt_wgts=ratio)
 
 def get_bkg_norm_sb(blind='sg', sb='sb', sample='Run2017[B-F]', sr_sample='Run2017[B-F]', workdir='Templates', do_pt_reweight=False, do_ptomGG=False, run_bkg=True):
     '''
@@ -495,12 +514,18 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     scale_num = 5.e3 #100., 1.
 
     #h['Run2017B-F_sr_ma0vma1'].Scale(1./h['Run2017B-F_sr_ma0vma1'].Integral())
-    h['Run2017B-F_sr_ma0vma1'].Scale(scale_num/h['Run2017B-F_sr_ma0vma1'].Integral())
+    print('sr integral:',h['Run2017B-F_sr_ma0vma1'].Integral())
+    #h['Run2017B-F_sr_ma0vma1'].Scale(scale_num/h['Run2017B-F_sr_ma0vma1'].Integral())
 
     h['gg'] = h['GluGluHToGG_sr_ma0vma1'].Clone()
     #norm['gg'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg')/get_entries_cr(h['gg'], 'gg')
     #h['gg'].Scale(norm['gg'])
     #h['gg'].Scale(1./h['gg'].Integral())
+    print('hgg integral:',h['gg'].Integral())
+    hggscale = 2.27e-3*48.58*41.9e3*h['gg'].Integral()/214099989.445038
+    hggscale /= h['Run2017B-F_sr_ma0vma1'].Integral()
+    #print('hgg lumi-wgt:',2.27e3*33.4*41.9e3*h['gg'].Integral()/214099989.445038)
+    print('hgg lumi-wgt:',hggscale)
     h['gg'].Scale(scale_num/h['gg'].Integral())
     h['gg'] = floor_hist(h['gg'])
     #print('gg:',get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'gg'), get_entries_cr(h['gg'], 'gg'))
@@ -514,6 +539,7 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     #print('sr-obs, gg:%f, jj:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
 
     h['jjlo'] = h['Run2017B-F_sblo_ma0vma1'].Clone()
+    print('sblo integral:',h['jjlo'].Integral(), h['jjlo'].Integral()/h['Run2017B-F_sr_ma0vma1'].Integral())
     #norm['jjlo'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jjlo'], 'jj')
     #h['jjlo'].Scale(norm['jjlo'])
     #h['jjlo'].Scale(1./h['jjlo'].Integral())
@@ -523,6 +549,7 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     print('sr-obs, gg:%f, jjlo:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
 
     h['jjhi'] = h['Run2017B-F_sbhi_ma0vma1'].Clone()
+    print('sbhi integral:',h['jjhi'].Integral(), h['jjhi'].Integral()/h['Run2017B-F_sr_ma0vma1'].Integral())
     #norm['jjhi'] = get_entries_cr(h['Run2017B-F_sr_ma0vma1'],'jj')/get_entries_cr(h['jjhi'], 'jj')
     #h['jjhi'].Scale(norm['jjhi'])
     #h['jjhi'].Scale(1./h['jjhi'].Integral())
@@ -531,6 +558,7 @@ def fit_templates_sb(blind='sg', workdir='Templates', derive_fit=False):
     print('sb-only, gg:%f, jjhi:%f'%(get_entries_cr(h['jjhi'], 'gg'), get_entries_cr(h['jjhi'], 'jj')))
     print('sr-obs, gg:%f, jjhi:%f'%(get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'gg'), get_entries_cr(h['Run2017B-F_sr_ma0vma1'], 'jj')))
 
+    h['Run2017B-F_sr_ma0vma1'].Scale(scale_num/h['Run2017B-F_sr_ma0vma1'].Integral())
     #fgg, fjj = 1., 0.
     #fgg, fjj = 0., 1.
     #fgg, fjj = 0.01, 1.
@@ -854,12 +882,12 @@ def get_weight_idx(ma, ma_edges):
     #if idx > 48: print(idx, ma, len(ma_edges))
     return idx
 
-def get_pt_wgt(tree, pt_edges, wgts):
+def get_pt_wgt(tree, pt_edges_lead, pt_edges_sublead, wgts):
     '''
     Convenience fn for returning 2d-pt wgt for an event loaded into `tree`
     '''
     assert tree.phoEt[0] > tree.phoEt[1]
-    return get_weight_2d(tree.phoEt[0], tree.phoEt[1], pt_edges, pt_edges, wgts)
+    return get_weight_2d(tree.phoEt[0], tree.phoEt[1], pt_edges_lead, pt_edges_sublead, wgts)
 
 def get_combined_template_wgt(tree, ma_edges, wgts):
     '''
