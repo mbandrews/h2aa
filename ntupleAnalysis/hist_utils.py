@@ -171,11 +171,16 @@ def fill_hists(h, tree, wgt):
 
     h['wgt'].Fill(wgt)
 
-    h['ma0'].Fill(tree.ma0, wgt)
-    h['ma1'].Fill(tree.ma1, wgt)
-    h['ma0vma1'].Fill(tree.ma0, tree.ma1, wgt)
-    h['maxy'].Fill(tree.ma0, wgt)
-    h['maxy'].Fill(tree.ma1, wgt)
+    scale = 1.#-0.03
+    offset = 0.#-0.006
+    ma0_ = tree.ma0*scale + offset
+    ma1_ = tree.ma1*scale + offset
+
+    h['ma0'].Fill(ma0_, wgt)
+    h['ma1'].Fill(ma1_, wgt)
+    h['ma0vma1'].Fill(ma0_, ma1_, wgt)
+    h['maxy'].Fill(ma0_, wgt)
+    h['maxy'].Fill(ma1_, wgt)
 
     #h['pt0'].Fill(tree.pho1_pt)
     #h['pt1'].Fill(tree.pho2_pt)
@@ -206,8 +211,8 @@ def fill_hists(h, tree, wgt):
 
     h['mGG'].Fill(tree.mgg, wgt)
 
-    h['ma0vpt0'].Fill(tree.phoEt[0], tree.ma0, wgt)
-    h['ma1vpt1'].Fill(tree.phoEt[1], tree.ma1, wgt)
+    h['ma0vpt0'].Fill(tree.phoEt[0], ma0_, wgt)
+    h['ma1vpt1'].Fill(tree.phoEt[1], ma1_, wgt)
 
 def norm_hists(h, norm):
 
