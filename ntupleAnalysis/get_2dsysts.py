@@ -684,20 +684,23 @@ valid_blind = 'diag_lo_hi'
 limit_blind = 'offdiag_lo_hi'
 blinds = [valid_blind, limit_blind]
 #syst = 'ptrwgt_resample'
-syst = 'ptrwgt'
+#syst = 'ptrwgt'
 #syst = 'tempfrac'
-systs = ['ptrwgt', 'tempfrace1', 'tempfrace2']
+#systs = ['ptrwgt', 'tempfrace1', 'tempfrace2']
+systs = ['flo']
 cr = 'a0noma1inv'
 syst_shifts = {}
 #syst_shifts['ptrwgt_resample'] = ['srsblo', 'nom', 'srsbhi']
 #syst_shifts['ptrwgt_resample'] = ['srsblo0p20', 'nom', 'srsbhi0p20']
 #syst_shifts['ptrwgt'] = ['sblo', 'nom', 'sbhi']
 syst_shifts['ptrwgt'] = ['srsblo0p20', 'srsbhi0p20']
+syst_shifts['flo'] = ['0p722', '0p790']
 #syst_shifts['tempfrac'] = ['e0dn', 'nom', 'e0up']
 syst_shifts['tempfrace1'] = ['dn', 'up']
 syst_shifts['tempfrace2'] = ['dn', 'up']
 #indir = 'Templates/%s/%s'%(syst, cr)
-indir = 'Templates/_prod_varptbinsxy/%s/'%(cr)
+#indir = 'Templates/_prod_varptbinsxy/%s/'%(cr)
+indir = 'Templates/scan_ptrwgt'
 
 for b in blinds:
     # Nominals
@@ -782,6 +785,7 @@ for key in keys_1d:
             #print(ksrcs)
             draw_hist_1dma_syst(ksrcs, syst)
 
+'''
 ##########################
 xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
 zrange = [0., 2.]
@@ -817,8 +821,6 @@ for blind in blinds:
 for k in h.keys():
     pass
     #if 'flat' in k: print(k)
-#'''
-#flat_Run2017B-F_offdiag_lo_hi_ptrwgtDown
 
 hout = OrderedDict()
 file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "RECREATE")
@@ -863,7 +865,6 @@ for i,syst in enumerate(systs):
 file_out.Write()
 file_out.Close()
 
-#'''
 #########################
 sample = 'h24gamma_1j_1M_100MeV'
 regions = ['sr']
@@ -978,7 +979,6 @@ for i,syst in enumerate(systs):
 
 file_out.Write()
 file_out.Close()
-'''
 
 xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
 zrange = None
