@@ -1,3 +1,4 @@
+from __future__ import print_function
 import ROOT
 import numpy as np
 from array import array
@@ -647,15 +648,17 @@ def draw_hist_1dstacked(k_, region, hist_list, c, samples, blind, ymax_=None, mc
         pass
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(samples[0], blind))
 
-def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, mcnorm=1., range_minmax=[0., 100.], title=''):
+def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, mcnorm=1., range_minmax=[0., 100.], title='', scale_obs=False):
 
     h, hsample = hist_list
 
-    print(h.keys())
+    #print(h.keys())
     kdata = 'data'+region+k_
+    print('kdata:',kdata)
     assert kdata in h.keys()
     kmc = 'mc'+region+k_
     assert kmc in h.keys()
+    print('kmc:',kmc)
 
     hc = {}
 
@@ -695,10 +698,11 @@ def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     hdummy.Draw("hist")
 
     hstack = ROOT.THStack("hs","hs")
-    print(hsample.keys())
+    #print(hsample.keys())
     for i,key in enumerate(hsample.keys()):
         if 'Run' in key: continue
-        if k_ not in key: continue
+        if region+k_ not in key: continue
+        print('Stacking:',key)
         hsample[key].SetFillStyle(3002)
         hsample[key].SetFillColor(plot_color(key))
         hsample[key].SetLineColor(plot_color(key))
@@ -706,10 +710,13 @@ def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
         hsample[key].Scale(mcnorm)
         print(key, hsample[key].Integral())
         hstack.Add(hsample[key])
-    hstack.Draw("hist same")
+    #hstack.Draw("hist same")
+    hstack.Draw("hist nostack same")
 
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a,pred} [GeV]", "N_{a}", "")
     h[k] = set_hist(h[k], title, "N_{a}", "")
+    if scale_obs:
+        h[k].Scale(1.e5/h[k].Integral())
     hc[k] = h[k].Clone()
     hc[k].SetFillStyle(0)
     hc[k].SetMarkerStyle(20)
@@ -721,12 +728,16 @@ def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     #hc[k].GetYaxis().SetLabelSize(0.06)
     #hc[k].GetYaxis().SetMaxDigits(3)
     ##hc[k].Draw("hist same")
+    if scale_obs:
+        hc[k].Scale(1.e5/hc[k].Integral())
     hc[k].Draw("E same")
 
     # SB
     #k = 'sb2sr_%s'%k_
     k = kmc
-    h[k].Scale(h[kdata].Integral()/h[kmc].Integral())
+    print('kmc:',kmc, mcnorm)
+    #h[k].Scale(h[kdata].Integral()/h[kmc].Integral())
+    h[k].Scale(mcnorm)
     print(h[k].Integral())
     h[k].SetLineColor(9)
     #h[k].Draw("hist SAME")
@@ -750,9 +761,8 @@ def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
         #print(np.max([hc[k].GetBinContent(ib) for ib in range(2, hc[k].GetNbinsX()+2)]))
     #if ymax_ is not None and ymax_ > 0.:
     #    ymax = ymax_
-    #hc[kdata].GetYaxis().SetRangeUser(0.1, ymax)
-    #hc[kdata].GetXaxis().SetRangeUser(0., 100.)
-    hdummy.GetYaxis().SetRangeUser(0.1, ymax)
+    #hdummy.GetYaxis().SetRangeUser(0.1, ymax)
+    hdummy.GetYaxis().SetRangeUser(0.1, h[kmc].GetMaximum()*1.2)
     hdummy.GetXaxis().SetRangeUser(range_minmax[0], range_minmax[1])
     ROOT.gPad.RedrawAxis()
 
@@ -1154,14 +1164,61 @@ def get_dataomc_norm(k_, region, h):
     assert kmc in h.keys()
 
     norm = h[kdata].Integral()/h[kmc].Integral()
+    #norm = 1.e5/h[kmc].Integral()
     return norm
 
-def plot_datamc(samples, blind, norm, regions, indir='Templates_datamc'):
+def get_flo(srshift, loshift, hishift):
+
+    ks = 'sr%s_lo%s_hi%s'%(srshift, loshift, hishift)
+
+    hfrac[ks+'fqcdlo'] = hsum['qcdsblonEvtsWgtd'].Clone()
+    hfrac[ks+'fqcdlo'].Divide(hsum['datasblonEvtsWgtd'])
+    ferr = hfrac[ks+'fqcdlo'].GetBinError(2)/hfrac[ks+'fqcdlo'].GetBinContent(2)
+    ferr = 1. + ferr if 'up' in loshift else 1. - ferr
+    scale = hfrac[ks+'fqcdlo'].GetBinContent(2)*ferr
+    if 'nom' not in loshift:
+        hfrac[ks+'fqcdlo'].Scale(scale)
+    print(ks+'fqcdlo:', hfrac[ks+'fqcdlo'].GetBinContent(2), hfrac[ks+'fqcdlo'].GetBinError(2)/hfrac[ks+'fqcdlo'].GetBinContent(2))
+
+    hfrac[ks+'fqcdhi'] = hsum['qcdsbhinEvtsWgtd'].Clone()
+    hfrac[ks+'fqcdhi'].Divide(hsum['datasbhinEvtsWgtd'])
+    ferr = hfrac[ks+'fqcdhi'].GetBinError(2)/hfrac[ks+'fqcdhi'].GetBinContent(2)
+    ferr = 1. + ferr if 'up' in hishift else 1. - ferr
+    scale = hfrac[ks+'fqcdhi'].GetBinContent(2)*ferr
+    if 'nom' not in hishift:
+        hfrac[ks+'fqcdhi'].Scale(scale)
+    print(ks+'fqcdhi:', hfrac[ks+'fqcdhi'].GetBinContent(2), hfrac[ks+'fqcdhi'].GetBinError(2)/hfrac[ks+'fqcdhi'].GetBinContent(2))
+
+    hfrac[ks+'fqcdsr'] = hsum['qcdsrnEvtsWgtd'].Clone()
+    hfrac[ks+'fqcdsr'].Divide(hsum['datasrnEvtsWgtd'])
+    ferr = hfrac[ks+'fqcdsr'].GetBinError(2)/hfrac[ks+'fqcdsr'].GetBinContent(2)
+    print(ferr)
+    ferr = 1. + ferr if 'up' in srshift else 1. - ferr
+    scale = ferr
+    if 'nom' not in srshift:
+        print(scale)
+        hfrac[ks+'fqcdsr'].Scale(scale)
+    print(ks+'fqcdsr:', hfrac[ks+'fqcdsr'].GetBinContent(2), hfrac[ks+'fqcdsr'].GetBinError(2)/hfrac[ks+'fqcdsr'].GetBinContent(2))
+
+    hfrac[ks+'flonum'] = hfrac[ks+'fqcdsr'].Clone()
+    hfrac[ks+'flonum'].Add(hfrac[ks+'fqcdhi'], -1.)
+    print(ks+'flonum:', hfrac[ks+'flonum'].GetBinContent(2), hfrac[ks+'flonum'].GetBinError(2)/hfrac[ks+'flonum'].GetBinContent(2))
+    hfrac[ks+'floden'] = hfrac[ks+'fqcdlo'].Clone()
+    hfrac[ks+'floden'].Add(hfrac[ks+'fqcdhi'], -1.)
+    print(ks+'floden:', hfrac[ks+'floden'].GetBinContent(2), hfrac[ks+'floden'].GetBinError(2)/hfrac[ks+'floden'].GetBinContent(2))
+
+    hfrac[ks+'flo'] = hfrac[ks+'flonum'].Clone()
+    hfrac[ks+'flo'].Divide(hfrac[ks+'floden'])
+    print(ks+'flo:', hfrac[ks+'flo'].GetBinContent(2), hfrac[ks+'flo'].GetBinError(2)/hfrac[ks+'flo'].GetBinContent(2))
+
+hsum = {}
+hfrac = {}
+def plot_datamc_sb(samples, blind, norm, regions):
 
     assert len(samples) > 0
     samples = [s.replace('[','').replace(']','') for s in samples]
 
-    sample_types = [s.split('_')[0] for s in samples]
+    sample_types = list(set([s.split('_')[0] for s in samples]))
 
     hf, h = {}, {}
     c = {}
@@ -1171,11 +1228,23 @@ def plot_datamc(samples, blind, norm, regions, indir='Templates_datamc'):
     #regions = ['sblo2sr']
     #regions = ['sblo']
     #keys = ['ma0vma1']
-    keys = ['maxy']
+    #keys = ['maxy']
     #keys = ['maxy','ma0','ma1']
     #keys = ['ptxy', 'maxy','mGG']
     #keys = ['ptxy', 'maxy','mGG','bdtxy']
-    #keys = ['pt0', 'pt1','mGG','bdtxy']
+    #keys = ['pt0', 'pt1']
+    keys = ['nEvtsWgtd']
+    #keys = ['ptxy']
+    indir = 'Templates_datamc/ptrwgt/flo_None'
+    indir = 'Templates_datamc/ptrwgt/flo_0p584'
+    indir = 'Templates_datamc/ptrwgt/flo_0p762'
+    indir = 'Templates_datamc/ptrwgt/flo_None_sb2srsbhi0p20'
+    indir = 'Templates_datamc/ptrwgt/flo_None_sb2srsblo0p20'
+    indir = 'Templates_datamc/ptrwgt/flo_0p756'
+    indir = 'Templates_datamc/ptrwgt/flo_0p642'
+    #indir = 'Templates_datamc/ptrwgt/flo_0p814'
+    indir = 'Templates_datamc/no_ptrwgt'
+    indir = 'Templates_datamc/no_ptrwgt/nom-nom'
 
     for s in samples:
         for r in regions:
@@ -1188,13 +1257,14 @@ def plot_datamc(samples, blind, norm, regions, indir='Templates_datamc'):
                 h[s+r+k].Scale(norm[s])
                 print(s+r+k,h[s+r+k].GetEntries(),h[s+r+k].Integral())
 
-    hsum = {}
+    #hsum = {}
     hsample = {}
     mcnorm = {}
     for k in keys:
         for r in regions:
             # Initialize
-            for d in ['data', 'mc']:
+            #for d in ['data', 'mc']:
+            for d in ['data', 'mc', 'qcd']:
                 # Clone struct of histogram without copying its contents
                 hsum[d+r+k] = h[samples[0]+r+k].Clone()
                 hsum[d+r+k].Reset()
@@ -1208,33 +1278,103 @@ def plot_datamc(samples, blind, norm, regions, indir='Templates_datamc'):
                 d = 'data' if 'Run' in s else 'mc'
                 #print(s, h[s+r+k].Integral())
                 hsum[d+r+k].Add(h[s+r+k])
-                #print(hsum[d+r+k].Integral())
+                #print(d+r+k, hsum[d+r+k].Integral(), hsum[d+r+k].GetBinError(2)/hsum[d+r+k].GetBinContent(2))
 
                 t = s.split('_')[0]
                 hsample[t+r+k].Add(h[s+r+k])
-                #print(t,hsample[t+r+k].Integral())
+                #print(t+r+k, hsample[t+r+k].Integral(), hsample[t+r+k].GetBinError(2)/hsample[t+r+k].GetBinContent(2))
+                if 'QCD' in s or 'GJet' in s:
+                    hsum['qcd'+r+k].Add(h[s+r+k])
 
+            #mcnorm = get_dataomc_norm(k, r, hsum) if 'sr' in r else 1.
             mcnorm[r+k] = get_dataomc_norm(k, r, hsum)
             #print(mcnorm)
 
-            #'''
+    for r in regions:
+        for k in keys:
+            for d in ['data', 'mc', 'qcd']:
+                kh = d+r+k
+                print('hsum:',kh, hsum[kh].Integral(), hsum[kh].GetBinError(2)/hsum[kh].GetBinContent(2))
+                if d != 'data':
+                    hsum[kh].Scale(mcnorm[r+k])
+                print('hsum:',kh, hsum[kh].Integral(), hsum[kh].GetBinError(2)/hsum[kh].GetBinContent(2))
+        for k in keys:
+            for t in sample_types:
+                if 'Run' in t: continue
+                kh = t+r+k
+                hsample[kh].Scale(mcnorm[r+k])
+                print('hsample:',kh, hsample[kh].Integral(), hsample[kh].GetBinError(2)/hsample[kh].GetBinContent(2))
+    #for r in ['sblo', 'sbhi']:
+    #hfrac = {}
+    #get_flo(srshift='nom', loshift='nom', hishift='nom')
+    #get_flo(srshift='down', loshift='nom', hishift='nom')
+    get_flo(srshift='up', loshift='nom', hishift='nom')
+    '''
+    #print('hsum:',hsum.keys())
+    if 'sr' not in regions and 'sb2sr' not in regions:
+        mcnorm_bysb = {}
+        flo = 0.687281137302 # flo=None, pt0vpt1
+        #flo = 0.6129795171 #flo=None, ptxy
+        #flo = 0.584 # fA=0.85
+        #flo = 0.762 # fA=0.24
+        #flo = 0.756 # by QCD frac
+        #flo = 0.642 # by QCD frac
+        #flo = 0.814 # by QCD frac
+        for kh in hsum.keys():
+            #if 'data' in kh: continue
+            if 'sr' in kh: continue
+            if 'data' in kh:
+                if 'sblo' in kh:
+                    hsum[kh].Scale(flo*1.e5/hsum[kh].Integral())
+                else:
+                    hsum[kh].Scale((1.-flo)*1.e5/hsum[kh].Integral())
+            else:
+                if 'sblo' in kh:
+                    mcnorm_bysb['sblo'] = flo*1.e5/hsum[kh].Integral()
+                    hsum[kh].Scale(mcnorm_bysb['sblo'])
+                else:
+                    mcnorm_bysb['sbhi'] = (1.-flo)*1.e5/hsum[kh].Integral()
+                    hsum[kh].Scale(mcnorm_bysb['sbhi'])
+            #print('hsum:',kh, hsum[kh].Integral())
+        for k in keys:
+            for d in ['data', 'mc']:
+                kh = d+'sb2sr'+k
+                hsum[kh] = hsum[d+'sblo'+k].Clone()
+                hsum[kh].Add(hsum[d+'sbhi'+k])
+                hsum[kh].SetName(kh)
+                #if d == 'data':
+                #    hsum[kh].Scale(1.e5/hsum[kh].Integral())
+                #print('hsum:',kh, hsum[kh].Integral())
+        #for kh in hsum.keys():
+        #    if 'data' in kh: continue
+        #    print('hsum:',kh, hsum[kh].Integral())
+        for kh in hsample.keys():
+            if 'Run' in kh: continue
+            if 'sr' in kh: continue
+            print('hsample:',kh, hsample[kh].Integral())
+            if 'sblo' in kh:
+                hsample[kh].Scale(mcnorm_bysb['sblo'])
+            else:
+                hsample[kh].Scale(mcnorm_bysb['sbhi'])
+            print('hsample:',kh, hsample[kh].Integral())
+        for k in keys:
+            for t in sample_types:
+                if 'Run' in t: continue
+                kh = t+'sb2sr'+k
+                hsample[kh] = hsample[t+'sblo'+k].Clone()
+                hsample[kh].Add(hsample[t+'sbhi'+k])
+                hsample[kh].SetName(kh)
+                print('hsample:',kh, hsample[kh].Integral())
+    '''
+
+    #'''
+    for k in keys:
+        for r in regions:
+        #for r in ['sb2sr']:
             if 'pt' in k:
                 print('pt')
-                #draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
-                #draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [25., 100.], "p_{T,a} [GeV]")
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [25., 125.], "p_{T,a} [GeV]")
-            if 'ma' in k and 'v' not in k:
-                print('max')
-                #draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [-0.4, 1.2], "m_{a,pred} [GeV]")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [25., 125.], "p_{T,a} [GeV]", scale_obs=True)
             if 'mGG' in k:
                 print('mGG')
-                #draw_hist_1dmGG(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [100., 180.], "m_{#gamma,#gamma} [GeV]")
-            if 'bdt' in k:
-                print('bdt')
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, None, mcnorm[r+k], [-1., 1.], "Photon ID")
-            if 'ma0vma1' in k:
-                print('ma0vma1')
-                draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)
-            #'''
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [100., 180.], "m_{#gamma,#gamma} [GeV]")
+    #'''

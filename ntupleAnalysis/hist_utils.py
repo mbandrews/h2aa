@@ -38,6 +38,7 @@ def create_hists(h):
     #h[k] = ROOT.TH2F(k, k, 50, 20., 170., 50, 20., 170.)
 
     pt_bins_ = {}
+    '''
     dPt = 1
     #pt_bins_[0] = np.arange(26,100,dPt)
     pt_bins_[0] = np.arange(25,100,dPt)
@@ -47,6 +48,9 @@ def create_hists(h):
     pt_bins_[2] = np.arange(120,200,dPt)
     #dPt = 750-200
     #pt_bins_[3] = np.arange(200,750+dPt,dPt)
+    '''
+    dPt = 10
+    pt_bins_[0] = np.arange(25,125+dPt,dPt)
 
     pt_bins = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_.values()])
     n_pt_bins = len(pt_bins)-1
@@ -112,6 +116,9 @@ def create_hists(h):
     #h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
     h[k] = ROOT.TH1F(k, k, 300, -600., 600.)
 
+    k = 'nEvtsWgtd'
+    h[k] = ROOT.TH1F(k, k, 2, 0., 2.)
+
     for k in h.keys():
         h[k].Sumw2()
 
@@ -170,11 +177,18 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
 def fill_hists(h, tree, wgt):
 
     h['wgt'].Fill(wgt)
+    h['nEvtsWgtd'].Fill(1., wgt)
 
-    scale = 1.#-0.03
-    offset = 0.#-0.006
-    ma0_ = tree.ma0*scale + offset
-    ma1_ = tree.ma1*scale + offset
+    ma0_ = tree.ma0
+    ma1_ = tree.ma1
+    #scale = 1.+0.036 # +/- 0.001
+    #offset = 0.-0.005
+    # data -> mc
+    #ma0_ = tree.ma0*scale + offset
+    #ma1_ = tree.ma1*scale + offset
+    # mc -> data
+    #ma0_ = scale*tree.ma0 + offset
+    #ma1_ = scale*tree.ma1 + offset
 
     h['ma0'].Fill(ma0_, wgt)
     h['ma1'].Fill(ma1_, wgt)

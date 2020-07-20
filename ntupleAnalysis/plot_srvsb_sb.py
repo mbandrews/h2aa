@@ -8,7 +8,7 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, apply_blinding=True):
     hc = {}
 
     err_style = 'E2'
-    fill_style = 3002
+    fill_style = 3001
     #wd, ht = int(440*1), int(400*1)
     #wd, ht = int(640*1), int(580*1)
     wd, ht = int(640*1), int(680*1)
@@ -354,7 +354,7 @@ def plot_srvsb_sb(sample, blind, apply_blinding=False):
         for k in keys:
             s_r_k = s_r+k
             h[s_r_k] = hf[s_r].Get(k)
-            print('key:%s, Entries:%d -> Integral:%.2f'%(s_r_k, h[s_r_k].GetEntries(), h[s_r_k].Integral()))
+            #print('key:%s, Entries:%d -> Integral:%.2f'%(s_r_k, h[s_r_k].GetEntries(), h[s_r_k].Integral()))
 
     # h[data sr].Add(scale*sg)
     tgt_region = 'sb2sr'
@@ -363,11 +363,11 @@ def plot_srvsb_sb(sample, blind, apply_blinding=False):
         #r_k_tgt = tgt_region+'_'+k
         #s_r_k_tgt = r_k_tgt
         h[s_r_k_tgt] = h[sample+'sblo2sr'+k].Clone()
-        print('key:%s, Adding: sblo2sr, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
+        #print('key:%s, Adding: sblo2sr, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
         h[s_r_k_tgt].Add(h[sample+'sbhi2sr'+k])
-        print('key:%s, Adding: sbhi2sr, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
+        #print('key:%s, Adding: sbhi2sr, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
         h[s_r_k_tgt].Add(h[s_hgg+r_hgg+k])
-        print('key:%s, Adding: hgg, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
+        #print('key:%s, Adding: hgg, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
         #h[s_r_k_tgt].Write()
     houtf = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, tgt_region, blind), "RECREATE")
     for k in keys:
