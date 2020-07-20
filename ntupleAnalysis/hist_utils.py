@@ -8,25 +8,27 @@ def create_hists(h):
 
     ma_bins = list(range(0,1200+25,25))
     ma_bins = [-400]+ma_bins
+    #ma_bins = [-400, -200]+ma_bins
     ma_bins = [float(m)/1.e3 for m in ma_bins]
     #print(len(ma_bins))
+    n_ma_bins = len(ma_bins)-1
     ma_bins = array('d', ma_bins)
     #print(ma_bins)
 
     #h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
     #h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
-    h[k] = ROOT.TH1F(k, k, 49, ma_bins)
+    h[k] = ROOT.TH1F(k, k, n_ma_bins, ma_bins)
     k = 'ma1'
     #h[k] = ROOT.TH1F(k, k, 48, 0., 1.2)
     #h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
-    h[k] = ROOT.TH1F(k, k, 49, ma_bins)
+    h[k] = ROOT.TH1F(k, k, n_ma_bins, ma_bins)
     k = 'ma0vma1'
     #h[k] = ROOT.TH2F(k, k, 48, 0., 1.2, 48, 0., 1.2)
     #h[k] = ROOT.TH2F(k, k, 56, -0.2, 1.2, 56, -0.2, 1.2)
-    h[k] = ROOT.TH2F(k, k, 49, ma_bins, 49, ma_bins)
+    h[k] = ROOT.TH2F(k, k, n_ma_bins, ma_bins, n_ma_bins, ma_bins)
     k = 'maxy'
     #h[k] = ROOT.TH1F(k, k, 56, -0.2, 1.2)
-    h[k] = ROOT.TH1F(k, k, 49, ma_bins)
+    h[k] = ROOT.TH1F(k, k, n_ma_bins, ma_bins)
 
     #k = 'pt0'
     #h[k] = ROOT.TH1F(k, k, 50, 20., 170.)
@@ -36,6 +38,7 @@ def create_hists(h):
     #h[k] = ROOT.TH2F(k, k, 50, 20., 170., 50, 20., 170.)
 
     pt_bins_ = {}
+    '''
     dPt = 1
     #pt_bins_[0] = np.arange(26,100,dPt)
     pt_bins_[0] = np.arange(25,100,dPt)
@@ -43,8 +46,11 @@ def create_hists(h):
     pt_bins_[1] = np.arange(100,120,dPt)
     dPt = 20
     pt_bins_[2] = np.arange(120,200,dPt)
-    dPt = 750-200
-    pt_bins_[3] = np.arange(200,750+dPt,dPt)
+    #dPt = 750-200
+    #pt_bins_[3] = np.arange(200,750+dPt,dPt)
+    '''
+    dPt = 10
+    pt_bins_[0] = np.arange(25,125+dPt,dPt)
 
     pt_bins = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_.values()])
     n_pt_bins = len(pt_bins)-1
@@ -54,8 +60,6 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
     k = 'pt1'
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
-    k = 'pt0vpt1'
-    h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, n_pt_bins, pt_bins)
     k = 'ptxy'
     h[k] = ROOT.TH1F(k, k, n_pt_bins, pt_bins)
 
@@ -63,6 +67,35 @@ def create_hists(h):
     h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, 49, ma_bins)
     k = 'ma1vpt1'
     h[k] = ROOT.TH2F(k, k, n_pt_bins, pt_bins, 49, ma_bins)
+
+    pt_bins_x_ = {}
+    dPt = 1
+    pt_bins_x_[0] = np.arange(25,100,dPt)
+    dPt = 5
+    pt_bins_x_[1] = np.arange(100,120,dPt)
+    dPt = 20
+    pt_bins_x_[2] = np.arange(120,200,dPt)
+    dPt = 750-200
+    pt_bins_x_[3] = np.arange(200,750+dPt,dPt)
+    pt_bins_x = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_x_.values()])
+    n_pt_bins_x = len(pt_bins_x)-1
+    pt_bins_x = array('d', list(pt_bins_x))
+
+    pt_bins_y_ = {}
+    dPt = 1
+    pt_bins_y_[0] = np.arange(25,60,dPt)
+    dPt = 5
+    pt_bins_y_[1] = np.arange(60,120,dPt)
+    dPt = 20
+    pt_bins_y_[2] = np.arange(120,200,dPt)
+    dPt = 750-200
+    pt_bins_y_[3] = np.arange(200,750+dPt,dPt)
+    pt_bins_y = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_y_.values()])
+    n_pt_bins_y = len(pt_bins_y)-1
+    pt_bins_y = array('d', list(pt_bins_y))
+
+    k = 'pt0vpt1'
+    h[k] = ROOT.TH2F(k, k, n_pt_bins_x, pt_bins_x, n_pt_bins_y, pt_bins_y)
 
     k = 'energy0'
     h[k] = ROOT.TH1F(k, k, 50, 20., 170.)
@@ -82,6 +115,9 @@ def create_hists(h):
     k = 'wgt'
     #h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
     h[k] = ROOT.TH1F(k, k, 300, -600., 600.)
+
+    k = 'nEvtsWgtd'
+    h[k] = ROOT.TH1F(k, k, 2, 0., 2.)
 
     for k in h.keys():
         h[k].Sumw2()
@@ -141,12 +177,24 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
 def fill_hists(h, tree, wgt):
 
     h['wgt'].Fill(wgt)
+    h['nEvtsWgtd'].Fill(1., wgt)
 
-    h['ma0'].Fill(tree.ma0, wgt)
-    h['ma1'].Fill(tree.ma1, wgt)
-    h['ma0vma1'].Fill(tree.ma0, tree.ma1, wgt)
-    h['maxy'].Fill(tree.ma0, wgt)
-    h['maxy'].Fill(tree.ma1, wgt)
+    ma0_ = tree.ma0
+    ma1_ = tree.ma1
+    #scale = 1.+0.036 # +/- 0.001
+    #offset = 0.-0.005
+    # data -> mc
+    #ma0_ = tree.ma0*scale + offset
+    #ma1_ = tree.ma1*scale + offset
+    # mc -> data
+    #ma0_ = scale*tree.ma0 + offset
+    #ma1_ = scale*tree.ma1 + offset
+
+    h['ma0'].Fill(ma0_, wgt)
+    h['ma1'].Fill(ma1_, wgt)
+    h['ma0vma1'].Fill(ma0_, ma1_, wgt)
+    h['maxy'].Fill(ma0_, wgt)
+    h['maxy'].Fill(ma1_, wgt)
 
     #h['pt0'].Fill(tree.pho1_pt)
     #h['pt1'].Fill(tree.pho2_pt)
@@ -177,8 +225,8 @@ def fill_hists(h, tree, wgt):
 
     h['mGG'].Fill(tree.mgg, wgt)
 
-    h['ma0vpt0'].Fill(tree.phoEt[0], tree.ma0, wgt)
-    h['ma1vpt1'].Fill(tree.phoEt[1], tree.ma1, wgt)
+    h['ma0vpt0'].Fill(tree.phoEt[0], ma0_, wgt)
+    h['ma1vpt1'].Fill(tree.phoEt[1], ma1_, wgt)
 
 def norm_hists(h, norm):
 

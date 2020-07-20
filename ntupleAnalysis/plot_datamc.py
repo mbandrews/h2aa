@@ -1156,7 +1156,7 @@ def get_dataomc_norm(k_, region, h):
     norm = h[kdata].Integral()/h[kmc].Integral()
     return norm
 
-def plot_datamc(samples, blind, norm, regions):
+def plot_datamc(samples, blind, norm, regions, indir='Templates_datamc'):
 
     assert len(samples) > 0
     samples = [s.replace('[','').replace(']','') for s in samples]
@@ -1171,15 +1171,16 @@ def plot_datamc(samples, blind, norm, regions):
     #regions = ['sblo2sr']
     #regions = ['sblo']
     #keys = ['ma0vma1']
-    #keys = ['maxy']
+    keys = ['maxy']
     #keys = ['maxy','ma0','ma1']
     #keys = ['ptxy', 'maxy','mGG']
-    keys = ['ptxy', 'maxy','mGG','bdtxy']
+    #keys = ['ptxy', 'maxy','mGG','bdtxy']
+    #keys = ['pt0', 'pt1','mGG','bdtxy']
 
     for s in samples:
         for r in regions:
             #hf[s+r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
-            hf[s+r] = ROOT.TFile("Templates_datamc/%s_%s_blind_%s_templates.root"%(s, r, blind),"READ")
+            hf[s+r] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(indir, s, r, blind),"READ")
             for k in keys:
                 #srk = '%s_%s_%s'%(s, r, k)
                 h[s+r+k] = hf[s+r].Get(k)
@@ -1189,6 +1190,7 @@ def plot_datamc(samples, blind, norm, regions):
 
     hsum = {}
     hsample = {}
+    mcnorm = {}
     for k in keys:
         for r in regions:
             # Initialize
@@ -1212,25 +1214,26 @@ def plot_datamc(samples, blind, norm, regions):
                 hsample[t+r+k].Add(h[s+r+k])
                 #print(t,hsample[t+r+k].Integral())
 
-            mcnorm = get_dataomc_norm(k, r, hsum)
+            mcnorm[r+k] = get_dataomc_norm(k, r, hsum)
             #print(mcnorm)
 
             #'''
             if 'pt' in k:
                 print('pt')
                 #draw_hist_1dpt(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [25., 100.], "p_{T,a} [GeV]")
+                #draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [25., 100.], "p_{T,a} [GeV]")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [25., 125.], "p_{T,a} [GeV]")
             if 'ma' in k and 'v' not in k:
                 print('max')
                 #draw_hist_1dma(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [-0.4, 1.2], "m_{a,pred} [GeV]")
+                draw_hist_1dmastacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [-0.4, 1.2], "m_{a,pred} [GeV]")
             if 'mGG' in k:
                 print('mGG')
                 #draw_hist_1dmGG(k, r, hsum, c, samples, blind, -1)
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [100., 180.], "m_{#gamma,#gamma} [GeV]")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [100., 180.], "m_{#gamma,#gamma} [GeV]")
             if 'bdt' in k:
                 print('bdt')
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, None, mcnorm, [-1., 1.], "Photon ID")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, None, mcnorm[r+k], [-1., 1.], "Photon ID")
             if 'ma0vma1' in k:
                 print('ma0vma1')
                 draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)

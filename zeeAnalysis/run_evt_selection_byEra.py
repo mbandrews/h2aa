@@ -33,7 +33,7 @@ samples = [
     ,'C'
     ,'D'
     ,'E'
-#    ,'F'
+    ,'F'
     ]
 samples = ['Run2017%s'%s for s in samples]
 #samples = ['Run2017[B-F]']
@@ -75,9 +75,11 @@ if not os.path.isdir(output_dir):
 procs = []
 procs_rewgt = []
 
-nEvtsData = 800000
+#nEvtsData = 800000
+#nEvtsData = 2000000
+nEvtsData = 10000000
 #nEvtsData = 800
-nEvtsMC = nEvtsData*5
+nEvtsMC = nEvtsData*len([s for s in samples if 'Run' in s])
 
 for s in samples:
 

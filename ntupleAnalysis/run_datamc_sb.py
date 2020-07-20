@@ -5,10 +5,10 @@ import numpy as np
 import subprocess
 from data_utils import *
 from get_bkg_norm import *
-from plot_srvsb import plot_srvsb
-from plot_srvsb_pt import plot_srvsb_pt
-from plot_srvsb_sb import plot_srvsb_sb
-from plot_datamc import plot_datamc
+#from plot_srvsb import plot_srvsb
+#from plot_srvsb_pt import plot_srvsb_pt
+#from plot_srvsb_sb import plot_srvsb_sb
+from plot_datamc_sb import plot_datamc_sb
 
 def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
 
@@ -83,26 +83,15 @@ xsec = {
 #    'Run2017B-F': 1.
 }
 
-flo_ = None # evt-wgtd ave: pt0vpt1: 0.687281137302
-#flo_ = 0.584 # fA=0.85
-#flo_ = 0.762 # fA=0.24
-
-#flo_ = 0.756 # match QCD frac
-#flo_ = 0.642 # fA=0.85
-#flo_ = 0.814 # fA=0.24
-
 output_dir = 'Templates_datamc'
-#output_dir = '%s/ptrwgt/flo_%s_sb2srsblo0p30'%(output_dir, str('%.3f'%flo_).replace('.','p') if flo_ is not None else None)
-#output_dir = '%s/ptrwgt/flo_%s_sb2srsbhi0p30'%(output_dir, str('%.3f'%flo_).replace('.','p') if flo_ is not None else None)
-#output_dir = '%s/ptrwgt/flo_%s'%(output_dir, str('%.3f'%flo_).replace('.','p') if flo_ is not None else None)
-#output_dir = '%s/no_ptrwgt'%(output_dir)
-output_dir = '%s/no_ptrwgt/nom-nom'%(output_dir)
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
+regions = ['sr', 'sb']
+
 processes = []
 norm = {}
-#run_ptweights(do_ptomGG=True, flo_=flo_, workdir=output_dir, ntuple_dir='MAntuples/2pho', output_dir='Weights')
+#run_ptweights(do_ptomGG=True, flo_=None, workdir=output_dir, ntuple_dir='MAntuples/2pho', output_dir='Weights_datamc')
 for sample in samples:
 
     print(sample)
@@ -150,7 +139,7 @@ for sample in samples:
     #regions = ['sblo2sr', 'sbhi2sr', 'sr']
     #regions = ['sblo2sr']
 
-    #regions = ['sblo', 'sbhi']
+    regions = ['sblo', 'sbhi']
     regions = ['sblo', 'sbhi', 'sr']
     #regions = ['sb']
     #regions = ['sb2sr']
@@ -172,4 +161,4 @@ for sample in samples:
 #pool.close()
 #pool.join()
 
-plot_datamc(samples, blind, norm, regions, indir=output_dir)
+plot_datamc_sb(samples, blind, norm, regions)

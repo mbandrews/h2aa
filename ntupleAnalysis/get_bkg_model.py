@@ -24,6 +24,7 @@ parser.add_argument('--do_ptomGG', action='store_true', help='Switch to apply pt
 parser.add_argument('--do_pt_reweight', action='store_true', help='Switch to apply 2d pt re-weighting.')
 parser.add_argument('--do_combined_template', action='store_true', help='Switch to apply 2d ma re-weighting corresponding to combined hgg SR + data SB template.')
 parser.add_argument('--do_mini2aod', action='store_true', help='Switch to apply mini2oad wgts.')
+parser.add_argument('--write_pts', action='store_true', help='Write out photon pts.')
 parser.add_argument('-n', '--norm', default=None, type=float, help='SB to SR normalization.')
 parser.add_argument('-e', '--events', default=-1, type=int, help='Number of evts to process.')
 args = parser.parse_args()
@@ -55,7 +56,14 @@ if do_pt_reweight:
     print('Using pt weights')
     s = 'Run2017B-F'
     r = 'sb2sr'
+    #r = 'sb2srsblo0p20'
+    #r = 'sb2srsbhi0p20'
+    #r = 'sb2srsblo'
+    #r = 'sb2srsbhi'
+    #r = 'sb2sblo'
+    #r = 'sb2sbhi'
     nfpt = np.load("Weights/%s_%s_blind_%s_ptwgts.npz"%(s, r, None))
+    #nfpt = np.load("Weights/%s_%s_resample_blind_%s_ptwgts.npz"%(s, r, None))
 
 do_ptomGG = args.do_ptomGG
 #do_ptomGG = args.do_ptomGG if 'sb' not in region else False
@@ -70,6 +78,10 @@ if do_mini2aod:
     assert 'GluGluHToGG' in sample
     print('Using mini2oad wgts')
     nfmini2aod = np.load("Weights/Photon_Pt25To100_mAn0p4To1p6_mini2aod_ptmawgts.npz")
+
+write_pts = args.write_pts
+if write_pts:
+    evtlist_f = open("Weights/%s_region_%s_blind_%s_selected_phoEt_list.txt"%(sample, region, blind), "w+")
 
 hists = {}
 create_hists(hists)
@@ -100,7 +112,7 @@ print('N evts in MA ntuple:',nEvts)
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts if args.events == -1 else args.events
-#iEvtEnd   = 10000
+#iEvtEnd   = 100000
 
 '''
 # Inject sg
@@ -129,7 +141,8 @@ sw.Start()
 for iEvt in range(iEvtStart,iEvtEnd):
 
     # Initialize event
-    if iEvt%10e3==0: print(iEvt,'/',iEvtEnd-iEvtStart)
+    #if iEvt%10e3==0: print(iEvt,'/',iEvtEnd-iEvtStart)
+    if iEvt%1e5==0: print(iEvt,'/',iEvtEnd-iEvtStart)
     evt_statusf = tree.GetEntry(iEvt)
     if evt_statusf <= 0: continue
 
@@ -147,7 +160,7 @@ for iEvt in range(iEvtStart,iEvtEnd):
     #if region != 'sr' and do_pt_reweight:
     #if 'sb' in region and do_pt_reweight:
     if do_pt_reweight:
-        wgt = wgt*get_pt_wgt(tree, nfpt['pt_edges'], nfpt['pt_wgts'])
+        wgt = wgt*get_pt_wgt(tree, nfpt['pt_edges_lead'], nfpt['pt_edges_sublead'], nfpt['pt_wgts'])
     if do_combined_template:
         wgt = wgt*get_combined_template_wgt(tree, nfma['ma_edges'], nfma['wgts'])
         #print(wgt)
@@ -159,6 +172,11 @@ for iEvt in range(iEvtStart,iEvtEnd):
     #if nWrite > 10:break
     # Fill histograms with appropriate weight
     fill_hists(hists, tree, wgt)
+
+    if write_pts:
+        #evtId = '%f:%f'%(tree.phoEt[0], tree.phoEt[1])
+        evtId = '%f:%f:%f:%f:%f'%(tree.phoEt[0], tree.phoEt[1], tree.phoIDMVA[0], tree.phoIDMVA[1], tree.mgg)
+        evtlist_f.write('%s\n'%evtId)
 
     nWrite += 1
 
@@ -182,3 +200,6 @@ write_cut_hists(cut_hists, "%s/%s_%s_cut_hists.root"%(outdir, sample, region))
 
 # Print cut flow summary
 print_stats(counts, "%s/%s_%s_cut_stats.txt"%(outdir, sample, region))
+
+if write_pts:
+    evtlist_f.close()
