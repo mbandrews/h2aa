@@ -1236,9 +1236,9 @@ def plot_datamc(samples, blind, norm, regions):
                 print('mee')
                 #draw_hist_1dmee(k, r, hsum, c, samples, blind, -1)
                 draw_hist_1dptstacked(k, r, [hsum, hsample], c, sample_types, blind, -1, mcnorm, [60., 120.], "m_{#gamma,#gamma} [GeV]")
-            #if 'bdt' in k:
-            #    print('bdt')
-            #    draw_hist_1dptstacked(k, r, [hsum, hsample], c, sample_types, blind, None, mcnorm, [-1., 1.], "Photon ID")
+            if 'bdt' in k:
+                print('bdt')
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, sample_types, blind, None, mcnorm, [-1., 1.], "Photon ID")
             #if 'ma0vma1' in k:
             #    print('ma0vma1')
             #    draw_hist_2dma(k, hsum, c, samples, blind, r, do_trunc=True)

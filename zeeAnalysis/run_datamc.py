@@ -40,7 +40,7 @@ samples = [
     ,'C'
     ,'D'
     ,'E'
-#    ,'F'
+    ,'F'
     ]
 samples = ['Run2017%s'%s for s in samples]
 samples.append('DYToEE')
