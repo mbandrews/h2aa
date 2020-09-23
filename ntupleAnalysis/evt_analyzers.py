@@ -84,7 +84,7 @@ def select_event(tree, cuts, hists, counts, outvars=None):
                 #print('%d presel: %f, %f, %f'%(preselIdx, tree.phoEt[preselIdx], tree.phoEta[preselIdx], tree.phoPhi[preselIdx]))
 
                 # Ensure photons are alike
-                dR = ROOT.Math.VectorUtil.DeltaR(p4_presel, p4_nonPresel)
+                dR = abs(ROOT.Math.VectorUtil.DeltaR(p4_presel, p4_nonPresel))
                 #print('dR: %f'%dR)
 
                 if dR < minDR:
@@ -229,8 +229,11 @@ def in_region(region, tree):
         if in_sbhi: return True
     elif 'sb' in region:
         if in_sblo or in_sbhi: return True
-    elif region == 'sr':
+    #elif region == 'sr':
+    elif 'sr' in region:
         if in_sr: return True
+    else:
+        raise Exception('Regions %s not recognized'%region)
     return False
 
     # DEPRECATED:

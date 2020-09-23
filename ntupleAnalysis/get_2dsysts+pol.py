@@ -8,6 +8,7 @@ from collections import OrderedDict
 import CMS_lumi, tdrstyle
 
 #tdrstyle.setTDRStyle()
+ROOT.gStyle.SetPadTickX(1)
 ROOT.gStyle.SetPadTickY(1)
 #change the CMS_lumi variables (see CMS_lumi.py)
 CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
@@ -243,10 +244,32 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     hatch[k].SetFillColor(14)
     hatch[k].Draw("same")
 
-    legend[k] = ROOT.TLegend(0.6,0.65,0.9,0.85) #(x1, y1, x2, y2)
+    blindTextOffset = 0.4
+    blindTextSize   = 0.65
+    t_ = pUp.GetTopMargin()
+    b_ = pUp.GetBottomMargin()
+    r_ = pUp.GetRightMargin()
+    l_ = pUp.GetLeftMargin()
+    relPosX = 0.32#0.045
+    relPosY = 0.035#0.235 #0.035
+    posX_ =   l_ + relPosX*(1-l_-r_)
+    posY_ = 1-t_ - relPosY*(1-t_-b_)
+    #posY_ = 0.85
+    print(posY_)
+
+    blindText = 'm(a)-SR' if 'offdiag' in blind else 'm(a)-SB'
+    ltx = ROOT.TLatex()
+    ltx.SetNDC()
+    ltx.SetTextFont(42)#bold:62
+    ltx.SetTextAlign(13)
+    ltx.SetTextSize(blindTextSize*t_)
+    ltx.DrawLatex(posX_, posY_, blindText)
+
+    legend[k] = ROOT.TLegend(0.62, posY_-0.2 if plot_syst else posY_-0.13, 0.92, posY_) #(x1, y1, x2, y2)
     legend[k].AddEntry(hc[sr_k].GetName(), 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
     legend[k].AddEntry(hc[sb2sr_k].GetName(), "Bkg", "fl")
-    legend[k].AddEntry(h[ksyst].GetName(), "Syst", "fl")
+    if plot_syst:
+        legend[k].AddEntry(h[ksyst].GetName(), "Syst", "fl")
     legend[k].SetBorderSize(0)
     legend[k].Draw("same")
 
@@ -267,7 +290,8 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
 
-    dY = 0.199
+    #dY = 0.199
+    dY = 0.399
     #fUnity.GetYaxis().SetTitle("SB/SR")
     fUnity.GetYaxis().SetTitle("Obs/Bkg")
     #fUnity.GetYaxis().SetRangeUser(1.-dY,1.+dY)
@@ -282,7 +306,8 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     fUnity.GetYaxis().SetLabelSize(0.14)
 
     fUnity.SetLineColor(9)
-    fUnity.SetLineWidth(1)
+    #fUnity.SetLineWidth(1)
+    fUnity.SetLineWidth(0)
     fUnity.SetLineStyle(7)
     fUnity.SetTitle("")
     fUnity.Draw()
@@ -290,7 +315,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     # For h4g: sg err bands
     if is_h4g:
         k = ksr
-        kr = k+'err'
+        kr = k+'ratioerr'
         h[kr] = ROOT.TGraphAsymmErrors()
         h[kr].SetName(kr)
         for i in range(h[k].GetNbinsX()-1):
@@ -311,7 +336,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
 
     # Bkg err bands
     k = sb2sr_k
-    kr = k+'err'
+    kr = k+'ratioerr'
     h[kr] = ROOT.TGraphAsymmErrors()
     h[kr].SetName(kr)
     for i in range(h[k].GetNbinsX()-1):
@@ -519,7 +544,7 @@ def plot_2dma(k, title, xtitle, ytitle, ztitle, zrange=None, do_trunc=False, do_
     c[k].Print('Plots/Sys2D_%s.eps'%(k))
     #c[k].Print('Plots/Sys2D_%s.png'%(k))
 
-def plot_datavmc_flat(region, kplots, syst, nbins, yrange=None, colors=[3, 10], styles=[1001, 1001], titles=["im_{x}#timesim_{y} + im_{y}", "N_{evts}"], plot_syst=True):
+def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], styles=[1001, 1001], titles=["im_{1} #times im_{2} + im_{2}", "N_{evts}"], plot_syst=True):
 
     hc = {}
     legend = {}
@@ -619,15 +644,42 @@ def plot_datavmc_flat(region, kplots, syst, nbins, yrange=None, colors=[3, 10], 
 
     pUp.RedrawAxis()
 
+    blindTextSize     = 0.65
+    blindTextOffset   = 0.4
+    t_ = pUp.GetTopMargin()
+    b_ = pUp.GetBottomMargin()
+    r_ = pUp.GetRightMargin()
+    l_ = pUp.GetLeftMargin()
+    relPosX    = 0.35#0.045
+    relPosY    = 0.035#0.235 #0.035
+    posX_ =   l_ + relPosX*(1-l_-r_)
+    posY_ = 1-t_ - relPosY*(1-t_-b_)
+    #posY_ = 0.85
+    print(posY_)
+
+    blindText = 'm(a)-SR' if 'offdiag' in blind else 'm(a)-SB'
+    #blindText = 'h #rightarrow'
+    ltx = ROOT.TLatex()
+    ltx.SetNDC()
+    #ltx.SetTextColor(ROOT.kBlack)
+    ltx.SetTextFont(42)#bold:62
+    ltx.SetTextAlign(13)
+    ltx.SetTextSize(blindTextSize*t_)
+    ltx.DrawLatex(posX_, posY_, blindText)
+
     k = kobs_nom
-    legend[k] = ROOT.TLegend(0.65,0.65,0.95,0.85) #(x1, y1, x2, y2)
+    #legend[k] = ROOT.TLegend(0.65,0.65,0.95,0.85) #(x1, y1, x2, y2)
+    #legend[k] = ROOT.TLegend(0.65,0.65 if plot_syst else 0.71,0.95,0.85) #(x1, y1, x2, y2)
+    legend[k] = ROOT.TLegend(0.65, posY_-0.20 if plot_syst else posY_-0.13, 0.95, posY_) #(x1, y1, x2, y2)
     legend[k].AddEntry(h[kobs_nom].GetName(), 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
     legend[k].AddEntry(hc[kbkg_nom].GetName(), "Bkg", "fl")
-    legend[k].AddEntry(h[kfit].GetName(), "Syst", "fl")
+    if plot_syst:
+        legend[k].AddEntry(h[kfit].GetName(), "Syst", "fl")
     legend[k].SetBorderSize(0)
     legend[k].Draw("same")
 
     CMS_lumi.CMS_lumi(pUp, iPeriod, iPos)
+
 
     ##### Ratio plots on lower pad #####
     pDn.cd()
@@ -637,12 +689,14 @@ def plot_datavmc_flat(region, kplots, syst, nbins, yrange=None, colors=[3, 10], 
     fUnity.SetParameter( 0,1. )
 
     fUnity.GetXaxis().SetTitle(xtitle)
+    print(xtitle)
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
 
-    dY = 0.399
+    #dY = 0.399
+    dY = 0.75
     fUnity.GetYaxis().SetTitle("Obs/Bkg")
     #fUnity.GetYaxis().SetRangeUser(1.-dY,1.+dY)
     fUnity.SetMaximum(1.+dY)
@@ -655,9 +709,10 @@ def plot_datavmc_flat(region, kplots, syst, nbins, yrange=None, colors=[3, 10], 
     fUnity.GetYaxis().SetTitleSize(0.15)
     fUnity.GetYaxis().SetLabelSize(0.12)
 
-    #fUnity.SetLineColor(9)
-    fUnity.SetLineColor(3)
-    fUnity.SetLineWidth(1)
+    fUnity.SetLineColor(9)
+    #fUnity.SetLineColor(3)
+    #fUnity.SetLineWidth(1)
+    fUnity.SetLineWidth(0)
     fUnity.SetLineStyle(1)
     fUnity.SetTitle("")
     fUnity.Draw("L")
@@ -771,7 +826,6 @@ def plot_datavmc_flat(region, kplots, syst, nbins, yrange=None, colors=[3, 10], 
     #'''
     c[kc].Draw()
     #c[kc].Update()
-    #c[kc].Print('Plots/Sys2D_flat_blind%s_syst%s_datavbkg.eps'%(region, syst))
     c[kc].Print('Plots/Sys2D_%s.eps'%(kc))
 
 def get_data_flat(region, ksrc, ktgt, nbins):
@@ -919,26 +973,18 @@ systs = ['flo']
 #systs = ['flo', 'flo_None_hgg']
 #cr = 'a0noma1inv'
 syst_shifts = {}
-#syst_shifts['ptrwgt_resample'] = ['srsblo', 'nom', 'srsbhi']
-#syst_shifts['ptrwgt_resample'] = ['srsblo0p20', 'nom', 'srsbhi0p20']
-#syst_shifts['ptrwgt'] = ['sblo', 'nom', 'sbhi']
-#syst_shifts['ptrwgt'] = ['srsblo0p20', 'srsbhi0p20']
-#syst_shifts['flo'] = ['0p722', '0p790']
-#syst_shifts['flo'] = ['0p618', '0p756']
-#syst_shifts['flo'] = ['0p10', '0p90']
 #syst_shifts['flo'] = ['0p406', '1p000']
 #syst_shifts['flo'] = ['0p406', '0p758']
 syst_shifts['flo'] = ['0p504', '0p791']
 syst_shifts['flo_None_hgg'] = ['dn', 'up']
-#syst_shifts['tempfrac'] = ['e0dn', 'nom', 'e0up']
-#syst_shifts['tempfrace1'] = ['dn', 'up']
-#syst_shifts['tempfrace2'] = ['dn', 'up']
-#indir = 'Templates/%s/%s'%(syst, cr)
-#indir = 'Templates/_prod_varptbinsxy/%s/'%(cr)
 #indir = 'Templates/scan_ptrwgt'
-indir = 'Templates/scan_ptrwgt/nom-nom'
+#indir = 'Templates/scan_ptrwgt/nom-nom'
+#indir = 'Templates/prod_normblind_diaglohi/nom-nom'
+indir = 'Templates/prod_fixsb2srnorm/nom-nom'
 apply_blinding = True
 #apply_blinding = False
+plot_syst = False
+plot_syst = True
 
 for b in blinds:
     # Nominals
@@ -962,7 +1008,7 @@ for b in blinds:
                 h[kidx_k].SetName(kidx_k)
                 #print('Adding:',kidx_k)
 
-dMa = 25
+#dMa = 25
 #dMa = 50
 dMa = 100
 ma_bins = list(range(0,1200+dMa,dMa))
@@ -983,8 +1029,13 @@ hvalid, hlimit = {}, {}
 xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
 #zrange = None
 #zrange = [0., 650.]
-#zrange = [0., 2.4e3] #nom-inv, dM=100MeV
-zrange = [0., 3.6e3]
+if dMa == 100:
+    ymax_1d = 15.e3
+    ymax_flat = 4.e3
+else:
+    ymax_1d = 4.e3
+    ymax_flat = 350
+zrange = [0., ymax_flat]
 do_trunc = True
 do_log = False if do_trunc else True
 
@@ -1000,7 +1051,9 @@ for kidx in h.keys():
     for ix in range(1, h[k].GetNbinsX()+1):
         for iy in range(1, h[k].GetNbinsY()+1):
             binc = h[k].GetBinContent(ix, iy)
+            binerr = h[k].GetBinError(ix, iy)
             h[k].SetBinContent(ix, iy, binc)
+            h[k].SetBinError(ix, iy, binerr)
 
     #plot_2dma(k, "", xtitle, ytitle, ztitle, zrange, do_trunc, do_log=do_log)
     #print(k)
@@ -1031,19 +1084,37 @@ for key in keys_1d:
                 ]
             ksrcs = ['%s_%s'%(ksrc, key) for ksrc in ksrcs]
             #print(ksrcs)
-            draw_hist_1dma_syst(ksrcs, syst)
+            draw_hist_1dma_syst(ksrcs, syst, ymax_=ymax_1d, plot_syst=plot_syst)
 
 ##########################
 kfitpol = 'pol2_2d_x_bkg'
-kfitsrc = '%s_sb2sr_%s_%s'%(sample, valid_blind, keys[0])
-kfittgt = '%s_sr_%s_%s'%(sample, valid_blind, keys[0])
+#kfitsrc = '%s_sb2sr_%s_%s'%(sample, valid_blind, keys[0])
+#kfittgt = '%s_sr_%s_%s'%(sample, valid_blind, keys[0])
+kfitsrc = '%s_sb2sr_%s_%s_rebin'%(sample, valid_blind, keys[0])
+kfittgt = '%s_sr_%s_%s_rebin'%(sample, valid_blind, keys[0])
+print('fitsrc:',h[kfitsrc].Integral())
+print('fittgt:',h[kfittgt].Integral())
 
 k = kfitpol
 #h[k] = ROOT.TF2(k, pol2_2d_x_bkg, -0.4, 1.2, -0.4, 1.2, nparams)
 h[k] = ROOT.TF2(k, pol2_2d_x_bkg, 0., 1.2, 0., 1.2, nparams)
-h[k].FixParameter(0, 9.87205e-01)
-h[k].FixParameter(1, 4.19752e-03)
-h[k].FixParameter(2, 5.33662e-02)
+#nom-nom
+if dMa == 25:
+    pass
+    h[k].FixParameter(0, 9.67198e-01)
+    h[k].FixParameter(1, 7.90648e-03)
+    h[k].FixParameter(2, 5.76750e-02)
+elif dMa == 50:
+    pass
+    h[k].FixParameter(0, 9.65982e-01)
+    h[k].FixParameter(1, 9.59381e-03)
+    h[k].FixParameter(2, 5.86968e-02)
+elif dMa == 100:
+    h[k].FixParameter(0, 9.64834e-01)
+    h[k].FixParameter(1, 1.26475e-02)
+    h[k].FixParameter(2, 5.84001e-02)
+else:
+    raise Exception('Invalid dMa',dMa)
 
 fitResult = h[kfittgt].Fit(h[k], "LLIEMNS")
 chi2 = h[k].GetChisquare()
@@ -1075,11 +1146,10 @@ for ix in range(1, h[kfitsrc].GetNbinsX()+1):
         h[k].SetBinContent(ix, iy, pol_val)
 print('pol_hist:%s, min:%f, max:%f'%(k, h[k].GetMinimum(), h[k].GetMaximum()))
 #plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.05, 1.+0.05])
-plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1])
+plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1], do_trunc=do_trunc)
 
 # Eigenvariations from solving covariance matrix
 # Must be hardcoded here
-varvec = np.array([
 # a0 nom, a1 inv
 #floNone, dM50
 #np.sqrt(3.930942e-04) * np.array([ 0.603954327138,-0.56766240213,-0.559462749376 ]),
@@ -1094,11 +1164,31 @@ varvec = np.array([
 #np.sqrt(1.139487e-05) * np.array([ -0.777720829331,-0.27728825569,-0.564146731694 ]),
 #np.sqrt(1.387601e-04) * np.array([ -0.16056057336,-0.780056901608,0.604757416272 ])
 # a0 nom, a1 nom
-#floNone, dM100
-np.sqrt(4.405223e-04) * np.array([ 0.560677985844,-0.602254555078,-0.568268991832 ]),
-np.sqrt(1.618661e-05) * np.array([ -0.824805633899,-0.345665991761,-0.447449090321 ]),
-np.sqrt(1.509911e-04) * np.array([ -0.0730469881631,-0.719586320762,0.690550262104 ])
-])
+if dMa == 25:
+    pass
+    #floNone, dMa25
+    varvec = np.array([
+    np.sqrt(4.267093e-04) * np.array([ 0.560030290803,-0.602802878561,-0.56832628215 ]),
+    np.sqrt(1.569770e-05) * np.array([ -0.825253511347,-0.3454894375,-0.446759096813 ]),
+    np.sqrt(1.462930e-04) * np.array([ -0.0729569420455,-0.719211886842,0.690949742335 ])
+    ])
+elif dMa == 50:
+    pass
+    #floNone, dMa50
+    varvec = np.array([
+    np.sqrt(4.284814e-04) * np.array([ 0.560140562083,-0.603062260222,-0.567942304293 ]),
+    np.sqrt(1.569358e-05) * np.array([ -0.825207682046,-0.346096749344,-0.446373522495 ]),
+    np.sqrt(1.467250e-04) * np.array([ -0.0726280400483,-0.718702268251,0.6915144376 ])
+    ])
+elif dMa == 100:
+    #floNone, dMa100
+    varvec = np.array([
+    np.sqrt(4.349961e-04) * np.array([ 0.560609664117,-0.604968977337,-0.565446143288 ]),
+    np.sqrt(1.567023e-05) * np.array([ -0.824690412625,-0.346165192438,-0.447275511143 ]),
+    np.sqrt(1.482336e-04) * np.array([ -0.0748500355591,-0.717064987295,0.692975667807 ])
+    ])
+else:
+    raise Exception('invalid dMa',dMa)
 varvec *= 1.
 for v in varvec:
     print(v)
@@ -1187,7 +1277,7 @@ for key in keys_1d:
             #    print(ksrc)
             #    assert ksrc in h.keys()
             #print(ksrcs)
-            draw_hist_1dma_syst(ksrcs, syst)
+            draw_hist_1dma_syst(ksrcs, syst, ymax_=ymax_1d, plot_syst=plot_syst)
             #'''
 
 ##########################
@@ -1199,7 +1289,8 @@ sb2sr_k = sample+'sb2sr'+valid_blind+key
 key = keys[0]
 
 #########################
-yrange_flat = [0., 3.6e3] # a0nom, a1nom, dM=100MeV
+yrange_flat = [0., ymax_flat] # a0nom, a1nom, dM=100MeV
+#yrange_flat = [0., 4.e3] # a0nom, a1nom, dM=100MeV
 #yrange_flat = [0., 2.4e3] # a0nom, a1inv
 #yrange_flat = [0., 650.] # a0nom, a1inv
 #yrange_flat = [0., 200.] # a0inv, a1inv
@@ -1226,7 +1317,7 @@ for blind in blinds:
         get_datavmc_flat(ksrcs, ktgts, nbin)
         kplots = ['flat_'+k for k in ktgts]
         #if i != 0: continue
-        plot_datavmc_flat(blind, kplots, syst, nbin, yrange=yrange_flat)
+        plot_datavmc_flat(blind, kplots, syst, nbin, yrange=yrange_flat, plot_syst=plot_syst)
 
 for k in h.keys():
     pass
@@ -1281,8 +1372,8 @@ regions = ['sr']
 blinds = [limit_blind]
 
 #systs = ['offset', 'scale']
-systs = ['scale']
-#syst_shifts['offset'] = ['dn', 'up']
+systs = ['scale', 'smear']
+syst_shifts['smear'] = ['dn', 'up']
 syst_shifts['scale'] = ['dn', 'up']
 #indir = 'Templates/scan_ptrwgt/h4g'
 indir = 'Templates/scan_ptrwgt/nom-nom/h4g'
@@ -1361,7 +1452,7 @@ for ma in ['100MeV', '400MeV', '1GeV']:
                     print(ksrc)
                     assert ksrc in h.keys(), ksrc
                 #print(ksrcs)
-                draw_hist_1dma_syst(ksrcs, syst)
+                draw_hist_1dma_syst(ksrcs, syst, ymax_=ymax_1d, plot_syst=plot_syst)
                 #'''
 
     # Flatten 2d -> 1d
@@ -1384,7 +1475,7 @@ for ma in ['100MeV', '400MeV', '1GeV']:
             get_datavmc_flat(ksrcs, ktgts, nbin)
             kplots = ['flat_'+k for k in ktgts]
             #if i != 0: continue
-            plot_datavmc_flat(blind, kplots, syst, nbin, yrange=yrange_flat)
+            plot_datavmc_flat(blind, kplots, syst, nbin, yrange=yrange_flat, plot_syst=plot_syst)
 
     file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "UPDATE")
     for i,syst in enumerate(systs):

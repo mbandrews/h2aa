@@ -730,14 +730,15 @@ def draw_hist_1dptstacked(k_, region, hist_list, c, samples, blind, ymax_=None, 
     ##hc[k].Draw("hist same")
     if scale_obs:
         hc[k].Scale(1.e5/hc[k].Integral())
+        print(h[k].Integral())
     hc[k].Draw("E same")
 
     # SB
     #k = 'sb2sr_%s'%k_
     k = kmc
     print('kmc:',kmc, mcnorm)
-    #h[k].Scale(h[kdata].Integral()/h[kmc].Integral())
-    h[k].Scale(mcnorm)
+    h[k].Scale(hc[kdata].Integral()/h[kmc].Integral())
+    #h[k].Scale(mcnorm)
     print(h[k].Integral())
     h[k].SetLineColor(9)
     #h[k].Draw("hist SAME")
@@ -1163,8 +1164,8 @@ def get_dataomc_norm(k_, region, h):
     kmc = 'mc'+region+k_
     assert kmc in h.keys()
 
-    norm = h[kdata].Integral()/h[kmc].Integral()
-    #norm = 1.e5/h[kmc].Integral()
+    #norm = h[kdata].Integral()/h[kmc].Integral()
+    norm = 1.e5/h[kmc].Integral()
     return norm
 
 def get_flo(srshift, loshift, hishift):
@@ -1233,8 +1234,9 @@ def plot_datamc_sb(samples, blind, norm, regions):
     #keys = ['ptxy', 'maxy','mGG']
     #keys = ['ptxy', 'maxy','mGG','bdtxy']
     #keys = ['pt0', 'pt1']
-    keys = ['nEvtsWgtd']
-    #keys = ['ptxy']
+    #keys = ['nEvtsWgtd']
+    keys = ['ptxy']
+    #keys = ['mGG']
     indir = 'Templates_datamc/ptrwgt/flo_None'
     indir = 'Templates_datamc/ptrwgt/flo_0p584'
     indir = 'Templates_datamc/ptrwgt/flo_0p762'
@@ -1243,7 +1245,7 @@ def plot_datamc_sb(samples, blind, norm, regions):
     indir = 'Templates_datamc/ptrwgt/flo_0p756'
     indir = 'Templates_datamc/ptrwgt/flo_0p642'
     #indir = 'Templates_datamc/ptrwgt/flo_0p814'
-    indir = 'Templates_datamc/no_ptrwgt'
+    #indir = 'Templates_datamc/no_ptrwgt'
     indir = 'Templates_datamc/no_ptrwgt/nom-nom'
 
     for s in samples:
@@ -1286,34 +1288,40 @@ def plot_datamc_sb(samples, blind, norm, regions):
                 if 'QCD' in s or 'GJet' in s:
                     hsum['qcd'+r+k].Add(h[s+r+k])
 
-            #mcnorm = get_dataomc_norm(k, r, hsum) if 'sr' in r else 1.
+            # relative pt
+            mcnorm_ = get_dataomc_norm(k, r, hsum) if 'sr' in r else 1.
             mcnorm[r+k] = get_dataomc_norm(k, r, hsum)
-            #print(mcnorm)
+            print(mcnorm)
 
     for r in regions:
         for k in keys:
             for d in ['data', 'mc', 'qcd']:
                 kh = d+r+k
-                print('hsum:',kh, hsum[kh].Integral(), hsum[kh].GetBinError(2)/hsum[kh].GetBinContent(2))
+                print('hsum:',kh, hsum[kh].Integral())#, hsum[kh].GetBinError(2)/hsum[kh].GetBinContent(2))
                 if d != 'data':
                     hsum[kh].Scale(mcnorm[r+k])
-                print('hsum:',kh, hsum[kh].Integral(), hsum[kh].GetBinError(2)/hsum[kh].GetBinContent(2))
+                print('hsum:',kh, hsum[kh].Integral())#, hsum[kh].GetBinError(2)/hsum[kh].GetBinContent(2))
         for k in keys:
             for t in sample_types:
                 if 'Run' in t: continue
                 kh = t+r+k
                 hsample[kh].Scale(mcnorm[r+k])
-                print('hsample:',kh, hsample[kh].Integral(), hsample[kh].GetBinError(2)/hsample[kh].GetBinContent(2))
+                print('hsample:',kh, hsample[kh].Integral())#, hsample[kh].GetBinError(2)/hsample[kh].GetBinContent(2))
     #for r in ['sblo', 'sbhi']:
     #hfrac = {}
+    # get uncert on flo
     #get_flo(srshift='nom', loshift='nom', hishift='nom')
     #get_flo(srshift='down', loshift='nom', hishift='nom')
-    get_flo(srshift='up', loshift='nom', hishift='nom')
-    '''
+    #get_flo(srshift='up', loshift='nom', hishift='nom')
+    #'''
+    # Make qcd pt plots
     #print('hsum:',hsum.keys())
     if 'sr' not in regions and 'sb2sr' not in regions:
         mcnorm_bysb = {}
-        flo = 0.687281137302 # flo=None, pt0vpt1
+        #nom-nom
+        flo = 0.65
+        #nom-inv
+        #flo = 0.687281137302 # flo=None, pt0vpt1
         #flo = 0.6129795171 #flo=None, ptxy
         #flo = 0.584 # fA=0.85
         #flo = 0.762 # fA=0.24
@@ -1365,7 +1373,8 @@ def plot_datamc_sb(samples, blind, norm, regions):
                 hsample[kh].Add(hsample[t+'sbhi'+k])
                 hsample[kh].SetName(kh)
                 print('hsample:',kh, hsample[kh].Integral())
-    '''
+    #'''
+    print(mcnorm.keys())
 
     #'''
     for k in keys:
@@ -1373,8 +1382,9 @@ def plot_datamc_sb(samples, blind, norm, regions):
         #for r in ['sb2sr']:
             if 'pt' in k:
                 print('pt')
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [25., 125.], "p_{T,a} [GeV]", scale_obs=True)
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [25., 125.], "p_{T,a} [GeV]", scale_obs=True)
+                #draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm_, [25., 125.], "p_{T,a} [GeV]", scale_obs=True)
             if 'mGG' in k:
                 print('mGG')
-                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm, [100., 180.], "m_{#gamma,#gamma} [GeV]")
+                draw_hist_1dptstacked(k, r, [hsum, hsample], c, samples, blind, -1, mcnorm[r+k], [100., 180.], "m_{#gamma,#gamma} [GeV]")
     #'''

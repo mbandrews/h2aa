@@ -1,9 +1,10 @@
 import ROOT
 import numpy as np
+import os
 from array import array
 from hist_utils import *
 
-def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, apply_blinding=True):
+def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, apply_blinding=True, output_dir='Plots'):
 
     hc = {}
 
@@ -12,13 +13,13 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, apply_blinding=True):
     #wd, ht = int(440*1), int(400*1)
     #wd, ht = int(640*1), int(580*1)
     wd, ht = int(640*1), int(680*1)
-    #ROOT.TGaxis.fgMaxDigits = 3
+    ROOT.TGaxis.fgMaxDigits = 3
     ROOT.gStyle.SetErrorX(0)
 
     #k = 'sr_%s'%k_
-    sr_k = sample+'sr'+k_
-    sb2sr_k = sample+'sb2sr'+k_
-    srosb2sr_k = sample+'srosb2sr'+k_
+    sr_k = sample+'_sr_'+k_
+    sb2sr_k = sample+'_sb2sr_'+k_
+    srosb2sr_k = sample+'_srosb2sr_'+k_
 
     k = sr_k
     c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
@@ -58,7 +59,7 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, apply_blinding=True):
     hc[k].GetYaxis().SetTitleOffset(0.9)
     hc[k].GetYaxis().SetTitleSize(0.07)
     hc[k].GetYaxis().SetLabelSize(0.06)
-    hc[k].GetYaxis().SetMaxDigits(3)
+    #hc[k].GetYaxis().SetMaxDigits(3)
     #hc[k].Draw("hist same")
     hc[k].Draw("E")
     #k = 'sb2sr_%s'%k_
@@ -221,15 +222,15 @@ def draw_hist_1dma(k_, h, c, sample, blind, ymax_=None, apply_blinding=True):
     c[k].Update()
     #c[k].Print('Plots/%s_sb2srvsr_blind_%s.eps'%(sample, blind))
     #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
-    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+    c[k].Print('%s/%s_sb2srvsr_blind_%s_%s.eps'%(output_dir, sample, blind, k))
 
-def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
+def draw_hist_2dma(k_, h, c, sample, blind, ymax_=None, do_trunc=True, output_dir='Plots'):
 
     hc = {}
     wd, ht = int(800*1), int(680*1)
 
-    sr_k = sample+'sr'+k_
-    sb2sr_k = sample+'sb2sr'+k_
+    sr_k = sample+'_sr_'+k_
+    sb2sr_k = sample+'_sb2sr_'+k_
 
     #k = '%s_%s'%(r, k_)
     #k = 'sb2sr'+'_%s'%(k_)
@@ -270,15 +271,15 @@ def draw_hist_2dma(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True):
     #palette.SetY1NDC(0.13)
 
     c[k].Update()
-    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+    c[k].Print('%s/%s_sb2srvsr_blind_%s_%s.eps'%(output_dir, sample, blind, k))
 
-def draw_hist_2dma_ratio(k_, h, c, sample, blind, r, zmax=2., do_trunc=True, do_significance=False):
+def draw_hist_2dma_ratio(k_, h, c, sample, blind, zmax=2., do_trunc=True, do_significance=False, output_dir='Plots'):
 
     hc = {}
     wd, ht = int(800*1), int(680*1)
 
-    sr_k = sample+'sr'+k_
-    sb2sr_k = sample+'sb2sr'+k_
+    sr_k = sample+'_sr_'+k_
+    sb2sr_k = sample+'_sb2sr_'+k_
 
     k = sr_k+'o'+sb2sr_k+'sig'+str(do_significance)
     c[k] = ROOT.TCanvas("c%s_ratio"%k,"c%s_ratio"%k,wd,ht)
@@ -328,28 +329,36 @@ def draw_hist_2dma_ratio(k_, h, c, sample, blind, r, zmax=2., do_trunc=True, do_
 
     c[k].Update()
     #c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s_ratio.eps'%(sample, blind, k))
-    c[k].Print('Plots/%s_sb2srvsr_blind_%s_%s.eps'%(sample, blind, k))
+    c[k].Print('%s/%s_sb2srvsr_blind_%s_%s.eps'%(output_dir, sample, blind, k))
 
-def plot_srvsb_sb(sample, blind, apply_blinding=False):
+def plot_srvsb_sb(samples, regions, blind, apply_blinding=False, workdir='Templates', output_dir='Plots'):
 
     hf, h = {}, {}
     c = {}
 
     #regions = ['sb2sr', 'sr']
-    regions = ['sblo2sr', 'sbhi2sr', 'sr']
+    #regions = ['sblo2sr', 'sbhi2sr', 'sr']
     #regions = ['sbcombo2sr', 'sr']
     #keys = ['ma0vma1', 'maxy']
     #keys = ['maxy']
     #keys = ['maxy','ma0','ma1']
     keys = ['maxy','ma0','ma1','ma0vma1']
 
+    for sample in samples:
+        s = sample.replace('[','').replace(']','')
+        load_hists(h, hf, [s], regions[sample], keys, blind, workdir)
+
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+
+    '''
     for r in regions:
         s_r = sample+r
         hf[s_r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
 
-    s_hgg = 'GluGluHToGG'
-    r_hgg = 'sr'
     hf[s_hgg+r_hgg] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(s_hgg, r_hgg, blind),"READ")
+    '''
+
     for s_r in hf.keys():
         for k in keys:
             s_r_k = s_r+k
@@ -357,21 +366,26 @@ def plot_srvsb_sb(sample, blind, apply_blinding=False):
             #print('key:%s, Entries:%d -> Integral:%.2f'%(s_r_k, h[s_r_k].GetEntries(), h[s_r_k].Integral()))
 
     # h[data sr].Add(scale*sg)
+    tgt_sample = samples[0].replace('[','').replace(']','')
     tgt_region = 'sb2sr'
+    #s_hgg = 'GluGluHToGG'
+    #r_hgg = 'hgg2sr'
+    s_hgg = samples[1]
+    r_hgg = regions[s_hgg][0]
     for k in keys:
-        s_r_k_tgt = sample+tgt_region+k
+        s_r_k_tgt = '%s_%s_%s'%(tgt_sample, tgt_region, k)
         #r_k_tgt = tgt_region+'_'+k
         #s_r_k_tgt = r_k_tgt
-        h[s_r_k_tgt] = h[sample+'sblo2sr'+k].Clone()
+        h[s_r_k_tgt] = h['%s_sblo2sr_%s'%(tgt_sample, k)].Clone()
         #print('key:%s, Adding: sblo2sr, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
-        h[s_r_k_tgt].Add(h[sample+'sbhi2sr'+k])
+        h[s_r_k_tgt].Add(h['%s_sbhi2sr_%s'%(tgt_sample, k)])
         #print('key:%s, Adding: sbhi2sr, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
-        h[s_r_k_tgt].Add(h[s_hgg+r_hgg+k])
+        h[s_r_k_tgt].Add(h['%s_%s_%s'%(s_hgg, r_hgg, k)])
         #print('key:%s, Adding: hgg, Entries:%d -> Integral:%.2f'%(s_r_k_tgt, h[s_r_k_tgt].GetEntries(), h[s_r_k_tgt].Integral()))
         #h[s_r_k_tgt].Write()
-    houtf = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, tgt_region, blind), "RECREATE")
+    houtf = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(workdir, tgt_sample, tgt_region, blind), "RECREATE")
     for k in keys:
-        s_r_k_tgt = sample+tgt_region+k
+        s_r_k_tgt = '%s_%s_%s'%(tgt_sample, tgt_region, k)
         h[s_r_k_tgt].Write()
     houtf.Write()
     houtf.Close()
@@ -393,16 +407,16 @@ def plot_srvsb_sb(sample, blind, apply_blinding=False):
     for k in keys:
         print('Doing key:',k)
         if k == 'maxy':
-            draw_hist_1dma(k, h, c, sample, blind, -1, apply_blinding=apply_blinding)
-            #draw_hist_1dma(k, h, c, sample, blind, 4.e3)
-            #draw_hist_1dma(k, h, c, sample, blind)
+            draw_hist_1dma(k, h, c, tgt_sample, blind, -1, apply_blinding=apply_blinding, output_dir=output_dir)
+            #draw_hist_1dma(k, h, c, tgt_sample, blind, 4.e3)
+            #draw_hist_1dma(k, h, c, tgt_sample, blind)
         elif k == 'ma0vma1':
-            draw_hist_2dma(k, h, c, sample, blind, r, do_trunc=True)
-            draw_hist_2dma_ratio(k, h, c, sample, blind, r, do_trunc=True)
-            draw_hist_2dma_ratio(k, h, c, sample, blind, r, do_trunc=True, do_significance=True, zmax=5)
+            draw_hist_2dma(k, h, c, tgt_sample, blind, do_trunc=True, output_dir=output_dir)
+            draw_hist_2dma_ratio(k, h, c, tgt_sample, blind, do_trunc=True, output_dir=output_dir)
+            draw_hist_2dma_ratio(k, h, c, tgt_sample, blind, do_trunc=True, do_significance=True, zmax=5, output_dir=output_dir)
         else:
-            #draw_hist_1dma(k, h, c, sample, blind)
-            draw_hist_1dma(k, h, c, sample, blind, -1, apply_blinding=apply_blinding)
+            #draw_hist_1dma(k, h, c, tgt_sample, blind)
+            draw_hist_1dma(k, h, c, tgt_sample, blind, -1, apply_blinding=apply_blinding, output_dir=output_dir)
 
     #houtf.Write()
     #houtf.Close()
