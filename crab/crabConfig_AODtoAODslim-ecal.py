@@ -23,15 +23,20 @@ config.JobType.maxJobRuntimeMin = 2750 # mins
 config.Data.outputDatasetTag = config.General.requestName
 config.Data.splitting = 'LumiBased'
 config.Data.unitsPerJob = int(UNITSPERJOB)
-if LUMIMASK is not None:
+if LUMIMASK != 'None':
     config.Data.lumiMask = LUMIMASK
 
 config.Data.inputDataset = DATASET
 
-config.Data.outLFNDirBase = '/store/group/lpchaa4g/mandrews/2017/%s'%CAMPAIGN
+#config.Data.outLFNDirBase = '/store/group/lpchaa4g/mandrews/2017/%s'%CAMPAIGN
+#config.Data.outLFNDirBase = '/store/user/mandrews/2016/%s'%CAMPAIGN
+#config.Data.outLFNDirBase = '/store/user/mandrews/Run%s/%s'%(SAMPLE.split('_')[-1][:-1], CAMPAIGN)
+config.Data.outLFNDirBase = '/store/user/mandrews/Run%s/%s'%(CAMPAIGN.split('_')[0].replace('Era',''), CAMPAIGN)
 #config.Data.publication = False
 config.Data.publication = True
+print(config.Data.outLFNDirBase)
 
 #config.Site.storageSite = 'T2_CH_CERN'
-config.Site.storageSite = 'T3_US_FNALLPC'
+#config.Site.storageSite = 'T3_US_FNALLPC'
+config.Site.storageSite = 'T3_US_CMU'
 #config.Site.ignoreGlobalBlacklist = True if 'BAD_ERA' in SAMPLE else False
