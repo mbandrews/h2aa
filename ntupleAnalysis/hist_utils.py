@@ -50,6 +50,7 @@ def create_hists(h):
     #pt_bins_[3] = np.arange(200,750+dPt,dPt)
     '''
     dPt = 10
+    #dPt = 1
     pt_bins_[0] = np.arange(25,125+dPt,dPt)
 
     pt_bins = np.concatenate([pt_bin_ for pt_bin_ in pt_bins_.values()])
@@ -110,7 +111,8 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
 
     k = 'mGG'
-    h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
+    #h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
+    h[k] = ROOT.TH1F(k, k, 400, 90., 190.)
 
     k = 'wgt'
     #h[k] = ROOT.TH1F(k, k, 50, 0., 50.)
@@ -174,6 +176,12 @@ def fill_cut_hists(h, tree, cut_, outvars=None):
             h[cut+'dR'].Fill(outvars['dR'])
 
 
+def ma_ss(ma, scale, smear):
+    if smear == 0.:
+        return scale*ma
+    else:
+        return scale*np.random.normal(ma, smear)
+
 def fill_hists(h, tree, wgt):
 
     h['wgt'].Fill(wgt)
@@ -181,14 +189,11 @@ def fill_hists(h, tree, wgt):
 
     ma0_ = tree.ma0
     ma1_ = tree.ma1
-    #scale = 1.+0.036 # +/- 0.001
-    #offset = 0.-0.005
-    # data -> mc
-    #ma0_ = tree.ma0*scale + offset
-    #ma1_ = tree.ma1*scale + offset
     # mc -> data
-    #ma0_ = scale*tree.ma0 + offset
-    #ma1_ = scale*tree.ma1 + offset
+    #scale = 1.#+0.01
+    #smear = 0.#+0.012
+    #ma0_ = ma_ss(ma0_, scale, smear)
+    #ma1_ = ma_ss(ma1_, scale, smear)
 
     h['ma0'].Fill(ma0_, wgt)
     h['ma1'].Fill(ma1_, wgt)
@@ -324,8 +329,10 @@ def get_cplimits_sym(num, den, num_err, den_err):
         # 2sigma (95% CL): tail = (1 - 0.95) / 2 = 0.025
         # 1sigma (68% CL): tail = (1 - 0.68) / 2 = 0.16
         tail = 0.16
-        n_num = pow(num/num_err, 2.)
-        n_den = pow(den/den_err, 2.)
+        n_num = pow(num/num_err, 2.) if num_err > 0. else 0.
+        n_den = pow(den/den_err, 2.) if num_err > 0. else 0.
+
+        if n_den == 0: return 0.
 
         # nom
         n_rat = n_num / n_den
@@ -347,3 +354,17 @@ def get_cplimits_sym(num, den, num_err, den_err):
         #err_ = np.sqrt(np.mean(np.array([err_lo, err_hi])**2))
         err_ = err_lo if num/den > 1. else err_hi
         return err_
+
+def load_hists(h, hf, samples, regions, keys, blind, input_dir):
+
+    # NOTE: Need to pass file objects `hf` as well for histograms `h`
+    # to remain persistent, otherwise segfaults
+    for s in samples :
+        for r in regions:
+            if s == 'GluGluHToGG' and 'sb' in r: continue
+            #if 'Run2017' in s and r == 'sr' and blind == None and 'pt0vpt1' not in keys: continue
+            sr = '%s_%s'%(s, r)
+            hf[sr] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(input_dir, s, r, blind),"READ")
+            for k in keys:
+                srk = '%s_%s_%s'%(s, r, k)
+                h[srk] = hf[sr].Get(k)

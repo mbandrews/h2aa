@@ -13,7 +13,10 @@ LUMIMASK = '__LUMIMASK__'
 
 #this_campaign = 'Era2016_15Jan2020_AODslim-ext_v1'
 #this_campaign = 'Era2016_04May2020_AODslim-ecal_v1'
-this_campaign = 'Era2017_18May2020_AODslim-ecal_v1'
+#this_campaign = 'Era2017_18May2020_AODslim-ecal_v1'
+#this_campaign = 'Era2016_03Sep2020_AODslim-ecal_v1'
+this_campaign = 'Era2016_06Sep2020_AODslim-ecal_v2'
+#this_campaign = 'Era2018_06Sep2020_AODslim-ecal_v2'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
@@ -32,23 +35,34 @@ if not os.path.isdir(crab_folder):
 #    }
 #lumi_mask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt'
 
-run = 'DoubleEG_2017'
-job_units = 10
-samples = {
-    '%sB'%run: '/DoubleEG/Run2017B-17Nov2017-v1/AOD',
-    '%sC'%run: '/DoubleEG/Run2017C-17Nov2017-v1/AOD',
-    '%sD'%run: '/DoubleEG/Run2017D-17Nov2017-v1/AOD',
-    '%sE'%run: '/DoubleEG/Run2017E-17Nov2017-v1/AOD',
-    '%sF'%run: '/DoubleEG/Run2017F-17Nov2017-v1/AOD',
-    }
-lumi_mask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
-
-##job_units = 100
-#job_units = 50
+#run = 'DoubleEG_2017'
+#job_units = 10
 #samples = {
-#    #'GluGluHToGG': '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM'
-#    'GluGluHToGG': '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM'
+#    '%sB'%run: '/DoubleEG/Run2017B-17Nov2017-v1/AOD',
+#    '%sC'%run: '/DoubleEG/Run2017C-17Nov2017-v1/AOD',
+#    '%sD'%run: '/DoubleEG/Run2017D-17Nov2017-v1/AOD',
+#    '%sE'%run: '/DoubleEG/Run2017E-17Nov2017-v1/AOD',
+#    '%sF'%run: '/DoubleEG/Run2017F-17Nov2017-v1/AOD',
 #    }
+#lumi_mask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON.txt'
+
+#run = 'EGamma_2018'
+#job_units = 10
+#samples = {
+#    '%sA'%run: '/EGamma/Run2018A-17Sep2018-v2/AOD',
+#    '%sB'%run: '/EGamma/Run2018B-17Sep2018-v1/AOD',
+#    '%sC'%run: '/EGamma/Run2018C-17Sep2018-v1/AOD',
+#    '%sD'%run: '/EGamma/Run2018D-22Jan2019-v2/AOD',
+#    }
+#lumi_mask = 'https://cms-service-dqm.web.cern.ch/cms-service-dqm/CAF/certification/Collisions18/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt'
+
+#job_units = 100
+job_units = 50
+samples = {
+    'GluGluHToGG': '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext2-v1/AODSIM'
+    #'GluGluHToGG': '/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM'
+    #'GluGluHToGG': '/GluGluHToGG_M125_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM'
+    }
 
 for s,dset in samples.iteritems(): #python3: samples.items()
 
@@ -67,7 +81,11 @@ for s,dset in samples.iteritems(): #python3: samples.items()
     file_data = file_data.replace(DATASET, dset)
     file_data = file_data.replace(CAMPAIGN, this_campaign)
     file_data = file_data.replace(UNITSPERJOB, str(job_units))
-    file_data = file_data.replace(LUMIMASK, lumi_mask if 'DoubleEG' in s else None)
+    #file_data = file_data.replace(LUMIMASK, lumi_mask if 'DoubleEG' in s else None)
+    if 'Run201' in dset:
+        file_data = file_data.replace(LUMIMASK, lumi_mask)
+    else:
+        file_data = file_data.replace(LUMIMASK, str(None))
 
     # Write out sample-specific crabConfig
     with open('%s/crabConfig_AODtoAODslim-ecal_%s.py'%(crab_folder, s), "w") as sample_file:

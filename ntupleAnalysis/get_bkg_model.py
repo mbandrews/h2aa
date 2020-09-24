@@ -191,8 +191,8 @@ if norm is not None:
 
 print('h[ma0vma1].GetEntries():',hists['ma0vma1'].GetEntries())
 print('h[ma0vma1].Integral():',hists['ma0vma1'].Integral())
-print('h[maxy].GetEntries():',hists['maxy'].GetEntries())
-print('h[maxy].Integral():',hists['maxy'].Integral())
+#print('h[maxy].GetEntries():',hists['maxy'].GetEntries())
+#print('h[maxy].Integral():',hists['maxy'].Integral())
 
 # Initialize output ntuple
 write_hists(hists, "%s/%s_%s_blind_%s_templates.root"%(outdir, sample, region, blind))

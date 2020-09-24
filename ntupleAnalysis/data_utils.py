@@ -1,5 +1,10 @@
-import os
+import glob, os, re
 import subprocess
+
+#eosfind = 'eos root://cmseos.fnal.gov find'
+#eosfind = '/usr/bin/eos root://cmseos.fnal.gov find'
+#eosfind = 'xrdfs root://cmseos.fnal.gov find'
+eosfind = 'xrdfs root://cmseos.fnal.gov ls'
 
 def get_ma_tree_name(sample):
     if 'Run2017' in sample:
@@ -16,7 +21,6 @@ def get_ma_tree_name(sample):
 def run_process(process):
     os.system('python %s'%process)
 
-
 def replace_eosredir(eosdir):
     if '/eos/uscms' in eosdir:
         return eosdir.replace('/eos/uscms', 'root://cmseos.fnal.gov/')
@@ -28,6 +32,9 @@ def replace_eosredir(eosdir):
 def run_eosfind(eos_basedir, sample, eos_redir='root://cmseos.fnal.gov'):
 
     eosfind = 'eos %s find'%eos_redir
+    #eosfind = '/usr/bin/eos %s find'%eos_redir
+    #eosfind = 'xrdfs %s find'%eos_redir
+    #eosfind = 'xrdfs %s ls'%eos_redir
 
     cmd = '%s %s'%(eosfind, eos_basedir)
     #print(cmd)
@@ -43,3 +50,28 @@ def run_eosfind(eos_basedir, sample, eos_redir='root://cmseos.fnal.gov'):
     #print(len(file_list))
 
     return file_list
+
+def get_mantuples(sample, eos_basedir='/store/group/lpchaa4g/mandrews/2017/MAntuples'):
+
+    cmd = '%s %s/'%(eosfind, eos_basedir) # H4G ntuple same for miniaod or aod IMG ntuple
+    print(cmd)
+    ma_inputs = subprocess.check_output(cmd, shell=True)
+    # subprocess.check_output() returns a byte-string => decode into str then split into files
+    ma_inputs = ma_inputs.decode("utf-8").split('\n')
+    # eosfind returns directories as well, keep only root files from correct sample and add fnal redir
+    ma_inputs = [f for f in ma_inputs if 'mantuple.root' in f]
+    ma_inputs = [f for f in ma_inputs if 'ARCHIVE/' not in f]
+    #ma_inputs = [f.replace('/eos/uscms','root://cmseos.fnal.gov/') for f in ma_inputs] # eosfind
+    ma_inputs = ['root://cmseos.fnal.gov/%s'%f for f in ma_inputs] # xrdfs ls
+    ma_inputs = [f for f in ma_inputs if re.search(sample, f) is not None]
+    # clean up empty elements:
+    ma_inputs = list(filter(None, ma_inputs)) # for py2.7: use filter(None, ma_inputs) without list()
+    print(ma_inputs[0])
+    print('len(ma_inputs):',len(ma_inputs))
+    assert len(ma_inputs) > 0
+
+    ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%sample)
+    print('len(ma_inputs):',len(ma_inputs))
+    assert len(ma_inputs) > 0
+
+    return ma_inputs

@@ -25,9 +25,9 @@ processes = []
 for s in samples:
 
     #blind = 'sg'
-    #blind = None
+    blind = None
     #blind = 'diag_lo_hi'
-    blind = 'offdiag_lo_hi'
+    #blind = 'offdiag_lo_hi'
 
     # Do data
     ma_inputs = glob.glob('MAntuples/%s_mantuple.root'%s)
@@ -35,6 +35,7 @@ for s in samples:
     assert len(ma_inputs) > 0
     s = s.replace('[','').replace(']','')
     regions = ['sr']
+    #regions = ['all']
     for r in regions:
         print('For region:',r)
         # Regress 2d ma off-diagonals in signal region (SR) and sideband (SB)
@@ -72,4 +73,3 @@ pool = Pool(processes=len(processes))
 pool.map(run_process, processes)
 pool.close()
 pool.join()
-
