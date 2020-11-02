@@ -1,0 +1,12 @@
+universe = vanilla
+Executable = run_skim.sh
+Should_Transfer_Files = YES
+when_to_transfer_output = ON_EXIT
+Transfer_Input_Files = run_skim.sh, h2aa.tgz
+Output = job_$(Cluster)_$(Process).stdout
+Error = job_$(Cluster)_$(Process).stderr
+Log = job_$(Cluster)_$(Process).log
+x509userproxy = $ENV(X509_USER_PROXY)
+request_cpus = 7
+Arguments = Era2016_23Sep2020_mgg100_ptomGG_bdgtm0p99_ggSkimv1
+Queue 1

@@ -14,28 +14,32 @@ from data_utils import *
 import ROOT
 
 # Register command line options
-parser = argparse.ArgumentParser(description='Run h24g selection.')
-parser.add_argument('-s', '--sample', default='test', type=str, help='Sample name.')
-parser.add_argument('-i', '--inputs', default=None, nargs='+', type=str, help='Input MA ntuple.')
-parser.add_argument('-b', '--eos_basedir', default='/store/group/lpcsusystealth/stealth2018Ntuples_with9413', type=str, help='Input EOS basedir.')
-parser.add_argument('-t', '--treename', default='Data', type=str, help='MA TTree name prefix.')
-parser.add_argument('-o', '--outdir', default='.', type=str, help='Output directory.')
+parser = argparse.ArgumentParser(description='Skim ggntuples.')
+parser.add_argument('-i', '--inlist', default='../ggNtuples/Era24Sep2020_v1/data2017-Run2017B_file_list.txt', type=str, help='Input list of ggntuples.')
+parser.add_argument('-o', '--outdir', default='ggSkims', type=str, help='Output directory.')
 args = parser.parse_args()
 
-sample = args.sample
-outdir = args.outdir
-#inputs = args.inputs
-eos_basedir = args.eos_basedir
+inlist = args.inlist
+assert os.path.isfile(inlist)
+print('Input list:',inlist)
 
-cuts = [str(None), 'trg', 'npho', 'presel', 'mgg']
-#cuts = [str(None), 'npho', 'presel', 'mgg']
+outdir = args.outdir
+if not os.path.isdir(outdir):
+    os.makedirs(outdir)
+print('Output dir:',outdir)
+
+sample = inlist.split('/')[-1].split('_')[0]
+print('Sample name:',sample)
+
+#cuts = [str(None), 'trg', 'npho', 'presel', 'mgg']
+cuts = [str(None), 'trg', 'npho', 'presel', 'mgg', 'ptomGG', 'bdt']
+#cuts = [str(None), 'ptomGG', 'chgiso', 'bdt']
 hists = OrderedDict()
 create_cut_hists(hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])
 
-inputs = run_eosfind(eos_basedir, sample) if args.inputs is None else args.inputs
-if 'lpcsusystealth' in sample:
-    inputs = [f for f in inputs if ('ntuplizedOct2019' in f) and ('failed' not in f)]
+inputs = open(args.inlist).readlines()
+inputs = [f.strip('\n') for f in inputs]
 print('N ggntuple input files:',len(inputs))
 print('ggntuple file[0]:',inputs[0])
 print('ggntuple file[-1]:',inputs[-1])
@@ -52,7 +56,7 @@ print('N evts in ggntuples:',nEvts)
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts
-#iEvtEnd   = 10000
+#iEvtEnd   = 100000
 
 file_out = ROOT.TFile("%s/%s_ggskim.root"%(outdir, sample), "RECREATE")
 file_out.mkdir('ggNtuplizer')
@@ -69,6 +73,9 @@ phoPreselIdxs = np.zeros(2, dtype='int32')
 tree_out.Branch('mgg', mgg, 'mgg/F')
 #tree_out.Branch('phoPreselIdxs', phoPreselIdxs, 'phoPreselIdxs[2]/F')
 tree_out.Branch('phoPreselIdxs', phoPreselIdxs, 'phoPreselIdxs[2]/I')
+
+# Evt list
+evt_list = open("%s/%s_event_list.txt"%(outdir, sample),"w+")
 
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0
@@ -99,6 +106,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     tree_out.Fill()
 
     #if nWrite > 10:break
+    eventId = '%d:%d:%d'%(tree.run, tree.lumis, tree.event)
+    evt_list.write('%s\n'%eventId)
     nWrite += 1
 
 sw.Stop()
@@ -110,6 +119,10 @@ print(">> CPU time: ",sw.CpuTime() /60.,"minutes")
 file_out.Write()
 file_out.Close()
 write_cut_hists(hists, "%s/%s_cut_hists.root"%(outdir, sample))
+evt_list.close()
 
 # Print cut flow summary
 print_stats(counts, "%s/%s_cut_stats.txt"%(outdir, sample))
+
+if counts['None'] != (iEvtEnd-iEvtStart):
+    print('!!! WARNING !!! Evt count mismatch !!! processed:%d vs. total:%d'%(counts['None'], (iEvtEnd-iEvtStart)))

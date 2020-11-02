@@ -6,6 +6,12 @@
 *.bak
 *.txt
 *.json
+*.log
+*stdout
+*stderr
+*tgz
+*docker_stderror
 ggSkims*/*
 crab*/crab_*
 ntupleAnalysis/__*
+condor/jdls/ggNtuples*
