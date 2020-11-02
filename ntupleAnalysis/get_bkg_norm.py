@@ -7,7 +7,7 @@ from root_numpy import hist2array
 from data_utils import *
 from hist_utils import *
 
-def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False, write_pts=False):
+def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False, write_pts=False, do_pu_rwgt=False, systPhoIdSF=None, systScale=None, systSmear=None):
     '''
     Convenience fn for running the background modeling event loop.
     Returns a string for the python command arguments to be executed.
@@ -25,6 +25,14 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
         pyargs += ' --do_mini2aod'
     if write_pts:
         pyargs += ' --write_pts'
+    if do_pu_rwgt:
+        pyargs += ' --do_pu_rwgt'
+    if systPhoIdSF is not None:
+        pyargs += ' --systPhoIdSF %s'%systPhoIdSF
+    if systScale is not None:
+        pyargs += ' --systScale %s'%systScale
+    if systSmear is not None:
+        pyargs += ' --systSmear %s'%systSmear
     print('cmd: %s'%pyargs)
 
     return pyargs

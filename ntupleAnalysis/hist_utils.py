@@ -104,11 +104,14 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, 50, 20., 170.)
 
     k = 'bdt0'
-    h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    #h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    h[k] = ROOT.TH1F(k, k, 200, -1., 1.)
     k = 'bdt1'
-    h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    #h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    h[k] = ROOT.TH1F(k, k, 200, -1., 1.)
     k = 'bdtxy'
-    h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    #h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
+    h[k] = ROOT.TH1F(k, k, 200, -1., 1.)
 
     k = 'mGG'
     #h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
@@ -120,6 +123,12 @@ def create_hists(h):
 
     k = 'nEvtsWgtd'
     h[k] = ROOT.TH1F(k, k, 2, 0., 2.)
+
+    k = 'wgtSF'
+    h[k] = ROOT.TH1F(k, k, 100, 0., 10.)
+
+    k = 'wgtPU'
+    h[k] = ROOT.TH1F(k, k, 100, 0., 10.)
 
     for k in h.keys():
         h[k].Sumw2()
@@ -133,19 +142,23 @@ def create_cut_hists(h, cuts):
         h[cut+'pt'] = ROOT.TH1F(cut+'pt', cut+'pt', 50, 0., 150.)
         h[cut+'eta'] = ROOT.TH1F(cut+'eta', cut+'eta', 50, -3., 3.)
         h[cut+'phi'] = ROOT.TH1F(cut+'phi', cut+'phi', 50, -3.14, 3.14)
-        h[cut+'bdt'] = ROOT.TH1F(cut+'bdt', cut+'bdt', 50, -1., 1.)
+        #h[cut+'bdt'] = ROOT.TH1F(cut+'bdt', cut+'bdt', 50, -1., 1.)
+        h[cut+'bdt'] = ROOT.TH1F(cut+'bdt', cut+'bdt', 200, -1., 1.)
         h[cut+'phoIso'] = ROOT.TH1F(cut+'phoIso', cut+'phoIso', 50, 0., 10.)
         h[cut+'chgIso'] = ROOT.TH1F(cut+'chgIso', cut+'chgIso', 50, 0., 10.)
-        h[cut+'relChgIso'] = ROOT.TH1F(cut+'relChgIso', cut+'relChgIso', 50, 0., 0.05)
+        #h[cut+'relChgIso'] = ROOT.TH1F(cut+'relChgIso', cut+'relChgIso', 50, 0., 0.05)
+        h[cut+'relChgIso'] = ROOT.TH1F(cut+'relChgIso', cut+'relChgIso', 100, 0., 0.1)
         h[cut+'r9'] = ROOT.TH1F(cut+'r9', cut+'r9', 50, 0., 1.2)
         h[cut+'sieie'] = ROOT.TH1F(cut+'sieie', cut+'sieie', 50, 0., 0.1)
-        h[cut+'hoe'] = ROOT.TH1F(cut+'hoe', cut+'hoe', 50, 0., 0.2)
+        #h[cut+'hoe'] = ROOT.TH1F(cut+'hoe', cut+'hoe', 50, 0., 0.2)
+        h[cut+'hoe'] = ROOT.TH1F(cut+'hoe', cut+'hoe', 100, 0., 0.2)
         #h[cut+'HLTDipho_m90'] = ROOT.TH1F(cut+'HLTDipho_m90', cut+'HLTDipho_m90', 2, 0., 2.)
         h[cut+'HLTDiphoPV_m55'] = ROOT.TH1F(cut+'HLTDiphoPV_m55', cut+'HLTDiphoPV_m55', 2, 0., 2.)
         #h[cut+'wgt'] = ROOT.TH1F(cut+'wgt', cut+'wgt', 50, 0., 100.)
 
         #if 'mgg' in c:
-        h[cut+'mgg'] = ROOT.TH1F(cut+'mgg', cut+'mgg', 50, 50., 200.)
+        #h[cut+'mgg'] = ROOT.TH1F(cut+'mgg', cut+'mgg', 50, 50., 200.)
+        h[cut+'mgg'] = ROOT.TH1F(cut+'mgg', cut+'mgg', 150, 50., 200.)
         h[cut+'dR'] = ROOT.TH1F(cut+'dR', cut+'dR', 86, -0.0174, 85*0.0174)
 
 def fill_cut_hists(h, tree, cut_, outvars=None):
@@ -182,18 +195,42 @@ def ma_ss(ma, scale, smear):
     else:
         return scale*np.random.normal(ma, smear)
 
-def fill_hists(h, tree, wgt):
+def fill_hists(h, tree, wgt, wgtPU=1., wgtSF=1., systScale=None, systSmear=None):
 
     h['wgt'].Fill(wgt)
     h['nEvtsWgtd'].Fill(1., wgt)
 
     ma0_ = tree.ma0
     ma1_ = tree.ma1
+
     # mc -> data
-    #scale = 1.#+0.01
-    #smear = 0.#+0.012
-    #ma0_ = ma_ss(ma0_, scale, smear)
-    #ma1_ = ma_ss(ma1_, scale, smear)
+    scale_nom, scale_shift = 1., 0.01
+    smear_nom, smear_shift = 0., 0.012
+    # Energy scale syst
+    if systScale is not None:
+        assert systSmear is None
+        if systScale == 'up':
+            ma0_ = ma_ss(ma0_, scale_nom+scale_shift, smear_nom)
+            ma1_ = ma_ss(ma1_, scale_nom+scale_shift, smear_nom)
+        elif systScale == 'dn':
+            ma0_ = ma_ss(ma0_, scale_nom-scale_shift, smear_nom)
+            ma1_ = ma_ss(ma1_, scale_nom-scale_shift, smear_nom)
+        else:
+            raise Exception('Unknown systScale shift:%s'%(systScale))
+    # Energy smearing syst
+    if systSmear is not None:
+        assert systScale is None
+        if systSmear == 'up':
+            # apply smearing
+            ma0_ = ma_ss(ma0_, scale_nom, smear_nom+smear_shift)
+            ma1_ = ma_ss(ma1_, scale_nom, smear_nom+smear_shift)
+        elif systSmear == 'dn':
+            # no smearing
+            pass
+            #ma0_ = ma_ss(ma0_, scale_nom, smear_nom)
+            #ma1_ = ma_ss(ma1_, scale_nom, smear_nom)
+        else:
+            raise Exception('Unknown systSmear shift:%s'%(systSmear))
 
     h['ma0'].Fill(ma0_, wgt)
     h['ma1'].Fill(ma1_, wgt)
@@ -232,6 +269,9 @@ def fill_hists(h, tree, wgt):
 
     h['ma0vpt0'].Fill(tree.phoEt[0], ma0_, wgt)
     h['ma1vpt1'].Fill(tree.phoEt[1], ma1_, wgt)
+
+    h['wgtPU'].Fill(wgtPU)
+    h['wgtSF'].Fill(wgtSF)
 
 def norm_hists(h, norm):
 
@@ -305,9 +345,10 @@ def set_hist(h, xtitle, ytitle, htitle):
     #return h, c
     return h
 
-def print_stats(counts, file_out):
+def print_stats(counts, file_out=None):
 
-    writer = open(file_out, "w")
+    if file_out is not None:
+        writer = open(file_out, "w")
 
     nTotal = counts['None']
     nLast = nTotal
@@ -317,10 +358,12 @@ def print_stats(counts, file_out):
         line = '.. {:>10} | Npassed: {:>7d} | f_prev: {:>.3f} | f_total: {:>.3f}'\
                 .format(k, counts[k], 1.*counts[k]/nLast if nLast > 0 else 0., 1.*counts[k]/nTotal)
         print(line)
-        writer.write(line+'\n')
+        if file_out is not None:
+            writer.write(line+'\n')
         nLast = counts[k]
 
-    writer.close()
+    if file_out is not None:
+        writer.close()
 
 def get_cplimits_sym(num, den, num_err, den_err):
 

@@ -27,6 +27,10 @@ parser.add_argument('--do_mini2aod', action='store_true', help='Switch to apply 
 parser.add_argument('--write_pts', action='store_true', help='Write out photon pts.')
 parser.add_argument('-n', '--norm', default=None, type=float, help='SB to SR normalization.')
 parser.add_argument('-e', '--events', default=-1, type=int, help='Number of evts to process.')
+parser.add_argument('--systPhoIdSF', default=None, type=str, help='Syst, photon ID SF: None, nom, up, dn.')
+parser.add_argument('--systScale', default=None, type=str, help='Syst, m_a energy scale: None, up, dn.')
+parser.add_argument('--systSmear', default=None, type=str, help='Syst, m_a energy smear: None, up, dn.')
+parser.add_argument('--do_pu_rwgt', action='store_true', help='Apply PU reweighting')
 args = parser.parse_args()
 
 ma_binw = 25. # MeV
@@ -83,6 +87,30 @@ write_pts = args.write_pts
 if write_pts:
     evtlist_f = open("Weights/%s_region_%s_blind_%s_selected_phoEt_list.txt"%(sample, region, blind), "w+")
 
+do_pu_rwgt = args.do_pu_rwgt
+if 'data' in sample: assert do_pu_rwgt is False
+if do_pu_rwgt:
+    print('Doing PU re-weighting')
+    year = str(2017)
+    fpu = ROOT.TFile('PU/puwgts_Run%so%s.root'%(year, sample), "READ")
+    hpu = fpu.Get('pu_ratio')
+
+systPhoIdSF = args.systPhoIdSF
+if 'data' in sample: assert systPhoIdSF is None
+if systPhoIdSF is not None:
+    print('Doing syst: photon ID SF shift:',systPhoIdSF)
+    year = str(2017)
+    fsf = ROOT.TFile("SF/SF%s_egammaEffi.txt_EGM2D.root"%(year), "READ")
+    hsf = fsf.Get('EGamma_SF2D')
+
+systScale = args.systScale
+if 'data' in sample: assert systScale is None
+print('Doing syst: energy scale shift:',systScale)
+
+systSmear = args.systSmear
+if 'data' in sample: assert systSmear is None
+print('Doing syst: energy smear shift:',systSmear)
+
 hists = {}
 create_hists(hists)
 
@@ -91,9 +119,10 @@ create_hists(hists)
 #cuts = [str(None), 'npho', 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'npho', 'bdt']
 #cuts = [str(None), 'npho', 'ptomGG'] if do_ptomGG else [str(None), 'npho']
 #cuts = [str(None), 'ptomGG', 'bdt'] if do_ptomGG else [str(None), 'bdt']
-cuts = [str(None), 'ptomGG', 'chgiso', 'bdt'] if do_ptomGG else [str(None), 'chgiso', 'bdt']
 #cuts = [str(None), 'ptomGG', 'chgiso'] if do_ptomGG else [str(None), 'chgiso']
 #cuts = [str(None), 'ptomGG'] if do_ptomGG else [str(None)]
+#cuts = [str(None), 'ptomGG', 'chgiso', 'bdt'] if do_ptomGG else [str(None), 'chgiso', 'bdt']
+cuts = [str(None), 'ptomGG', 'bdt', 'chgiso'] if do_ptomGG else [str(None), 'bdt', 'chgiso']
 cut_hists = OrderedDict()
 create_cut_hists(cut_hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])
@@ -168,10 +197,17 @@ for iEvt in range(iEvtStart,iEvtEnd):
         wgt = wgt*get_mini2aod_wgt(tree, nfmini2aod['ma_edges'], nfmini2aod['pt_edges'], nfmini2aod['wgts'])
     if 'Run20' in sample and not tree.isData:
         wgt = wgt*sginj_wgt
+    if systPhoIdSF is not None and not tree.isData:
+        wgtSF = get_sftot(tree, hsf, systPhoIdSF)
+        wgt = wgt*wgtSF
+    if do_pu_rwgt and not tree.isData:
+        wgtPU = get_puwgt(tree, hpu)
+        wgt = wgt*wgtPU
 
     #if nWrite > 10:break
     # Fill histograms with appropriate weight
-    fill_hists(hists, tree, wgt)
+    #fill_hists(hists, tree, wgt)
+    fill_hists(hists, tree, wgt, wgtPU, wgtSF, systScale, systSmear)
 
     if write_pts:
         #evtId = '%f:%f'%(tree.phoEt[0], tree.phoEt[1])

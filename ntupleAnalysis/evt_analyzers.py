@@ -23,7 +23,8 @@ def EB_presel(i, tree):
     if abs(tree.phoEta[i]) >= 1.442: return False
 
     if tree.phoR9Full5x5[i] <= 0.5: return False
-    if tree.phoHoverE[i] >= 0.08: return False
+    #if tree.phoHoverE[i] >= 0.08: return False
+    if tree.phoHoverE[i] >= 0.04596: return False
     if tree.phohasPixelSeed[i] == True: return False
 
     if tree.phoR9Full5x5[i] <= 0.85:
@@ -44,6 +45,7 @@ def select_event(tree, cuts, hists, counts, outvars=None):
     cut = 'trg'
     if cut in cuts:
         #if tree.HLTPho>>14&1 == 0 and tree.HLTPho>>17&1 == 0: # HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90, HLT_Diphoton30EB_18EB_R9Id_OR_IsoCaloId_AND_HE_R9Id_DoublePixelVeto_Mass55_v
+        #if tree.HLTPho>>14&1 == 0: # HLT_Diphoton30_18_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90:2016 only
         if (tree.HLTPho>>37&1 == 0) and (tree.HLTPho>>16&1 == 0):
             #HLT_Diphoton30PV_18PV_R9Id_AND_IsoCaloId_AND_HE_R9Id_PixelVeto_Mass55_v
             #HLT_Diphoton30PV_18PV_R9Id_AND_IsoCaloId_AND_HE_R9Id_DoublePixelVeto_Mass55_v
@@ -61,7 +63,7 @@ def select_event(tree, cuts, hists, counts, outvars=None):
         #if len(phoRecoIdxs) != 2:
         if len(phoRecoIdxs) != 2 and len(phoRecoIdxs) != 3:
             return False
-        #'''
+        '''
         if len(phoRecoIdxs) == 3:
 
             # Find reco idx not preselected
@@ -97,10 +99,11 @@ def select_event(tree, cuts, hists, counts, outvars=None):
             outvars['dR'] = -1.*0.0174
 
             #print('pass')
-        #'''
+        '''
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
+    '''
     # dR(presel photon, reco photon)
     cut = 'dR'
     if cut in cuts:
@@ -112,6 +115,7 @@ def select_event(tree, cuts, hists, counts, outvars=None):
 
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
+    '''
 
     # Photon pre-selection
     cut = 'presel'
@@ -138,7 +142,9 @@ def select_event(tree, cuts, hists, counts, outvars=None):
             #p4.SetPtEtaPhiE(tree.phoEt[idx], tree.phoEta[idx], tree.phoPhi[idx], tree.phoE[idx])
             phoP4[idx] = p4
         outvars['mgg'] = get_inv_mass(phoP4)
-        if outvars['mgg'] <= 90:
+        #if outvars['mgg'] < 90.:
+        #if outvars['mgg'] < 100.:
+        if outvars['mgg'] < 100. or outvars['mgg'] > 180.:
             return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
@@ -146,21 +152,25 @@ def select_event(tree, cuts, hists, counts, outvars=None):
     # pt/mGG cuts
     cut = 'ptomGG'
     if cut in cuts:
-        if not ptomGG_passed(tree): return False
-        fill_cut_hists(hists, tree, cut, outvars)
-        counts[cut] += 1
-
-    # chgIso cut
-    cut = 'chgiso'
-    if cut in cuts:
-        if not chgiso_passed(tree): return False
+        if not ptomGG_passed(tree,
+                outvars['phoPreselIdxs'] if 'phoPreselIdxs' in outvars else tree.phoPreselIdxs,
+                outvars['mgg'] if 'mgg' in outvars else tree.mgg
+                ): return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
     # bdt cut
     cut = 'bdt'
     if cut in cuts:
-        if not bdt_passed(tree): return False
+        #if not bdt_passed(tree): return False
+        if not bdt_passed(tree, outvars['phoPreselIdxs'] if 'phoPreselIdxs' in outvars else tree.phoPreselIdxs, cut=-0.99): return False
+        fill_cut_hists(hists, tree, cut, outvars)
+        counts[cut] += 1
+
+    # chgIso cut
+    cut = 'chgiso'
+    if cut in cuts:
+        if not chgiso_passed(tree, outvars['phoPreselIdxs'] if 'phoPreselIdxs' in outvars else tree.phoPreselIdxs): return False
         fill_cut_hists(hists, tree, cut, outvars)
         counts[cut] += 1
 
@@ -176,18 +186,15 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
 
     return True
 
-def bdt_passed(tree):
-    #if tree.phoIDMVA[0] < -0.96: return False
-    #if tree.phoIDMVA[1] < -0.96: return False
-    #if tree.phoIDMVA[0] < -0.98: return False
-    #if tree.phoIDMVA[1] < -0.98: return False
-    if tree.phoIDMVA[tree.phoPreselIdxs[0]] < -0.98: return False
-    if tree.phoIDMVA[tree.phoPreselIdxs[1]] < -0.98: return False
+def bdt_passed(tree, phoIdxs, cut=-0.98):
+    #if tree.phoIDMVA[tree.phoPreselIdxs[0]] < cut: return False
+    #if tree.phoIDMVA[tree.phoPreselIdxs[1]] < cut: return False
+    if tree.phoIDMVA[phoIdxs[0]] <= cut: return False
+    if tree.phoIDMVA[phoIdxs[1]] <= cut: return False
     return True
 
-def chgiso_passed(tree):
-    #if tree.phoPFChIso[tree.phoPreselIdxs[0]] > 3.: return False
-    #if tree.phoPFChIso[tree.phoPreselIdxs[1]] > 3.: return False
+def chgiso_passed(tree, phoIdxs):
+    '''
     if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) > 0.05: return False
     #if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) > 0.05: return False
     # Inverted
@@ -198,15 +205,27 @@ def chgiso_passed(tree):
     #if (tree.phoPFChIso[tree.phoPreselIdxs[0]]/tree.phoEt[tree.phoPreselIdxs[0]]) < 0.05: nIso += 1
     #if (tree.phoPFChIso[tree.phoPreselIdxs[1]]/tree.phoEt[tree.phoPreselIdxs[1]]) < 0.05: nIso += 1
     #if nIso != 1: return False
+    '''
+    if (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]]) > 0.05: return False
+    if (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]]) > 0.05: return False
+    # Inverted
+    #if (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]]) < 0.05: return False
+    #if (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]]) < 0.05: return False
+    # Inverted, any 1
+    #nIso = 0
+    #if (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]]) < 0.05: nIso += 1
+    #if (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]]) < 0.05: nIso += 1
+    #if nIso != 1: return False
     return True
 
-def ptomGG_passed(tree):
+def ptomGG_passed(tree, phoIdxs, mgg):
 
-  #if tree.pho1_pt/tree.pho12_m < 1./3.: return False
-  #if tree.pho2_pt/tree.pho12_m < 1./4.: return False
-  assert tree.phoEt[tree.phoPreselIdxs[0]] > tree.phoEt[tree.phoPreselIdxs[1]]
-  if tree.phoEt[tree.phoPreselIdxs[0]]/tree.mgg < 1./3.: return False
-  if tree.phoEt[tree.phoPreselIdxs[1]]/tree.mgg < 1./4.: return False
+  #assert tree.phoEt[tree.phoPreselIdxs[0]] > tree.phoEt[tree.phoPreselIdxs[1]]
+  #if tree.phoEt[tree.phoPreselIdxs[0]]/tree.mgg < 1./3.: return False
+  #if tree.phoEt[tree.phoPreselIdxs[1]]/tree.mgg < 1./4.: return False
+  assert tree.phoEt[phoIdxs[0]] > tree.phoEt[phoIdxs[1]]
+  if tree.phoEt[phoIdxs[0]]/mgg < 1./3.: return False
+  if tree.phoEt[phoIdxs[1]]/mgg < 1./4.: return False
 
   return True
 
@@ -299,3 +318,47 @@ def is_blinded(blind, tree):
 #        wgt = wgt*get_combined_template_wgt
 #
 #    return wgt
+
+def get_sf(tree, preselIdx, h, shift='nom'):
+
+    pt = tree.phoEt[preselIdx]
+    sceta = tree.phoSCEta[preselIdx]
+
+    ieta = h.GetXaxis().FindBin(sceta)
+    ipt = h.GetYaxis().FindBin(pt)
+    sf = h.GetBinContent(ieta, ipt)
+    sf = sf if (sf > 0.) and (sf < 10.) else 1.
+
+    if shift == 'nom':
+        pass
+        #sf = sf
+    elif shift == 'up':
+       sf += h.GetBinError(ieta, ipt)
+    elif shift == 'dn':
+       sf -= h.GetBinError(ieta, ipt)
+    else:
+       raise Exception('Unknown pho ID SF shift: %s'%shift)
+
+    #print(preselIdx, pt, sceta, sf)
+    return sf
+
+def get_sftot(tree, h, shift='nom'):
+
+    sftot = 1.
+    if shift is None: return sftot
+
+    for idx in tree.phoPreselIdxs:
+        sftot *= get_sf(tree, idx, h, shift)
+    return sftot
+
+def get_puwgt(tree, h):
+
+    bx = np.array(tree.puBX)
+    pu = np.array(tree.puTrue)
+    ibx0 = np.argwhere(bx == 0)
+
+    ib = h.GetXaxis().FindBin(pu[ibx0])
+    wgt = h.GetBinContent(ib)
+    wgt = wgt if (wgt > 0.) and (wgt < 10.) else 1.
+
+    return wgt
