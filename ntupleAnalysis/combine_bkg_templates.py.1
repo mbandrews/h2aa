@@ -1,0 +1,251 @@
+from __future__ import print_function
+#import numpy as np
+import ROOT
+import os, glob, re
+from collections import OrderedDict
+from data_utils import *
+from hist_utils import *
+from template_utils import *
+
+k2dpt = 'pt0vpt1'
+k2dma = 'ma0vma1'
+sample_data = 'data'
+mh_regions = ['sb2sr+hgg', 'sr']
+ma_blinds = ['diag_lo_hi', 'offdiag_lo_hi']
+distns = ['%s-%s'%(k2dma, b) for b in ma_blinds]
+
+doRun2 = True
+run2dir = 'Run2'
+sel = 'nom'
+#sel = 'inv'
+campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-%s'%sel
+
+runs = ['2016', '2017', '2018']
+
+#c, hf = {}, {}
+h = OrderedDict()
+hf = OrderedDict()
+
+# Read in hists
+for r in runs:
+
+    print('>> Doing Run:',r)
+
+    #if r != '2016': continue
+    #if r != '2017': continue
+    #if r != '2018': continue
+
+    eos_basedir = '/store/user/lpchaa4g/mandrews'
+    indir = '%s/%s/%s/%s/Templates_bkg'%(eos_redir, eos_basedir, r, campaign_ptwgts)
+    outdir = '%s/%s/%s/%s/Templates_bkg'%(eos_redir, eos_basedir, run2dir, campaign_ptwgts)
+    print('.. input dir:', indir)
+    print('.. output dir:', outdir)
+    #run_eosmkdir(outdir)
+
+    samples = ['%s%s'%(sample_data, r)]
+
+    # raw mh-SR
+
+    # Get list of syst files for this run era.
+    infiles = indir.replace(eos_redir, '/eos/uscms') + '/*root'
+    print('.. inpath: %s'%infiles)
+    syst_files = glob.glob(infiles)
+    print('.. found %d syst files.'%(len(syst_files)))
+    systs = [s.split('/')[-1].replace('.root','') for s in syst_files]
+
+    for i,syst in enumerate(systs):
+
+        print('.. Reading syst:', syst)
+
+        h[syst] = OrderedDict()
+        hf[syst] = OrderedDict()
+
+        load_hists_in_file(h[syst], hf[syst], samples, mh_regions, distns, syst_files[i])
+
+# Check that each run has same syst scenarios
+syst_keys = {r: [k.replace(sample_data+r+'_', '') for k in h.keys() if r in k] for r in runs}
+for r in runs:
+    r_hists = [hist.replace(sample_data+r+'_', '') for hist in h['%s%s_%s'%(sample_data, r, syst_keys[r])]]
+    print(r_hists)
+    for r2 in runs:
+        if r == r2: continue
+        #r2_hists = [hist2.replace(sample_data+r+'_', '') for hist2 in syst_keys[r2]]
+        r2_hists = [hist2.replace(sample_data+r+'_', '') for hist2 in h['%s%s_%s'%(sample_data, r, syst_keys[r])]]
+        assert syst_keys[r] == syst_keys[r2]
+        assert r_hists == r2_hists
+    break # only need to do first loop once to exhaust all run pairings
+
+# Get unique syst scenarios
+systs = syst_keys[runs[0]]
+#hists = syst_keys[
+
+hcombo = OrderedDict()
+
+# Combine hists
+for syst in systs:
+
+    print('>> Reading syst:', syst)
+
+    hcombo[syst] = ROOT.TH2F()
+
+    for r in runs:
+
+        k = '%s%s_%s'%(sample_data, r, syst)
+        print('.. run systs:', k)
+        #print('.. keys:',h[k].keys())
+
+        for hist in h[k].keys():
+
+            kh = hist.replace(sample_data+r+'_', '')
+            print('   .. syst-hist:', kh)
+
+#print(syst_keys)
+#for syst in h.keys():
+#    print('>> Syst:', syst)
+#    for k2 in h[syst]:
+#        continue
+#        print('.. hist:',k2)
+#print(h.keys())
+
+'''
+        # --------------------------------------------------
+        # Init
+        # --------------------------------------------------
+        hnorm, hblind = {}, {}
+        # Get total hgg and mh-SR event yield
+        nevts = {}
+        for k in h:
+            if k2dpt in k:
+                nevts[k] = h[k].Integral()
+                print('total nevts[%s]: %f'%(k, nevts[k]))
+            else:
+                print('total nevts[%s]: %f'%(k, h[k].Integral()))
+
+        # pt rwgtd mh-SBs
+        sample = sample_data
+        mh_regions = ['sblo', 'sbhi']
+        workdir = '%s/%s/Templates_flo%s'%(indir, campaign_ptwgts, '%.4f'%flo_in)
+        load_hists(h, hf, [sample], mh_regions, distns, ma_blind_input, workdir)
+
+        # --------------------------------------------------
+        # Get sb->sr norm
+        # --------------------------------------------------
+        sb2sr_norm, sr_blind_yield = get_sb2sr_norm(h, hnorm, c, flo_in, flo_nom, sample_data, distns, to_blind=ma_blind_norm, k2dma=k2dma, k2dpt=k2dpt)
+
+        # --------------------------------------------------
+        # Make full data mh-SBlo+hi + hgg mh-SR bkg template
+        # --------------------------------------------------
+
+        # Combine pt re-weighted mh-SBlo+hi and normalize
+        ksblo = '%s_sblo_%s'%(sample, k2dma)
+        ksbhi = '%s_sbhi_%s'%(sample, k2dma)
+        ksb2sr = '%s_sb2sr_%s'%(sample, k2dma)
+        combine_sblohi(h, flo_in, flo_nom, ksblo, ksbhi, ksb2sr)
+        h[ksb2sr].Scale(sb2sr_norm)
+        print('.. h[%s].Integral(): %f'%(ksb2sr, h[ksb2sr].Integral()))
+
+        # Calculate fhgg over full, unblinded (2d-pt) evt yields (same as for flo)
+        # If only using blinded 2d-ma, can give skewed estimates of true hgg xsec yield
+        khgg_2dpt = '%s_sr_%s'%(sample_hgg, k2dpt)
+        ksr_2dpt = '%s_sr_%s'%(sample_data, k2dpt)
+
+        # Loop over hgg xsecs: nom: total SM inclusive: 50.94, syst: gluglu-only: 43.92
+        # If doing flo_nom, only need to do nom xsec
+        #xs_nom, xs_syst = 50.94, 43.92 # [pb] gluglu only:48.58->43.92
+        xs_syst, xs_nom = 50.94, 43.92 # [pb] gluglu only:48.58->43.92
+        xsecs = [xs_nom, xs_syst] if flo_in == flo_nom else [xs_nom]
+        for xsec_hgg in xsecs:
+
+            print('  >> Doing xsec(hgg):',xsec_hgg)
+
+            fhgg = br_hgg*xsec_hgg*intlumi[r]*nevts[khgg_2dpt]/nhgg[r]
+            fhgg /= nevts[ksr_2dpt]
+            print('  .. fhgg, 2017:', fhgg)
+            if sel == 'nom':
+                fhgg = 0.00395577246287 if xsec_hgg == xs_nom else 0.00458804756964
+            else:
+                fhgg = 3.84666817207e-05 if xsec_hgg == xs_nom else 4.46150447826e-05
+            fsb = 1.-fhgg
+            print('  .. fhgg:',fhgg)
+            print('  .. fsb:',fsb)
+
+            # Normalize hgg template s.t. diag_lo_hi-blinded hgg yield matches corresponding yield in data(mh-SR)
+            # Required to preserve norm of total SB+hgg template in diag_lo_hi-blinded 2d-ma
+            khgg = '%s_sr_%s'%(sample_hgg, k2dma)
+            khgg_blind = '%s-%s'%(khgg, ma_blind_norm)
+            hblind[khgg_blind] = h[khgg].Clone()
+            hblind[khgg_blind].SetName(khgg_blind)
+            blind_hist(hblind[khgg_blind], to_blind=ma_blind_norm)
+            hgg_norm = sr_blind_yield/hblind[khgg_blind].Integral()
+            h[khgg].Scale(hgg_norm)
+
+            # Combine existing mh-SBlo+hi template with hgg template:
+            # fsb*data(mh-SBlo+hi) + fgg*hgg(mh-SR)
+            ksb2sr_hgg = '%s_sb2sr+hgg_%s'%(sample_data, k2dma)
+            h[ksb2sr_hgg] = h[ksb2sr].Clone()
+            h[ksb2sr_hgg].SetName(ksb2sr_hgg)
+            h[ksb2sr_hgg].Scale(fsb)
+            h[ksb2sr_hgg].Add(h[khgg], fhgg)
+            print('  .. h[%s].Integral(): %f'%(ksb2sr_hgg, h[ksb2sr_hgg].Integral()))
+
+            # Draw
+            c[ksb2sr_hgg] = ROOT.TCanvas(ksb2sr_hgg, ksb2sr_hgg, wd, ht)
+            h[ksb2sr_hgg].Draw('COL Z')
+            c[ksb2sr_hgg].SetLogz()
+            c[ksb2sr_hgg].Draw()
+            c[ksb2sr_hgg].Update()
+
+            # Make blinded bkg templates
+            # Note: bkg vs. data(mh-SR) yields must agree in diag_lo_hi-blinded 2d-ma!
+            ksr = '%s_sr_%s'%(sample_data, k2dma)
+            for k in [ksb2sr_hgg, ksr]:
+
+                print('    >> doing mh-region:',k)
+
+                for b in ma_blind_outputs:
+
+                    print('      >> doing ma-blind:',b)
+                    kblind = '%s-%s'%(k, b)
+
+                    # Apply blinding
+                    hblind[kblind] = h[k].Clone()
+                    hblind[kblind].SetName(kblind)
+                    blind_hist(hblind[kblind], to_blind=b)
+                    print('      .. nevts[%s]: %f'%(kblind, hblind[kblind].Integral()))
+
+                    # Draw
+                    c[kblind] = ROOT.TCanvas(kblind, kblind, wd, ht)
+                    hblind[kblind].GetXaxis().SetRangeUser(0., 1.2)
+                    hblind[kblind].GetYaxis().SetRangeUser(0., 1.2)
+                    hblind[kblind].Draw('COL Z')
+                    #c[kblind].SetLogz()
+                    c[kblind].Draw()
+                    c[kblind].Update()
+
+            # Get syst str
+            syst_str = ''
+            # f_sblo
+            if flo_in < flo_nom:
+                syst_str += '_floDn'
+            elif flo_in > flo_nom:
+                syst_str += '_floUp'
+            # hgg yield
+            if xsec_hgg == xs_syst:
+                syst_str += '_hggSyst'
+
+            #print(hblind.keys())
+            #print(hnorm.keys())
+
+            # Write to file
+            outpath = '%s/%s%s.root'%(outdir, ksb2sr_hgg.replace('_'+k2dma, ''), syst_str)
+            print(' .. Writing to:',outpath)
+            hfout = ROOT.TFile.Open(outpath, 'RECREATE')
+            hfout.mkdir('hnorm/')
+            hfout.cd('hnorm/')
+            for k in hnorm:
+                hnorm[k].Write()
+            hfout.cd('')
+            for k in hblind:
+                hblind[k].Write()
+            hfout.Close()
+'''

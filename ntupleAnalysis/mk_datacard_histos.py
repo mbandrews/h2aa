@@ -148,7 +148,7 @@ def shiftNomUpDn_2d(h, hname, frac_diff=None):
 
     h_flat = ROOT.TH1F(hname+'flat', hname+'flat', nbins+2, 0., nbins+2) # add 2 for under/over flow
 
-    print(hname)
+    print(hname, h_flat.GetNbinsX())
     for i in range(len(binc_flat)):
         ib = i + 1
         #print(ib)
@@ -207,9 +207,9 @@ for s in samples:
     #blind = None
     blind = 'offdiag_lo_hi'
     s = s.replace('[','').replace(']','')
+    indir = 'Templates/_prod_varptbinsxy/a0noma1inv/nom'
 
-    hf_in[s] = ROOT.TFile('Templates/%s_%s_blind_%s_templates.root'%(s, r, blind), "READ")
-    #hf_in[s] = ROOT.TFile('Templates/no_bdt/%s_%s_blind_%s_templates.root'%(s, r, blind), "READ")
+    hf_in[s] = ROOT.TFile('%s/%s_%s_blind_%s_templates.root'%(indir, s, r, blind), "READ")
     h_in[s] = hf_in[s].Get(key)
     if 'h24' in s:
         #print(h_in[s].Integral())
@@ -239,13 +239,13 @@ for s in samples:
         # Bkg modeling
         for region in ['sb2sr', 'sr']:
             for b in ['diag_lo_hi', 'offdiag_lo_hi']:
-                hf_in[s+region+b] = ROOT.TFile('Templates/%s_%s_blind_%s_templates.root'%(s, region, b), "READ")
+                hf_in[s+region+b] = ROOT.TFile('%s/%s_%s_blind_%s_templates.root'%(indir, s, region, b), "READ")
                 h_in[s+region+b] = hf_in[s+region+b].Get(key)
 
-        bkg_uncert_flat = getBkgUncert2d_flat(h_in, s)
-        for shift in ['Up', 'Down']:
-            hname_shift = 'bkg_shape'+shift
-            h_out[hname_shift] = shiftNomUpDn_2d(h_in[s].Clone(), hname_shift, bkg_uncert_flat)
+        #bkg_uncert_flat = getBkgUncert2d_flat(h_in, s)
+        #for shift in ['Up', 'Down']:
+        #    hname_shift = 'bkg_shape'+shift
+        #    h_out[hname_shift] = shiftNomUpDn_2d(h_in[s].Clone(), hname_shift, bkg_uncert_flat)
 
 #hf_out = ROOT.TFile('Datacards/%s_hists.root'%hname.split('_')[0], "RECREATE")
 hf_out = ROOT.TFile('Datacards/%s_hists.root'%'shape', "RECREATE")

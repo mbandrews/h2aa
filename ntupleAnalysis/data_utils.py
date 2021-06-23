@@ -1,10 +1,28 @@
+from __future__ import print_function
 import glob, os, re
 import subprocess
 
 #eosfind = 'eos root://cmseos.fnal.gov find'
 #eosfind = '/usr/bin/eos root://cmseos.fnal.gov find'
 #eosfind = 'xrdfs root://cmseos.fnal.gov find'
-eosfind = 'xrdfs root://cmseos.fnal.gov ls'
+#eosfind = 'xrdfs root://cmseos.fnal.gov ls'
+eos_redir = 'root://cmseos.fnal.gov'
+
+def eosls(eos_redir):
+    #return 'xrdfs %s ls'%eos_redir
+    return 'eos %s ls'%eos_redir
+
+# Recursive version
+def eosfind(eos_redir):
+    #eosfind = 'eos %s find'%eos_redir
+    #eosfind = '/usr/bin/eos %s find'%eos_redir
+    #eosfind = 'xrdfs %s find'%eos_redir
+    #eosfind = 'xrdfs %s ls'%eos_redir
+    #eosfind = 'xrdfs %s ls -R'%eos_redir
+    return 'xrdfs %s ls -R'%eos_redir
+
+def eosmkdir(eos_redir):
+    return 'xrdfs %s mkdir -p'%eos_redir
 
 def get_ma_tree_name(sample):
     if 'Run2017' in sample:
@@ -30,22 +48,42 @@ def replace_eosredir(eosdir, eos_redir):
         #return eosdir
         return '%s/%s'%(eos_redir, eosdir)
 
+def run_eosmkdir(eos_tgtdir, eos_redir='root://cmseos.fnal.gov'):
+
+    if eos_redir in eos_tgtdir:
+        eos_tgtdir = eos_tgtdir.replace(eos_redir+'/', '')
+
+    cmd = '%s %s'%(eosmkdir(eos_redir), eos_tgtdir)
+    #print(cmd)
+    _ = subprocess.check_output(cmd, shell=True)
+
+def run_eosls(eos_indir, eos_redir='root://cmseos.fnal.gov'):
+
+    cmd = '%s %s'%(eosls(eos_redir), eos_indir)
+    #print(cmd)
+    # subprocess.check_output() returns a byte-string => decode into str then split into files
+    file_list = subprocess.check_output(cmd, shell=True).decode("utf-8").split('\n')
+    file_list = [str(f) for f in file_list]
+    #print(file_list)
+    # clean up empty elements:
+    file_list = list(filter(None, file_list)) # for py2.7: use filter(None, file_list) without list()
+    #print(file_list)
+    #print(len(file_list))
+    #'''
+
+    return file_list
+
 def run_eosfind(eos_basedir, sample, eos_redir='root://cmseos.fnal.gov'):
 
-    #eosfind = 'eos %s find'%eos_redir
-    #eosfind = '/usr/bin/eos %s find'%eos_redir
-    #eosfind = 'xrdfs %s find'%eos_redir
-    #eosfind = 'xrdfs %s ls'%eos_redir
-    eosfind = 'xrdfs %s ls -R'%eos_redir
-
-    cmd = '%s %s'%(eosfind, eos_basedir)
+    cmd = '%s %s'%(eosfind(eos_redir), eos_basedir)
     #print(cmd)
     # subprocess.check_output() returns a byte-string => decode into str then split into files
     file_list = subprocess.check_output(cmd, shell=True).decode("utf-8").split('\n')
     # only keep files for this sample
     #print(len(file_list))
-    #for f in file_list:
+    #for i,f in enumerate(file_list):
     #    print(f)
+    #    if i > 20: break
     file_list = [f for f in file_list if sample in f]
     #print(sample, len(file_list))
     if 'lpcsusystealth' in eos_basedir:
@@ -63,9 +101,10 @@ def run_eosfind(eos_basedir, sample, eos_redir='root://cmseos.fnal.gov'):
 
     return file_list
 
-def get_mantuples(sample, eos_basedir='/store/group/lpchaa4g/mandrews/2017/MAntuples'):
+#def get_mantuples(sample, eos_basedir='/store/group/lpchaa4g/mandrews/2017/MAntuples'):
+def get_mantuples(sample, eos_redir='root://cmseos.fnal.gov', eos_basedir='/store/group/lpchaa4g/mandrews/2017/MAntuples'):
 
-    cmd = '%s %s/'%(eosfind, eos_basedir) # H4G ntuple same for miniaod or aod IMG ntuple
+    cmd = '%s %s/'%(eosfind(eos_redir), eos_basedir) # H4G ntuple same for miniaod or aod IMG ntuple
     print(cmd)
     ma_inputs = subprocess.check_output(cmd, shell=True)
     # subprocess.check_output() returns a byte-string => decode into str then split into files
@@ -92,4 +131,3 @@ def mkoutdir(s):
     if not os.path.isdir(s):
         os.makedirs(s)
     return s
-

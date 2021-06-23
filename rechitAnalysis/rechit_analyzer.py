@@ -161,8 +161,8 @@ h[k] = ROOT.TH1F(k, k, 170//5, 0., 170)
 
 #nbins_rh, maxE_rh = 20, 10.
 #nbins_rh, maxE_rh = 50, 25.
-nbins_rh, maxE_rh = 100, 50.
-#nbins_rh, maxE_rh = 200, 100.
+#nbins_rh, maxE_rh = 100, 50.
+nbins_rh, maxE_rh = 200, 100.
 
 k = 'rechitE'
 c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
@@ -176,12 +176,12 @@ k = 'rechitErrvE2d'
 c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
 #h[k] = ROOT.TH2F(k, k, nbins_rh, 0., maxE_rh, 10, 0.05, 0.15)
 #h[k] = ROOT.TH2F(k, k, nbins_rh, 0., maxE_rh, 10, 0., 0.15)
-h[k] = ROOT.TH2F(k, k, nbins_rh, 0., maxE_rh, 25, 0., 0.25)
+h[k] = ROOT.TH2F(k, k, nbins_rh, 0., maxE_rh, 50, 0., 0.5)
 
 # Event range to process
 iEvtStart = 0
 iEvtEnd   = nEvts
-iEvtEnd   = 100000
+#iEvtEnd   = 100000
 print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 
 def shapeEB(eb):

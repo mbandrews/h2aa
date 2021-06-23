@@ -5,7 +5,7 @@ import numpy as np
 import subprocess
 import shutil
 from data_utils import *
-from evt_analyzers_zee import *
+from selection_utils import *
 
 eosls = 'eos root://eoscms.cern.ch ls'
 #eosfind = 'eos root://eoscms.cern.ch find'

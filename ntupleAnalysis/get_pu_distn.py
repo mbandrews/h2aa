@@ -1,46 +1,66 @@
 from __future__ import print_function
 from collections import OrderedDict
-import os
+import os, re
 import sys
 import numpy as np
 import argparse
 import ROOT
 from hist_utils import *
-from evt_analyzers import *
-#from get_bkg_norm import *
+from selection_utils import *
 
 # Register command line options
 parser = argparse.ArgumentParser(description='Run STEALTH selection.')
 parser.add_argument('-i', '--infiles', default=['test.root'], nargs='+', type=str, help='Input root files.')
-parser.add_argument('-o', '--outdir', default='PU', type=str, help='Output directory.')
+parser.add_argument('--inlist', default=None, type=str, help='Input MA ntuple file list.')
+parser.add_argument('-p', '--pu_data', default='PU/dataPU_2017.root', type=str, help='Input PU ref file.')
+parser.add_argument('-o', '--outfile', default='PU/puwgts_dataomc.root', type=str, help='Output PU file.')
 parser.add_argument('-s', '--sample', default='test', type=str, help='Sample name.')
 args = parser.parse_args()
 
-# Load input TTrees into TChain
-tree = ROOT.TChain('ggNtuplizer/EventTree')
-print('N input files:',len(args.infiles))
-print('Input file[0]:',args.infiles[0])
-for f_in in args.infiles:
-    tree.Add(f_in)
-nEvts = tree.GetEntries()
+sample = args.sample
+print('>> Doing sample:',sample)
+year = re.findall('(201[6-8])', sample.split('-')[0])[0]
+pu_data = args.pu_data
+print('>> Input PU reference:',pu_data)
+outfile = args.outfile
+print('>> Output PU wgts file:',outfile)
 
-# Event range to process
-iEvtStart = 0
-iEvtEnd   = nEvts
-#iEvtEnd   = 10000
-print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
-
+# NOTE: the `cuts` list here *must* match the list in select_events.py when run by run_sg_selection.py
 #cuts = [str(None), 'ptomGG', 'chgiso', 'bdt']
-cuts = [str(None), 'ptomGG', 'bdt', 'chgiso']
+#cuts = [str(None), 'ptomGG', 'bdt', 'chgiso']
+#cuts = [str(None), 'bdt', 'chgiso']
+cuts = [str(None), 'bdt', 'chgiso', 'phoEta']
 cut_hists = OrderedDict()
 create_cut_hists(cut_hists, cuts)
 counts = OrderedDict([(cut, 0) for cut in cuts])
 
-hpu = {}
-year = str(2017)
-sample = args.sample
+print('>> Reading input maNtuples...')
+if args.inlist is not None:
+    inlist = args.inlist
+    print('   .. input list file provided: %s'%inlist)
+    assert os.path.isfile(inlist), '   !! input maNtuple list not found!'
+    inputs = open(inlist).readlines()
+    inputs = [f.strip('\n') for f in inputs]
+else:
+    inputs = args.inputs
+print('   .. Nfiles:',len(inputs))
+tree = ROOT.TChain('ggNtuplizer/EventTree')
+for i,fh in enumerate(inputs):
+    tree.Add(fh)
+    print('   .. adding file: %s'%fh)
+    #if i > 10: break
+nEvts = tree.GetEntries()
+print('   .. Nevts: %d'%nEvts)
+# Event range to process
+iEvtStart = 0
+iEvtEnd   = nEvts
+#iEvtEnd   = 100
 
-fpuin = ROOT.TFile("PU/dataPU_%s.root"%(year), "READ")
+# Data pu created using pileupCalc: https://twiki.cern.ch/twiki/bin/viewauth/CMS/PileupJSONFileforData
+# See e.g. https://github.com/tanmaymudholkar/STEALTH/blob/tanmay-devel/miscUtils/PUReweighting/makeDataPUDistributions.sh
+# Output from Tanmay: https://github.com/tanmaymudholkar/STEALTH/tree/tanmay-devel/getMCSystematics/data
+hpu = {}
+fpuin = ROOT.TFile.Open(pu_data, "READ")
 hpu['data'] = fpuin.Get('pileup')
 hpu['data'].SetName('pu_data')
 #print(hpu['data'].GetEntries())
@@ -104,6 +124,7 @@ def get_puwgt(tree, h):
     return wgt
 '''
 
+print(">> Processing entries: [",iEvtStart,"->",iEvtEnd,")")
 nWrite = 0
 sw = ROOT.TStopwatch()
 sw.Start()
@@ -151,7 +172,8 @@ hpu['ratio'] = hpu['data'].Clone()
 hpu['ratio'].SetName('pu_ratio')
 hpu['ratio'].Divide(hpu['mc'])
 
-fpuout = ROOT.TFile('%s/puwgts_Run%so%s.root'%(args.outdir, year, sample), "RECREATE")
+#fpuout = ROOT.TFile('%s/puwgts_Run%so%s.root'%(args.outdir, year, sample), "RECREATE")
+fpuout = ROOT.TFile.Open(outfile, "RECREATE")
 for k in hpu:
     hpu[k].Write()
 fpuout.Close()

@@ -2,20 +2,25 @@ imax 1  number of channels
 jmax 1  number of backgrounds
 kmax *  number of nuisance parameters (sources of systematical uncertainties)
 ---------------
-shapes * * shape_hists.root $PROCESS $PROCESS_$SYSTEMATIC
+#shapes * * /uscms/home/mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/ntupleAnalysis/Fits/Bkgfits_flat_regionlimit.root $PROCESS $PROCESS_$SYSTEMATIC
+shapes * * Bkgfits_flat_regionlimit.root $PROCESS $PROCESS_$SYSTEMATIC
 ---------------
 bin h4g_$MA
 observation -1
-------------------------------
-bin             h4g_$MA  h4g_$MA
-process         h4g_$MA  bkg
-process         0          1
-rate            -1         -1
---------------------------------
-lumi    lnN     1.025    -
-stat    shape   1        1          # stat uncertainty ~ sqrt(N)
-shape   shape   -        1          # uncertainty on background shape
-#bgnorm   lnN    1.00       1.3
-#alpha  shapeN2    -           1   uncertainty on background shape and normalization
-#sigma  shapeN2    0.5         -   uncertainty on signal resolution. Assume the histogram is a 2 sigma shift,
-#                                so divide the unit gaussian by 2 before doing the interpolation
+----------------------------------------------
+bin                 h4g_$MA      h4g_$MA
+process             h4g_$MA      bkg
+process              0              1
+rate                -1              -1
+----------------------------------------------
+# Systs
+flo          shape   -               1.
+hgg          shape   -               1.
+pol2de0      shape   -               1.
+pol2de1      shape   -               1.
+pol2de2      shape   -               1.
+Lumi         shape   1.              -
+Scale        shape   1.              -
+Smear        shape   1.              -
+PhoIdSF      shape   1.              -
+* autoMCStats 0.

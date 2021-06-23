@@ -86,7 +86,8 @@ def draw_hist_mGG(k_, h, c, sample, blind, r, ymax_=None, do_trunc=True, zmax=No
     CMS_lumi.CMS_lumi(c[k], iPeriod, iPos)
 
     c[k].Update()
-    c[k].Print('Plots/%s_mGG_blind_%s.eps'%('_'.join(sample), blind))
+    #c[k].Print('Plots/%s_mGG_blind_%s.eps'%('_'.join(sample), blind))
+    c[k].Print('Plots/%s_mGG_blind_%s.pdf'%('_'.join(sample), blind))
 
 hf = {}
 h = {}

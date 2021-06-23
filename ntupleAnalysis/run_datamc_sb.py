@@ -54,12 +54,12 @@ def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
 #samples = ['h24gamma_1j_1M_%s'%s for s in samples]
 
 samples = [
-    'DiPhotonJets',
+    #'DiPhotonJets',
     'GJet_Pt20To40',
     'GJet_Pt40ToInf',
     'QCD_Pt30To40',
     'QCD_Pt40ToInf',
-    'GluGluHToGG'
+    #'GluGluHToGG'
     ]
 samples.append('Run2017[B-F]')
 
@@ -139,11 +139,10 @@ for sample in samples:
     #regions = ['sblo2sr', 'sbhi2sr', 'sr']
     #regions = ['sblo2sr']
 
-    regions = ['sblo', 'sbhi']
     regions = ['sblo', 'sbhi', 'sr']
-    #regions = ['sb']
     #regions = ['sb2sr']
-    #regions = ['sr']
+    regions = ['sr']
+    #regions = ['sblo', 'sbhi']
     for r in regions:
         processes.append(bkg_process(sample, r, blind, ma_inputs, output_dir,\
                 #do_combo_template=True if 'sb' in r else False,\

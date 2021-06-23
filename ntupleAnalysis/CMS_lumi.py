@@ -47,7 +47,7 @@ def CMS_lumi(pad,  iPeriod,  iPosX ):
 
     H = pad.GetWh()
     W = pad.GetWw()
-    l = pad.GetLeftMargin()
+    l = pad.GetLeftMargin()+cmsTextOffset
     t = pad.GetTopMargin()
     r = pad.GetRightMargin()
     b = pad.GetBottomMargin()

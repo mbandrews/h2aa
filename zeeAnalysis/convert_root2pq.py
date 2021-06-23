@@ -5,7 +5,7 @@ import os, glob, time
 import ROOT
 import pyarrow as pa
 import pyarrow.parquet as pq
-from hist_utils_zee import get_weight_1d
+from hist_utils import get_weight_1d
 
 # Register command line options
 import argparse

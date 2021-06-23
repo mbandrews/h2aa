@@ -195,8 +195,6 @@ def draw_hist_1dma(region, k_, h, c, sample, blind, ymax_=None):
 
     err_style = 'E2'
     fill_style = 3002
-    #wd, ht = int(440*1), int(400*1)
-    #wd, ht = int(640*1), int(580*1)
     wd, ht = int(640*1), int(680*1)
     #ROOT.gStyle.SetErrorX(0)
 
@@ -252,7 +250,9 @@ def draw_hist_1dma(region, k_, h, c, sample, blind, ymax_=None):
     ymax = 1.2*h[k].GetMaximum()
     if ymax_ == -1 and h[k].GetBinContent(2) > 0.:
         ymax = 1.2*np.max([h[k].GetBinContent(ib) for ib in range(2, h[k].GetNbinsX()+2)])
-    ymax = 4.2e3
+    else:
+        ymax = ymax_
+    #ymax = 4.2e3
     #ymax = 3.4e3
 
     #hc[k].GetYaxis().SetRangeUser(0.1, ymax)
@@ -268,10 +268,10 @@ def draw_hist_1dma(region, k_, h, c, sample, blind, ymax_=None):
     l[k].SetLineStyle(7)
     l[k].Draw("same")
 
-    l2[k] = ROOT.TLine(0.55, 0., 0.55, ymax) # x0,y0, x1,y1
-    l2[k].SetLineColor(14)
-    l2[k].SetLineStyle(7)
-    l2[k].Draw("same")
+    #l2[k] = ROOT.TLine(0.55, 0., 0.55, ymax) # x0,y0, x1,y1
+    #l2[k].SetLineColor(14)
+    #l2[k].SetLineStyle(7)
+    #l2[k].Draw("same")
 
     hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
     hatch[k].SetLineColor(14)
@@ -294,7 +294,7 @@ def draw_hist_1dma(region, k_, h, c, sample, blind, ymax_=None):
     c[k].Print('Plots/%s_sb_blind_%s_%s.eps'%(sample, blind, k))
     if 'ma1' in k_:
         pass
-        #c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
+        c[k].Print('Plots/%s_sb2srvsr_blind_%.eps'%(sample, blind))
 
 def plot_1dma(sample, blind, regions=None):
 
@@ -310,8 +310,11 @@ def plot_1dma(sample, blind, regions=None):
     #keys = ['maxy']
     keys = ['maxy','ma0','ma1']
 
+    indir = 'Templates/pi0_GJbyBDT'
+
     for r in regions:
-        hf[r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
+        #hf[r] = ROOT.TFile("Templates/%s_%s_blind_%s_templates.root"%(sample, r, blind),"READ")
+        hf[r] = ROOT.TFile("%s/%s_%s_blind_%s_templates.root"%(indir, sample, r, blind),"READ")
         for k in keys:
             rk = '%s_%s'%(r, k)
             #if rk == 'sr_maxy': c[rk] = ROOT.TCanvas("c%s"%rk,"c%s"%rk, wd, ht)
@@ -345,9 +348,12 @@ def plot_1dma(sample, blind, regions=None):
                 #draw_hist_1dma(region, k, h, c, sample, blind)
             else:
                 #draw_hist_1dma(reion, k, h, c, sample, blind)
-                draw_hist_1dma(region, k, h, c, sample, blind, -1)
+                #draw_hist_1dma(region, k, h, c, sample, blind, -1)
+                draw_hist_1dma(region, k, h, c, sample, blind, 12.e3)
 
 #plot_1dma('Run2017B-F', 'notgjet')
+#plot_1dma('data2017-Run2017B', None)
+plot_1dma('data2017', None)
 
 def plot_1dma_ratio(sample, blind, regions=None, sample_types=None):
 
@@ -378,4 +384,4 @@ def plot_1dma_ratio(sample, blind, regions=None, sample_types=None):
             h[ks[0]].Scale(h[ks[1]].Integral()/h[ks[0]].Integral())
             draw_hist_1dma_ratio(ks, h, c, sample, blind, -1)
 
-plot_1dma_ratio(sample='GluGluHToGG', blind='sg', regions=['sr'], sample_types=['aod', 'miniaod'])
+#plot_1dma_ratio(sample='GluGluHToGG', blind='sg', regions=['sr'], sample_types=['aod', 'miniaod'])

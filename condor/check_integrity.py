@@ -1,7 +1,9 @@
 from __future__ import print_function
 import os, re, glob
 
-campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v2'
+#campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v2'
+#campaign = 'ggNtuples-Era24Sep2020v1_ggSkimZee-v1'
+campaign = 'ggNtuples-Era04Dec2020v1_ggSkim-v1'
 
 job_files = glob.glob('jdls/%s/job*.stdout'%campaign)
 job_files.sort()
