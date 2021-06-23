@@ -3,7 +3,7 @@ import ROOT
 import re
 import numpy as np
 from array import array
-from hist_utils_zee import *
+from hist_utils import *
 #from plot_2dma import draw_hist_2dma
 
 def draw_hist_1dma(k_, region, h, c, samples, blind, ymax_=None):

@@ -10,7 +10,6 @@ parser = argparse.ArgumentParser(description='Run STEALTH selection.')
 parser.add_argument('-i', '--infiles', default=['test.root'], nargs='+', type=str, help='Input root files.')
 parser.add_argument('-o', '--outdir', default='evtsToProc', type=str, help='Output directory.')
 parser.add_argument('-s', '--sample', default='test', type=str, help='Sample name.')
-parser.add_argument('-t', '--treename', default='', type=str, help='TTree name prefix.')
 args = parser.parse_args()
 
 # Load input TTrees into TChain

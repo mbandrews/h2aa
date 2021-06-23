@@ -7,14 +7,14 @@ from root_numpy import hist2array
 from data_utils import *
 from hist_utils import *
 
-def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False, write_pts=False):
+def bkg_process(sample, mh_region, ma_blind, ma_inputs, output_dir, do_combo_template=False, norm=1., do_ptomGG=True, do_pt_reweight=False, nevts=-1, do_mini2aod=False, write_pts=False, do_pu_rwgt=False, systPhoIdSF=None, systScale=None, systSmear=None):
     '''
     Convenience fn for running the background modeling event loop.
     Returns a string for the python command arguments to be executed.
     '''
-    print('Running bkg model for sample %s, region: %s, blind: %s'%(s, r, blind))
+    print('Running bkg model for sample %s, mh_region: %s, ma_blind: %s'%(sample, mh_region, ma_blind))
     pyargs = 'get_bkg_model.py -s %s -r %s -b %s -i %s -t %s -o %s -n %f -e %d'\
-            %(s, r, blind, ' '.join(ma_inputs), get_ma_tree_name(s), output_dir, norm, nevts)
+            %(sample, mh_region, ma_blind, ' '.join(ma_inputs), get_ma_tree_name(sample), output_dir, norm, nevts)
     if do_combo_template:
         pyargs += ' --do_combined_template'
     if do_ptomGG:
@@ -25,6 +25,14 @@ def bkg_process(s, r, blind, ma_inputs, output_dir, do_combo_template=False, nor
         pyargs += ' --do_mini2aod'
     if write_pts:
         pyargs += ' --write_pts'
+    if do_pu_rwgt:
+        pyargs += ' --do_pu_rwgt'
+    if systPhoIdSF is not None:
+        pyargs += ' --systPhoIdSF %s'%systPhoIdSF
+    if systScale is not None:
+        pyargs += ' --systScale %s'%systScale
+    if systSmear is not None:
+        pyargs += ' --systSmear %s'%systSmear
     print('cmd: %s'%pyargs)
 
     return pyargs
@@ -423,4 +431,32 @@ def get_sg_norm(sample, xsec=50., tgt_lumi=41.9e3): # xsec:pb, tgt_lumi:/pb
     print(nevts_gen)
     norm = xsec*tgt_lumi/nevts_gen
     #print(norm)
+    return norm
+
+def get_sg_norm_bycampaign(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_basedir='root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews'): # xsec:pb, tgt_lumi:/pb
+
+    # root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/2018/ggNtuples-Era04Dec2020v1_ggSkim-v1/ggSkims//h4g2018-mA1p2GeV_cut_hists.root
+    year = re.findall('(201[6-8])', sample.split('-')[0])[0]
+    inpath = '%s/%s/%s/ggNtuples-%s/ggSkims/%s_cut_hists.root'%(eos_basedir, year, campaign, sample)
+
+    cut = str(None) # no cuts applied to get gen level event count
+    var = 'npho' # any var that has 1 count per evt will do
+    key = cut+'_'+var
+    hf = ROOT.TFile.Open(inpath, "READ")
+    h = hf.Get('%s/%s'%(cut, key))
+
+    nevts_gen = h.GetEntries()
+    # In general, one should use sum of wgtd evts to calculate `nevts_gen`
+    # not just the raw event count. Only valid for samples with wgt = 1.
+    # such as is the case for all h4g sg samples, but not for some bkg mc samples
+    assert 'h4g' in sample
+    ## Sum of wgts
+    #if sample == 'DiPhotonJets':
+    #    nevts_gen = 1118685275.488525
+    #elif sample == 'GluGluHToGG':
+    #    nevts_gen = 214099989.445038
+    #print(nevts_gen)
+    norm = xsec*tgt_lumi/nevts_gen
+    #print(norm)
+    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %.f pb: %.f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
     return norm

@@ -16,7 +16,7 @@ config = Configuration()
 ##  Once the Configuration object is created, it is possible to add new sections into it with corresponding parameters
 config.section_("General")
 config.General.requestName = 'pickEvents'
-config.General.workArea = 'crab_pickevents_20200530_221751'
+config.General.workArea = 'crab_pickevents_20210410_120748'
 
 
 config.section_("JobType")
@@ -25,7 +25,7 @@ config.JobType.psetName = '/cvmfs/cms.cern.ch/slc7_amd64_gcc700/cms/cmssw/CMSSW_
 config.JobType.pyCfgParams = ['eventsToProcess_load=pickevents_runEvents.txt', 'outputFile=pickevents.root']
 
 config.section_("Data")
-config.Data.inputDataset = '"/"'
+config.Data.inputDataset = '"/DYToEE_NNPDF30_13TeV-powheg-pythia8/RunIISummer16MiniAODv2-EGM0_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM"'
 
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased'

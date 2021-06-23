@@ -1,0 +1,11 @@
+universe = vanilla
+Executable = run_bkg_model.sh
+Should_Transfer_Files = YES
+when_to_transfer_output = ON_EXIT
+Transfer_Input_Files = run_bkg_model.sh, h2aa.tgz
+Output = job_$(Cluster)_$(Process).stdout
+Error = job_$(Cluster)_$(Process).stderr
+Log = job_$(Cluster)_$(Process).log
+x509userproxy = $ENV(X509_USER_PROXY)
+Arguments = a0nom_a1inv_flo0p406_2020_08_25_v2
+Queue 1

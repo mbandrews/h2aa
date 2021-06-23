@@ -1,0 +1,12 @@
+universe = vanilla
+Executable = __EXEC__
+Should_Transfer_Files = YES
+when_to_transfer_output = ON_EXIT
+Transfer_Input_Files = __INPUTS__
+Output = job_$(Cluster)_$(Process).stdout
+Error = job_$(Cluster)_$(Process).stderr
+Log = job_$(Cluster)_$(Process).log
+x509userproxy = $ENV(X509_USER_PROXY)
+request_memory = __MEM__
+Arguments = __ARGS__
+Queue 1
