@@ -12,9 +12,10 @@ ROOT.gStyle.SetPadTickY(1)
 CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
 CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
+CMS_lumi.cmsTextOffset = 0.
 #CMS_lumi.extraText = "Preliminary"
 #CMS_lumi.lumi_sqrtS = "41.5 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-CMS_lumi.lumi_sqrtS = "134 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+CMS_lumi.lumi_sqrtS = "136 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 #iPos = 11 # CMS in frame
 iPos = 0 # CMS above frame
 if( iPos==0 ): CMS_lumi.relPosX = 0.16
@@ -49,7 +50,8 @@ def draw_hist_2dma(k_, h, c, sample, blind, ymax_=None, ymin_=None, do_trunc=Tru
     k = k_
     c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
-    h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
+    #h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
+    h[k] = set_hist(h[k], "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "")
     ROOT.gPad.SetRightMargin(0.19)
     ROOT.gPad.SetLeftMargin(0.14)
     #ROOT.gPad.SetTopMargin(0.05) # no cms
@@ -145,17 +147,18 @@ indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
 sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
 k = keys[0]
 
-#'''
+'''
 # Sg model
 sel = 'nom'
 CMS_lumi.extraText = "Simulation"
 ma_pts = ['0p1', '0p4', '1p0']
 #ma_pts = ['0p1']
 regions = [r_sr]
-blinds = [limit_blind, valid_blind]
-campaign = 'sg-Era04Dec2020v6/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+blinds = [limit_blind, valid_blind] # to get fully unblinded plots, run mk_sg_temp and combine_sg_temp with both blinding settings!
+#campaign = 'sg-Era04Dec2020v6/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+campaign = 'sg-Era22Jun2021v2/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
 do_blind = True
-do_blind = False
+#do_blind = False
 for ma in ma_pts:
 
     sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
@@ -178,6 +181,7 @@ for ma in ma_pts:
                 h[srk] = h[srkb].Clone()
                 h[srk].SetName(srk)
             else:
+                # to make fully unblinded 2dma, add offdiag + diag blinded plots
                 if not (do_blind and r == r_sr):
                     h[srk].Add(h[srkb])
         maxzs.append(h[srk].GetMaximum())
@@ -186,18 +190,21 @@ for ma in ma_pts:
     for r in regions:
         srk = '%s_%s_%s'%(sample, r, k)
         draw_hist_2dma(srk, h, c, sample, limit_blind if do_blind and r == r_sr else None, ymax_=np.max(maxzs), do_trunc=True)
-#'''
-
 '''
+
+#'''
 # Bkg model
 sample = 'data'
-campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+sel = 'nom'
+#sel = 'inv'
+#campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+campaign = 'bkgPtWgts-Era22Jun2021v1/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
 regions = [r_sb2sr, r_sr]
 blinds = [valid_blind, limit_blind]
 #regions = [r_sb2sr]
-sel = 'nom'
-sel = 'inv'
 do_blind = True if sel == 'nom' else False
+if sel == 'inv':
+    do_blind = False
 CMS_lumi.extraText = "Preliminary"
 
 inpath = '%s/%s/%s_sb2sr+hgg.root'%(indir, campaign, sample)
@@ -233,7 +240,7 @@ h[kratio].SetName(kratio)
 h[kratio].Divide(h[kbkg])
 #print('h[%s], min,max: %f, %f'%(kratio, h[kratio].GetMinimum(), h[kratio].GetMaximum()))
 draw_hist_2dma(kratio, h, c, sample, limit_blind if do_blind else None, ymax_=2., ymin_=0., do_trunc=True, label='(Obs/Bkg)')
-'''
+#'''
 
 '''
 # rebinned ratios

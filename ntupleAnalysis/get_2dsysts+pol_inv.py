@@ -15,8 +15,9 @@ CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
 CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
+CMS_lumi.cmsTextOffset = 0.
 #CMS_lumi.lumi_sqrtS = "41.5 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-CMS_lumi.lumi_sqrtS = "134 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+CMS_lumi.lumi_sqrtS = "136 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod = 0
@@ -163,7 +164,8 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     pUp.cd()
 
     k = sr_k
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
+    #h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
     hc[k+'dummy'] = h[k].Clone()
 
     k = k+'dummy'
@@ -289,7 +291,7 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
-    fUnity.GetXaxis().SetTitle("m_{a,pred} [GeV]")
+    fUnity.GetXaxis().SetTitle("m_{#Gamma,pred} [GeV]")
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
@@ -485,7 +487,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     pUp.cd()
 
     k = sr_k
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
     hc[k+'dummy'] = h[k].Clone()
 
     k = k+'dummy'
@@ -604,7 +606,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     legend[k] = ROOT.TLegend(0.62, posY_-0.2 if plot_syst else posY_-0.13, 0.92, posY_) #(x1, y1, x2, y2)
     #legend[k].AddEntry(hc[sr_k].GetName(), 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp" if is_h4g else 'p')
     #legend[k].AddEntry(hc[sb2sr_k].GetName(), "Bkg, stat", "fel")
-    legend[k].AddEntry(kobs+'errs', 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
+    legend[k].AddEntry(kobs+'errs', 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
     legend[k].AddEntry(sb2sr_k+'errs', "Bkg, stat", "fel")
     if plot_syst:
         legend[k].AddEntry(h[ksyst].GetName(), 'Sg, syst' if is_h4g else 'Bkg, syst', "fel")
@@ -622,7 +624,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
-    fUnity.GetXaxis().SetTitle("m_{a,pred} [GeV]")
+    fUnity.GetXaxis().SetTitle("m_{#Gamma,pred} [GeV]")
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
@@ -1545,39 +1547,22 @@ hatch, hatch2 = {}, {}
 ax, ay = {}, {}
 c = {}
 
-sample_data = 'Run2017'
-#sample_data = 'Run2017B-F'
-sample = sample_data
 keys = ['ma0vma1']
-#keys = ['ma0vma1', 'ma1']
-#keys = ['ma0vma1', 'ma0', 'ma1']
 #valid_blind = 'sg'
 valid_blind = 'diag_lo_hi'
 limit_blind = 'offdiag_lo_hi'
 blinds = [valid_blind, limit_blind]
 #blinds = [valid_blind]
-#syst = 'ptrwgt_resample'
-#syst = 'ptrwgt'
-#syst = 'tempfrac'
-#systs = ['ptrwgt', 'tempfrace1', 'tempfrace2']
 #systs = ['flo']
 systs = ['flo', 'hgg']
 #cr = 'a0noma1inv'
 syst_shifts = {}
-#syst_shifts['flo'] = ['0p406', '1p000']
-#syst_shifts['flo'] = ['0p406', '0p758']
-#syst_shifts['flo'] = ['0p504', '0p791']
-#syst_shifts['flo_None_hgg'] = ['dn', 'up']
 syst_shifts['flo'] = ['Dn', 'Up']
 syst_shifts['hgg'] = ['Nom', 'Syst']
-#indir = 'Templates/scan_ptrwgt'
-#indir = 'Templates/scan_ptrwgt/nom-nom'
-#indir = 'Templates/prod_normblind_diaglohi/nom-nom'
-indir = 'Templates/prod_fixsb2srnorm/nom-nom'
-apply_blinding = True
+#apply_blinding = True
 apply_blinding = False
 plot_syst = False
-#plot_syst = True
+plot_syst = True
 
 #run = '2016'
 #run = '2017'
@@ -1598,12 +1583,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso <
 #sub_campaign = 'bdtgtm0p97_relChgIsolt0p06_etalt1p44' # bdt > -0.97, relChgIso < 0.06
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44' # bdt > -0.96, relChgIso < 0.08
-##campaign = 'runBkg_ptwgts_bdtgtm0p99-v2noceil/Templates_bkg'
-##campaign = 'bkgPtWgts-Era04Dec2020v1/%s/nom-nom/Templates_bkg'%sub_campaign # no 2018A, 2016H+2018 failed lumis
-##campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Templates_bkg'%sub_campaign # 2016H+2018 failed lumis, run = '2017'
-#campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Run2/Templates_bkg'%sub_campaign # yr-by-yr with Run2 ptwgts, 2016H+2018 failed lumis, run = '2017'
-campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
-#2018/bkgPtWgts-Era04Dec2020v1/bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom/Templates_bkg/
+#campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Templates_bkg'%sub_campaign # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+campaign = 'bkgPtWgts-Era22Jun2021v1/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, mgg95
 
 # Nominals
 inpath = '%s/%s/%s_sb2sr+hgg.root'%(indir, campaign, sample)
@@ -1660,32 +1641,22 @@ else:
 
 hvalid, hlimit = {}, {}
 
-xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
+#xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
+xtitle, ytitle, ztitle = "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
 #zrange = None
 #zrange = [0., 650.]
 if dMa == 100:
-    #ymax_1d = 15.e3
-    #ymax_flat = 4.e3
-    # 2016
-    #ymax_1d = 14.e3
-    #ymax_flat = 2.4e3
-    # 2017
-    #ymax_1d = 25.e3
-    #ymax_flat = 3.5e3
-    # 2018
-    #ymax_1d = 35.e3
-    #ymax_flat = 4.5e3
     # Run2
-    #ymax_1d = 74.e3
-    #ymax_flat = 10.e3
-    ymax_1d = 60.e3
-    ymax_flat = 9.e3
+    ymax_1d = 54.e3
+    ymax_flat = 18.e3
+elif dMa == 50:
+    # Run2
+    ymax_1d = 30.e3
+    ymax_flat = 5.4e3
 else:
-    ymax_1d = 4.e3
-    ymax_flat = 350
     # Run2
-    ymax_1d = 14.e3 #16.e3
-    ymax_flat = 0.7e3
+    ymax_1d = 20.e3 # 16.e3
+    ymax_flat = 0.8e3
 zrange = [0., ymax_flat]
 do_trunc = True
 do_log = False if do_trunc else True
@@ -1716,7 +1687,7 @@ for kidx in h:
 #    if key != 'ma0' and key != 'ma1': continue
 #
 #    #print(kidx)
-#    #plot_1dma(kidx, "", yrange=None, new_canvas=True, color=1, titles=["m_{a,pred} [GeV]", "N_{evts} / 25 MeV"])
+#    #plot_1dma(kidx, "", yrange=None, new_canvas=True, color=1, titles=["m_{#Gamma,pred} [GeV]", "N_{evts} / 25 MeV"])
 #
 ##keys_1d = ['ma0', 'ma1']
 #keys_1d = keys[1:]
@@ -1750,63 +1721,16 @@ k = kfitpol
 #h[k] = ROOT.TF2(k, pol2_2d_x_bkg, -0.4, 1.2, -0.4, 1.2, nparams)
 h[k] = ROOT.TF2(k, pol2_2d_x_bkg, 0., 1.2, 0., 1.2, nparams)
 ## Run2, nom-nom
-#'bdtgtm0p98_relChgIsolt0p05_etalt1p44' # nominal
-#'bdtgtm0p99_relChgIsolt0p05_etalt1p44' # bdt > -0.99
-#'bdtgtm0p96_relChgIsolt0p05_etalt1p44' # bdt > -0.96
-#'bdtgtm0p98_relChgIsolt0p03_etalt1p44' # relChgIso < 0.03
-#'bdtgtm0p98_relChgIsolt0p07_etalt1p44' # relChgIso < 0.07
 if dMa == 25:
     pass
 #    h[k].FixParameter(0,  9.86310e-01)
 #    h[k].FixParameter(1, -6.07111e-03)
 #    h[k].FixParameter(2,  3.15883e-02)
-#    h[k].FixParameter(0,  9.94601e-01)
-#    h[k].FixParameter(1, -1.19847e-02)
-#    h[k].FixParameter(2,  2.00016e-02)
-#    h[k].FixParameter(0,  9.85770e-01)
-#    h[k].FixParameter(1, -1.11777e-02)
-#    h[k].FixParameter(2,  3.70487e-02)
-#    h[k].FixParameter(0,  9.84844e-01)
-#    h[k].FixParameter(1, -4.33492e-03)
-#    h[k].FixParameter(2,  3.30299e-02)
-#    h[k].FixParameter(0,  9.89707e-01)
-#    h[k].FixParameter(1, -9.86390e-03)
-#    h[k].FixParameter(2,  2.79949e-02)
-#    h[k].FixParameter(0,  9.95226e-01)
-#    h[k].FixParameter(1, -1.54637e-02)
-#    h[k].FixParameter(2,  2.14290e-02)
-#    h[k].FixParameter(0,  9.88623e-01)
-#    h[k].FixParameter(1, -1.48400e-02)
-#    h[k].FixParameter(2,  3.43419e-02)
-#    h[k].FixParameter(0,  9.84700e-01)
-#    h[k].FixParameter(1, -8.21132e-03)
-#    h[k].FixParameter(2,  3.67385e-02)
 elif dMa == 50:
     pass
 #    h[k].FixParameter(0,  9.85385e-01)
 #    h[k].FixParameter(1, -5.41274e-03)
 #    h[k].FixParameter(2,  3.23650e-02)
-#    h[k].FixParameter(0,  9.94127e-01)
-#    h[k].FixParameter(1, -1.16004e-02)
-#    h[k].FixParameter(2,  2.06105e-02)
-#    h[k].FixParameter(0,  9.85292e-01)
-#    h[k].FixParameter(1, -1.09174e-02)
-#    h[k].FixParameter(2,  3.77911e-02)
-#    h[k].FixParameter(0,  9.84141e-01)
-#    h[k].FixParameter(1, -3.73403e-03)
-#    h[k].FixParameter(2,  3.39289e-02)
-#    h[k].FixParameter(0,  9.89025e-01)
-#    h[k].FixParameter(1, -9.32034e-03)
-#    h[k].FixParameter(2,  2.88988e-02)
-#    h[k].FixParameter(0,  9.94628e-01)
-#    h[k].FixParameter(1, -1.49709e-02)
-#    h[k].FixParameter(2,  2.22029e-02)
-#    h[k].FixParameter(0,  9.88039e-01)
-#    h[k].FixParameter(1, -1.44068e-02)
-#    h[k].FixParameter(2,  3.51611e-02)
-#    h[k].FixParameter(0,  9.83916e-01)
-#    h[k].FixParameter(1, -7.56216e-03)
-#    h[k].FixParameter(2,  3.77678e-02)
 elif dMa == 100:
     pass
 #    h[k].FixParameter(0,  9.85385e-01)
@@ -1814,18 +1738,6 @@ elif dMa == 100:
 #    h[k].FixParameter(2,  3.26524e-02)
 else:
     raise Exception('Invalid dMa',dMa)
-# 2016
-#h[k].FixParameter(0, 9.60924e-01)
-#h[k].FixParameter(1, 1.36569e-02)
-#h[k].FixParameter(2, 6.80024e-02)
-# 2017
-#h[k].FixParameter(0, 9.75586e-01)
-#h[k].FixParameter(1, 1.48966e-02)
-#h[k].FixParameter(2, 3.55535e-02)
-# 2018
-#h[k].FixParameter(0, 1.00610e+00)
-#h[k].FixParameter(1, -2.97482e-02)
-#h[k].FixParameter(2, 1.17133e-02)
 
 #fitResult = h[kfittgt].Fit(h[k], "LLIEMNS")
 # Set fit tgt to have stat errs of bkg+tgt
@@ -1871,48 +1783,32 @@ for ix in range(1, h[kfitsrc].GetNbinsX()+1):
         h[k].SetBinContent(ix, iy, pol_val)
 print('pol_hist:%s, min:%f, max:%f'%(k, h[k].GetMinimum(), h[k].GetMaximum()))
 #plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.05, 1.+0.05])
-plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1], do_trunc=do_trunc)
+#plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1], do_trunc=do_trunc)
+plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.04, 1.+0.04], do_trunc=do_trunc)
 
 # Eigenvariations from solving covariance matrix
 # Must be hardcoded here
-# a0 nom, a1 inv
 if dMa == 25:
     pass
-    #floNone, dMa25
     varvec = np.array([
-    #np.sqrt(4.267093e-04) * np.array([ 0.560030290803,-0.602802878561,-0.56832628215 ]),
-    #np.sqrt(1.569770e-05) * np.array([ -0.825253511347,-0.3454894375,-0.446759096813 ]),
-    #np.sqrt(1.462930e-04) * np.array([ -0.0729569420455,-0.719211886842,0.690949742335 ])
-    #sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
-    #np.sqrt(1.314388e-04) * np.array([ 0.602500699393,-0.585167018809,-0.542745306133 ]),
-    #np.sqrt(3.876645e-06) * np.array([ -0.776848498033,-0.274023088852,-0.56693717278 ]),
-    #np.sqrt(4.678455e-05) * np.array([ -0.183028190001,-0.763210918996,0.619685222343 ])
+    # nominal
     #blind_w = 300MeV
-    np.sqrt(2.033586e-04) * np.array([ 0.614562658884,-0.563233323661,-0.552341345024 ]),
-    np.sqrt(4.484688e-06) * np.array([ -0.76557977979,-0.256958978089,-0.589796307513 ]),
-    np.sqrt(5.125670e-05) * np.array([ -0.190263866989,-0.785328152238,0.589117436697 ])
+    #np.sqrt(1.109966e-04) * np.array([ 0.630671986495,-0.514766176261,-0.580748335536 ]),
+    #np.sqrt(2.546847e-06) * np.array([ -0.76442924112,-0.283054473226,-0.57924787484 ]),
+    #np.sqrt(2.866653e-05) * np.array([ -0.133793799447,-0.809256417314,0.572016844389 ])
+    #fhggv3
+    # no neg, with norm
+    np.sqrt(1.110046e-04) * np.array([ 0.630448219926,-0.515022079285,-0.58076440993 ]),
+    np.sqrt(2.556325e-06) * np.array([ -0.764567880212,-0.282798909229,-0.579189721496 ]),
+    np.sqrt(2.866904e-05) * np.array([ -0.134055953018,-0.809182942719,0.572059408342 ])
     ])
 elif dMa == 50:
     pass
-    #floNone, dMa50
     varvec = np.array([
-    #np.sqrt(4.284814e-04) * np.array([ 0.560140562083,-0.603062260222,-0.567942304293 ]),
-    #np.sqrt(1.569358e-05) * np.array([ -0.825207682046,-0.346096749344,-0.446373522495 ]),
-    #np.sqrt(1.467250e-04) * np.array([ -0.0726280400483,-0.718702268251,0.6915144376 ])
     ])
 elif dMa == 100:
-    #floNone, dMa100
+    pass
     varvec = np.array([
-    ##np.sqrt(4.349961e-04) * np.array([ 0.560609664117,-0.604968977337,-0.565446143288 ]),
-    ##np.sqrt(1.567023e-05) * np.array([ -0.824690412625,-0.346165192438,-0.447275511143 ]),
-    ##np.sqrt(1.482336e-04) * np.array([ -0.0748500355591,-0.717064987295,0.692975667807 ])
-    #np.sqrt(3.719228e-04) * np.array([ 0.570974223831,-0.591136122658,-0.569689845626 ]),
-    #np.sqrt(1.322635e-05) * np.array([ -0.818625620781,-0.357573726728,-0.449436450407 ]),
-    #np.sqrt(1.263508e-04) * np.array([ -0.0619719994948,-0.722979331961,0.688084556458 ])
-    #sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
-    np.sqrt(1.335967e-04) * np.array([ 0.602382478375,-0.58759698701,-0.540245435523 ]),
-    np.sqrt(3.883040e-06) * np.array([ -0.77681095032,-0.275895112736,-0.566080059913 ]),
-    np.sqrt(4.716022e-05) * np.array([ -0.183575862273,-0.760665279624,0.622646155666 ])
     ])
 else:
     raise Exception('invalid dMa',dMa)
@@ -2101,7 +1997,8 @@ k1dmas = [k for k in k1dmas if 'offdiag' in k]
 print('>> 1D-mA, all offdiag ks:',k1dmas)
 
 ##########################
-xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
+#xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
+xtitle, ytitle, ztitle = "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
 zrange = [0., 2.]
 
 sr_k = sample+'sr'+valid_blind+key
@@ -2238,38 +2135,24 @@ file_out.Close()
 ##########################
 #regions = ['sr']
 #blinds = [limit_blind]
-##sample_data = 'Run2017B-F'
-##sample = sample_data
 #sample_sg = 'h4g'
 #
-##systs = ['offset', 'scale']
-##systs = ['scale', 'smear']
-##syst_shifts['smear'] = ['dn', 'up']
-##syst_shifts['scale'] = ['dn', 'up']
-##indir = 'Templates/prod_fixsb2srnorm/nom-nom/h4g'
-#
-##systs = ['PhoIdSF']
-##systs = ['PhoIdSF', 'Scale', 'Smear']
-#systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi']
+##systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi']
+#systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi', 'TrgSF']
 #syst_shifts['PhoIdSF'] = ['dn', 'up']
 #syst_shifts['Scale'] = ['dn', 'up']
 #syst_shifts['Smear'] = ['dn', 'up']
+#syst_shifts['Lumi'] = ['dn', 'up']
+#syst_shifts['TrgSF'] = ['dn', 'up']
 ##systs = ['TEST'] # dummy to force output of nominal sg plots
 ##syst_shifts['TEST'] = ['dn', 'up']
-##systs = ['Lumi']
-#syst_shifts['Lumi'] = ['dn', 'up']
-##systs = []
 #keys = ['ma0vma1']
 #
 ##run = 'Run2'
 ##run = '2017'
 #indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
-##/eos/uscms/store/user/lpchaa4g/mandrews/Run2/sg-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom/Templates/systNom_nom/h4g_blind_offdiag_lo_hi_templates.root
-##campaign = 'sg-Era04Dec2020v2/%s/nom-nom/Templates'%sub_campaign
-##campaign = 'sg-Era04Dec2020v3/%s/nom-nom/Templates'%sub_campaign #old 2017 ss, SFs
-##campaign = 'sg-Era04Dec2020v4/%s/nom-nom/Templates'%sub_campaign # 2016-18 SFs. 2017-18 ss. 2016 ss uses 2017.
-##campaign = 'sg-Era04Dec2020v5/%s/nom-nom/Templates'%sub_campaign # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
-#campaign = 'sg-Era04Dec2020v6/%s/nom-nom/Templates'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+##campaign = 'sg-Era04Dec2020v6/%s/nom-nom/Templates'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era22Jun2021v2/%s/nom-inv/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
 #
 #ma_pts = ['0p1', '0p2', '0p4', '0p6', '0p8', '1p0', '1p2']
 ##ma_pts = ['0p1']
@@ -2523,53 +2406,3 @@ file_out.Close()
 #
 #    file_out.Write()
 #    file_out.Close()
-#
-##'''
-##xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
-##zrange = None
-##zrange = [1., 4100.]
-##for blind in blinds:
-##    for r in regions:
-##
-##        kbkg = 'Run2017B-F'+'sb2sr'+blind+key+'rebin'
-##        kreg = sample+r+blind+key
-##        k = kreg+'rebin'
-##
-##        if ma_bins is not None:
-##            h[k] = rebin2d(h[kreg], ma_bins)
-##
-##        for ix in range(1, h[k].GetNbinsX()+1):
-##            for iy in range(1, h[k].GetNbinsY()+1):
-##                binc = h[k].GetBinContent(ix, iy)
-##                h[k].SetBinContent(ix, iy, binc)
-##
-##        plot_2dma(k, "", xtitle, ytitle, ztitle, zrange, do_log=True)
-##
-##        region = 'limit'
-##
-##        ksrcs = [kbkg, k]
-##        ktgts = [sample+'_Obs']
-##        get_datavmc_flat(region, ksrcs, [None], ktgts, nbins[region])
-##        #yrange = [0., 600.]
-##        plot_1dma('flat_'+ktgts[0], color=4, yrange=yrange_flat)
-##
-##        file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%region, "UPDATE")
-##        #file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%region, "RECREATE")
-##        hout = hvalid if region == 'valid' else hlimit
-##        #k_ = 'flat_%sh4g100MeV'%region
-##        k_ = 'flat_%sh4g'%region
-##        hout[k_] = h['flat_'+ktgts[0]].Clone()
-##        hout[k_].SetName(k_)
-##        #for shift in ['Up', 'Down']:
-##        #    k_shift = k_+'_stat'+shift
-##        #    hout[k_shift] = hout[k_].Clone()
-##        #    hout[k_shift].Reset()
-##        #    hout[k_shift].SetName(k_shift)
-##        #    for ib in range(1, hout[k_shift].GetNbinsX()+1):
-##        #        binc = hout[k_].GetBinContent(ib)
-##        #        binerr = hout[k_].GetBinError(ib)
-##        #        binout = binc + binerr if shift == 'Up' else binc - binerr
-##        #        hout[k_shift].SetBinContent(ib, binout)
-##        file_out.Write()
-##        file_out.Close()
-##'''

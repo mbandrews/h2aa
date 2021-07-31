@@ -115,6 +115,11 @@ def create_hists(h):
     #h[k] = ROOT.TH1F(k, k, 50, -1., 1.)
     h[k] = ROOT.TH1F(k, k, 200, -1., 1.)
 
+    k = 'etaxy'
+    h[k] = ROOT.TH1F(k, k, 50, -3., 3.)
+    k = 'r9xy'
+    h[k] = ROOT.TH1F(k, k, 50, 0., 1.2)
+
     k = 'mGG'
     #h[k] = ROOT.TH1F(k, k, 50, 90., 190.)
     h[k] = ROOT.TH1F(k, k, 400, 90., 190.)
@@ -133,7 +138,10 @@ def create_hists(h):
     h[k] = ROOT.TH1F(k, k, 60, 0., 120.)
 
     k = 'wgtSF'
-    h[k] = ROOT.TH1F(k, k, 100, 0., 10.)
+    h[k] = ROOT.TH1F(k, k, 100, 0.5, 1.5)
+
+    k = 'wgtTrgSF'
+    h[k] = ROOT.TH1F(k, k, 100, 0.5, 1.5)
 
     k = 'wgtPt'
     h[k] = ROOT.TH1F(k, k, 150, 0., 15.)
@@ -281,7 +289,7 @@ def get_smearByEta(systSmear_, eta_):
 
     return s
 
-def fill_hists(h, tree, wgt, wgtPt=1., wgtPU=1., wgtSF=1., systScale=None, systSmear=None, magen=None, outvars=None):
+def fill_hists(h, tree, wgt, wgtPt=1., wgtPU=1., wgtSF=1., wgtTrgSF=1., systScale=None, systSmear=None, magen=None, outvars=None):
 
     h['wgt'].Fill(wgt)
     h['nEvtsWgtd'].Fill(1., wgt)
@@ -367,20 +375,30 @@ def fill_hists(h, tree, wgt, wgtPt=1., wgtPU=1., wgtSF=1., systScale=None, systS
 
     #h['mGG'].Fill(tree.pho12_m)
 
-    assert tree.phoEt[0] > tree.phoEt[1]
-    h['pt0'].Fill(tree.phoEt[0], wgt)
-    h['pt1'].Fill(tree.phoEt[1], wgt)
-    h['pt0vpt1'].Fill(tree.phoEt[0], tree.phoEt[1], wgt)
-    h['ptxy'].Fill(tree.phoEt[0], wgt)
-    h['ptxy'].Fill(tree.phoEt[1], wgt)
+    # get preselected indices. If not available, assume 0 and 1
+    idx0 = tree.phoPreselIdxs[0] if 'phoPreselIdxs' in branches else 0
+    idx1 = tree.phoPreselIdxs[1] if 'phoPreselIdxs' in branches else 1
+    assert tree.phoEt[idx0] > tree.phoEt[idx1]
+    #assert tree.phoEt[0] > tree.phoEt[1]
 
-    h['energy0'].Fill(tree.phoE[0], wgt)
-    h['energy1'].Fill(tree.phoE[1], wgt)
+    h['pt0'].Fill(tree.phoEt[idx0], wgt)
+    h['pt1'].Fill(tree.phoEt[idx1], wgt)
+    h['pt0vpt1'].Fill(tree.phoEt[idx0], tree.phoEt[idx1], wgt)
+    h['ptxy'].Fill(tree.phoEt[idx0], wgt)
+    h['ptxy'].Fill(tree.phoEt[idx1], wgt)
 
-    h['bdt0'].Fill(tree.phoIDMVA[0], wgt)
-    h['bdt1'].Fill(tree.phoIDMVA[1], wgt)
-    h['bdtxy'].Fill(tree.phoIDMVA[0], wgt)
-    h['bdtxy'].Fill(tree.phoIDMVA[1], wgt)
+    h['energy0'].Fill(tree.phoE[idx0], wgt)
+    h['energy1'].Fill(tree.phoE[idx1], wgt)
+
+    h['bdt0'].Fill(tree.phoIDMVA[idx0], wgt)
+    h['bdt1'].Fill(tree.phoIDMVA[idx1], wgt)
+    h['bdtxy'].Fill(tree.phoIDMVA[idx0], wgt)
+    h['bdtxy'].Fill(tree.phoIDMVA[idx1], wgt)
+
+    h['etaxy'].Fill(tree.phoEta[idx0], wgt)
+    h['etaxy'].Fill(tree.phoEta[idx1], wgt)
+    h['r9xy'].Fill(tree.phoR9Full5x5[idx0], wgt)
+    h['r9xy'].Fill(tree.phoR9Full5x5[idx1], wgt)
 
     if outvars is not None:
         if 'mgg' in outvars:
@@ -388,12 +406,13 @@ def fill_hists(h, tree, wgt, wgtPt=1., wgtPU=1., wgtSF=1., systScale=None, systS
     else:
         h['mGG'].Fill(tree.mgg, wgt)
 
-    h['ma0vpt0'].Fill(tree.phoEt[0], ma0_, wgt)
-    h['ma1vpt1'].Fill(tree.phoEt[1], ma1_, wgt)
+    h['ma0vpt0'].Fill(tree.phoEt[idx0], ma0_, wgt)
+    h['ma1vpt1'].Fill(tree.phoEt[idx1], ma1_, wgt)
 
     h['wgtPt'].Fill(wgtPt)
     h['wgtPU'].Fill(wgtPU)
     h['wgtSF'].Fill(wgtSF)
+    h['wgtTrgSF'].Fill(wgtTrgSF)
 
     if magen is not None:
         assert magen > 0.
@@ -537,7 +556,8 @@ def load_hists(h, hf, samples, regions, keys, blind, input_dir):
     # to remain persistent, otherwise segfaults
     for s in samples :
         for r in regions:
-            if s == 'GluGluHToGG' and 'sb' in r: continue
+            #if s == 'GluGluHToGG' and 'sb' in r: continue
+            if s == 'hgg' and 'sb' in r: continue
             #if 'Run2017' in s and r == 'sr' and blind == None and 'pt0vpt1' not in keys: continue
             sr = '%s_%s'%(s, r)
             inpath = "%s/%s_%s_blind_%s_templates.root"%(input_dir, s, r, blind)

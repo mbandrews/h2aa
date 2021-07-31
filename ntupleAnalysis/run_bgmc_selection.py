@@ -15,14 +15,15 @@ import argparse
 
 # Register command line options
 parser = argparse.ArgumentParser(description='Run h2aa selection on bkg mc.')
-#parser.add_argument('-s', '--sample', default='bg2017-diphotonjets', type=str, help='Sample name.')
+parser.add_argument('-s', '--sample', default='bg2017-diphotonjets', type=str, help='Sample name.')
 #parser.add_argument('-s', '--sample', default='bg2017-hgg', type=str, help='Sample name.')
-parser.add_argument('-s', '--sample', default='h4g2018-mA1p0GeV', type=str, help='Sample name.')
+#parser.add_argument('-s', '--sample', default='h4g2018-mA1p0GeV', type=str, help='Sample name.')
 parser.add_argument('-r', '--region', default='sr', type=str, help='mH-region: sr, sb, sblo, sbhi, all')
 #parser.add_argument('-r', '--region', default='sblo', type=str, help='mH-region: sr, sb, sblo, sbhi, all')
+parser.add_argument('-i', '--inlist', default='../ggNtuples/Era20May2021_v2/bg2017-diphotonjets_file_list.txt', type=str, help='Input list of ggntuples.')
 #parser.add_argument('-i', '--inlist', default='../ggNtuples/Era06Sep2020_v1/bg2017-diphotonjets_file_list.txt', type=str, help='Input list of ggntuples.')
 #parser.add_argument('-i', '--inlist', default='../ggNtuples/Era06Sep2020_v1/bg2017-hgg_file_list.txt', type=str, help='Input list of ggntuples.')
-parser.add_argument('-i', '--inlist', default='../ggNtuples/Era20May2021_v1/h4g2018-mA1p0GeV_file_list.txt', type=str, help='Input list of ggntuples.')
+#parser.add_argument('-i', '--inlist', default='../ggNtuples/Era20May2021_v1/h4g2018-mA1p0GeV_file_list.txt', type=str, help='Input list of ggntuples.')
 #parser.add_argument('--pu_data', default='PU/dataPU_2017.root', type=str, help='PU data ref file.')
 #parser.add_argument('--systPhoIdFile', default='SF/SF2017_egammaEffi.txt_EGM2D.root', type=str, help='Photon ID syst reweighting file if to be applied.')
 #parser.add_argument('--systPhoIdFile', default=None, type=str, help='Photon ID syst reweighting file if to be applied.')
@@ -95,4 +96,3 @@ if pt_rwgt is not None:
 #    pyargs += ' --systPhoIdSF nom --systPhoIdFile %s'%systPhoIdFile
 print('>> Making nominal MC templates: %s'%pyargs)
 os.system('python %s'%pyargs)
-

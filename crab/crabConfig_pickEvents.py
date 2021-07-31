@@ -52,5 +52,5 @@ config.Site.storageSite = 'T3_US_CMU'
 config.Site.ignoreGlobalBlacklist = True if 'GluGluHToGG' in SAMPLE else False
 #config.Site.whitelist = ['T2_US*']
 #config.Site.whitelist = ['T2_US_Caltech','T2_US_Florida','T2_US_MIT','T2_US_Nebraska','T2_US_Purdue','T2_US_UCSD','T2_US_Vanderbilt'] # T2_US* - T2_US_Wisconsin
-config.Site.blacklist = ['T2_US_Wisconsin']
+#config.Site.blacklist = ['T2_US_Wisconsin']
 #config.Data.ignoreLocality = True

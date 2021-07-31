@@ -17,12 +17,13 @@ CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 #CMS_lumi.extraText = "Simulation"
 CMS_lumi.extraText = "Preliminary"
-#CMS_lumi.lumi_sqrtS = "41.9 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+#CMS_lumi.cmsTextOffset = 0.
+CMS_lumi.lumi_sqrtS = "41.5 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+#CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 #iPos = 11 # CMS in frame
 iPos = 0 # CMS above frame
 if iPos == 0:
-    CMS_lumi.relPosX = 0.15
+    CMS_lumi.relPosX = 0.148 # 15
 iPeriod = 0
 
 def get_proc(k):
@@ -30,14 +31,20 @@ def get_proc(k):
     return proc
 
 def get_proc(key):
+    mhsr_str = 'm(H)-SR'
+    mhsb_str = mhsr_str if plot_true_mhsr else 'm(H)-SB'
     if 'qcd' in key:
-        proc = 'dijet + #gamma+jet'
+        #proc = 'dijet #oplus #gamma+jet, '
+        proc = 'QCD, '
+        proc += mhsb_str
     elif 'diphoton' in key:
-        proc = '#gamma#gamma'
+        proc = '#gamma#gamma, '
+        proc += mhsb_str
     elif 'hgg' in key:
-        proc = 'H#rightarrow#gamma#gamma'
+        proc = 'H#rightarrow#gamma#gamma, '
+        proc += mhsb_str
     else:
-        proc = 'data'
+        proc = 'data, '+mhsr_str
     return proc
 
 def draw_hist_1dptstacked(ks, mh_region, ymax=None, range_minmax=[25., 125.], scale_qcd=False):
@@ -57,11 +64,14 @@ def draw_hist_1dptstacked(ks, mh_region, ymax=None, range_minmax=[25., 125.], sc
     #    #proc = k.split('_')[0].split('-')[-1].replace(run, '')
     #    #print(proc)
     #    nevts[proc] = hProc[k].Integral()
-    nDataNotQCD = hProc[kdata].Integral() - sum(hProc[k].Integral() for k in ks if (k is not kdata) and (k is not kqcd))
-    #print(nDataNotQCD, hProc[kqcd].Integral())
+    print(ks)
+    nNotDataNotQCD = sum(hProc[k].Integral() for k in ks if (k is not kdata) and (k is not kqcd))
+    nDataNotQCD = hProc[kdata].Integral() - nNotDataNotQCD
+    print('nNotDataNotQCD: %f, nData: %f, nQCD: %f, nDataNotQCD: %f'%(nNotDataNotQCD, hProc[kdata].Integral(), hProc[kqcd].Integral(), nDataNotQCD))
     norm_qcd = nDataNotQCD/hProc[kqcd].Integral()
     print('.. norm qcd2data:',norm_qcd)
     hProc[kqcd].Scale(norm_qcd)
+    print('nNotDataNotQCD: %f, nData: %f, nQCD: %f, nDataNotQCD: %f'%(nNotDataNotQCD, hProc[kdata].Integral(), hProc[kqcd].Integral(), nDataNotQCD))
 
     err_style = 'E2'
     fill_style = 3002
@@ -87,7 +97,7 @@ def draw_hist_1dptstacked(ks, mh_region, ymax=None, range_minmax=[25., 125.], sc
 
     hdummy = hProc[k].Clone()
     hdummy.Reset()
-    hdummy = set_hist(hdummy, "p_{T}", "N_{a} / 25 GeV", "")
+    hdummy = set_hist(hdummy, "p_{T,#Gamma} [GeV]", "N_{#Gamma} / 25 GeV", "")
     hdummy.GetXaxis().SetTitle('')
     hdummy.GetXaxis().SetLabelSize(0.)
     #hdummy.GetYaxis().SetTitleOffset(0.9)
@@ -100,24 +110,36 @@ def draw_hist_1dptstacked(ks, mh_region, ymax=None, range_minmax=[25., 125.], sc
 
     hstack = ROOT.THStack("hs","hs")
     hmc = hProc[kqcd].Clone()
+    hmc.Reset()
     hmc.SetName('mc')
     hmc.SetTitle('mc')
-    for i,key in enumerate(ks):
-        if key == kdata: continue
+    ks_stack = ['hgg', 'diphoton', 'qcd']
+    #for i,key in enumerate(ks):
+    for i,key_ in enumerate(ks_stack):
+        key = [ik for ik in ks if key_ in ik][0]
+        #if key == kdata: continue
         print('Stacking:',key)
         hProc[key].SetFillStyle(3002)
         hProc[key].SetFillColor(colorByProc(key))
         hProc[key].SetLineColor(colorByProc(key))
         hstack.Add(hProc[key])
         hmc.Add(hProc[key])
+    # mc tot, stat
+    #hmc.SetLineColor(9)
+    #hmc.Draw('E0 same')
+    # mc stack
     hstack.Draw("hist same")
     #hstack.Draw("hist nostack same")
+    print('>> Integrals: MC: %f, data: %f'%(hmc.Integral(), hProc[kdata].Integral()))
 
+    # data
     #hProc[k] = set_hist(hProc[k], "p_{T}", "N_{a}", "")
     hc[k] = hProc[k].Clone()
+    hc[k].SetName(k+'p')
     hc[k].SetFillStyle(0)
     hc[k].SetMarkerStyle(20)
     hc[k].SetMarkerSize(0.85)
+    hc[k].SetLineColor(1)
     #hc[k].GetXaxis().SetTitle('')
     #hc[k].GetXaxis().SetLabelSize(0.)
     #hc[k].GetYaxis().SetTitleOffset(0.9)
@@ -161,20 +183,40 @@ def draw_hist_1dptstacked(ks, mh_region, ymax=None, range_minmax=[25., 125.], sc
     if ymax is None:
         ymax = 1.2*hProc[k].GetMaximum()
         #hdummy.GetYaxis().SetRangeUser(0.1, ymax)
-        hdummy.GetYaxis().SetRangeUser(0., ymax)
+    hdummy.GetYaxis().SetRangeUser(0., ymax)
     #if range_minmax is not None:
     hdummy.GetXaxis().SetRangeUser(range_minmax[0], range_minmax[1])
     ROOT.gPad.RedrawAxis()
 
-    legend[k] = ROOT.TLegend(0.68, 0.62, 0.92, 0.86) #(x1, y1, x2, y2)
-    for i,key in enumerate(ks):
-        leg_marker = 'lep' if key == kdata else 'f'
+    legend[k] = ROOT.TLegend(0.56, 0.62, 0.92, 0.86) #(x1, y1, x2, y2)
+    #print(ks)
+    # ['bg2017-diphotonjets_sb', 'data2017_sr', 'bg2017-qcd_sb', 'bg2017-hgg_sr']
+    ks_legend = ['data', 'qcd', 'diphoton', 'hgg']
+    #for i,key in enumerate(ks):
+    for i,key_ in enumerate(ks_legend):
+        key = [ik for ik in ks if key_ in ik][0]
+        leg_marker = 'f'
+        if key == kdata:
+            # get marker version of plot
+            key = key+'p'
+            leg_marker = 'lep'
         legend[k].AddEntry(key , get_proc(key), leg_marker)
     #legend[k].AddEntry(hc[kmc].GetName(),"Exp","l")
     legend[k].SetBorderSize(0)
     legend[k].Draw("same")
 
-    CMS_lumi.cmsTextOffset = 0.1
+    if not plot_true_mhsr:
+        ptrwgt_txt = 'with' if do_ptrwgt else 'no'
+        ptrwgt_txt += ' p_{T} re-weighting'
+        ltx = ROOT.TLatex()
+        ltx.SetNDC()
+        #ltx.SetTextColor(ROOT.kBlack)
+        ltx.SetTextFont(42)#bold:62
+        ltx.SetTextAlign(13)
+        ltx.SetTextSize(0.05)
+        ltx.DrawLatex(0.57, 0.58, ptrwgt_txt) # x, y, txt
+
+    CMS_lumi.cmsTextOffset = 0.09
     CMS_lumi.CMS_lumi(pUp, iPeriod, iPos)
 
     ##### Ratio plots on lower pad #####
@@ -240,7 +282,8 @@ def draw_hist_1dptstacked(ks, mh_region, ymax=None, range_minmax=[25., 125.], sc
     #hRatio[kr].Divide(hmc)
     #hRatio[kr].Divide(hstack)
     # MC stat band
-    hRatio[kstat].SetFillColor(9)
+    #hRatio[kstat].SetFillColor(9)
+    hRatio[kstat].SetFillColor(14)
     hRatio[kstat].SetFillStyle(fill_style)
     hRatio[kstat].Draw("E2 same")
     # Data ratio pts
@@ -274,13 +317,32 @@ eos_redir = 'root://cmseos.fnal.gov'
 indir = '/store/user/lpchaa4g/mandrews/%s'%run
 sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
 
+#bkgPtWgts_campaign = 'bkgPtWgts-Era04Dec2020v3' # only if using pt re-wgtd templates
+#bkgNoPtWgts_campaign = 'bkgNoPtWgts-Era04Dec2020v2' #v3
+bkgNoPtWgts_campaign = 'bkgNoPtWgts-Era22Jun2021v1'
+bkgPtWgts_campaign = 'bkgPtWgts-Era22Jun2021v1'
+#bgmc_campaign = 'bgmc-Era06Dec2020v1'
+bgmc_campaign = 'bgmc-Era20May2021v1'
+
 mablind = None
 sel = 'nom'
-#do_ptrwgt = False
+do_ptrwgt = False
 do_ptrwgt = True
-flo = '0.6437'
+#flo = '0.6437'
+flo = '0.6475' # mgg90
+
+plot_true_mhsr = True # plot data and mc in mh-SR
+plot_true_mhsr = False # plot data in mh-SR, mc in mh-SB
+
+if plot_true_mhsr:
+    # pt rewgting only applied for mc mh-sb -> sr
+    do_ptrwgt = False
+
+#ymax = None
+ymax = 22.e4
 
 distn = 'ptxy'
+#distn = 'nEvtsWgtd'
 regions = ['sblo', 'sr', 'sbhi']
 regionsByType = ['sb', 'sr']
 samples = [
@@ -309,9 +371,12 @@ def colorByProc(key):
     #elif 'GJet' in key:
     #    return 4 #blue
     elif 'diphoton' in key:
-        return 3 #green
+        #return 3 #green
+        return 9 # violet
     elif 'hgg' in key:
-        return 5 # yellow
+        #return 5 # yellow
+        #return 9 # violet
+        return 3 #green
     else:
         return 1 # black
 samplesByType = [
@@ -342,19 +407,18 @@ for s in samples:
     for r in regions:
 
         # Get files
-        # For data sample, if doing pt rwgt get SB templates from bkgPtWgts campaign
+        # For data sample, if doing pt rwgt get re-wgtd SB templates from bkgPtWgts campaign
         if 'data' in s:
             if do_ptrwgt and 'sb' in r:
                 # strictly only for data-SB
-                # bkgPtWgts-Era04Dec2020v3/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Run2/Templates_flo0.6437/
-                campaign = 'bkgPtWgts-Era04Dec2020v3/%s/nom-%s/Run2/Templates_flo%s'%(sub_campaign, sel, flo) # data, pt rwgt
+                campaign = '%s/%s/nom-%s/Run2/Templates_flo%s'%(bkgPtWgts_campaign, sub_campaign, sel, flo) # data, pt rwgt
             else:
-                campaign = 'bkgNoPtWgts-Era04Dec2020v3/%s/nom-%s/Templates'%(sub_campaign, sel) # data
+                campaign = '%s/%s/nom-%s/Templates'%(bkgNoPtWgts_campaign, sub_campaign, sel) # data
         else:
             if do_ptrwgt and 'sb' in r:
-                campaign = 'bgmc-Era06Dec2020v1/%s/nom-%s/Templates_flo%s/systNom_nom'%(sub_campaign, sel, flo) # bgmc
+                campaign = '%s/%s/nom-%s/Templates_flo%s/systNom_nom'%(bgmc_campaign, sub_campaign, sel, flo) # bgmc
             else:
-                campaign = 'bgmc-Era06Dec2020v1/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # bgmc
+                campaign = '%s/%s/nom-%s/Templates/systNom_nom'%(bgmc_campaign, sub_campaign, sel) # bgmc
         fs = run_eosls('%s/%s'%(indir, campaign))
         fs = [f for f in fs if 'templates.root' in f]
         fs_s = [f for f in fs if s in f]
@@ -413,7 +477,7 @@ for s in samplesByProc:
     for r in regionsByType:
         print('      >> mh-region:',r)
         ks_r = [k for k in ks_s if r in k]
-        print(ks_r)
+        #print(ks_r)
         ksr = get_ksr(run, s, r)
         print('      .. ksr:',ksr)
         hProc[ksr] = h[ks_r[0]].Clone()
@@ -426,18 +490,24 @@ for s in samplesByProc:
 
 #print(hProc.keys())
 #for r in regionsByType:
-#r = regionsByType[1]
-r = regionsByType[0]
+if plot_true_mhsr:
+    # true sr
+    r = regionsByType[1]
+else:
+    # sb2sr
+    r = regionsByType[0]
 print('   >> mh-region:',r)
 ks_r = [k for k in hProc.keys() if r in k]
 # for mH-SB, want to compare effect of pt rwgting on MC-SB to tgt mH-SR
 # So compare to data-SR + hgg-SR by swapping out data- and hgg-SB with -SR counterpart
 # Note: pt rwgt data-SB identical to data-SR by construction
-if 'sb' in r:
-    ks_r = [k.replace('sb', 'sr') if ('data' in k) or ('hgg' in k) else k for k in ks_r]
 print(ks_r)
+if 'sb' in r:
+    pass
+    ks_r = [k.replace('sb', 'sr') if ('data' in k) or ('hgg' in k) else k for k in ks_r]
+#print(ks_r)
 #print('   .. ksr:',ksr)
-draw_hist_1dptstacked(ks_r, r)
+draw_hist_1dptstacked(ks_r, r, ymax=ymax)
 '''
 for s in samplesByType:
     print('   >> sampleByType:',s)

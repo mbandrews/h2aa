@@ -10,13 +10,15 @@ MEM = '__MEM__'
 
 # Input maNtuple campaign
 indir = '../maNtuples'
-input_campaign = 'Era04Dec2020v1' # updated later with 2018A
+#input_campaign = 'Era04Dec2020v1' # updated later with 2018A
+input_campaign = 'Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
 print('>> Input campaign: maNtuples-%s'%input_campaign)
 
 # Input pt wgts campaign
 #ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v1' # no 2018A, 2016H+2018 failed lumis
 #ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis
-ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v3' # redo v2 with nVtx, nPU plots
+#ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v3' # redo v2 with nVtx, nPU plots
+ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
 print('>> Input pt wgts campaign: %s'%ptwgts_campaign)
 
 #ptwgts_subcampaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom' # a0nom-a1nom
@@ -31,14 +33,15 @@ print('>> Input pt wgts campaign: %s'%ptwgts_campaign)
 #ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.09
 #ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.08
 
-ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.07 !! optimal
-#ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-inv' # bdt > -0.96, relChgIso < 0.07 !! optimal
+#ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.07 !! optimal
+ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-inv' # bdt > -0.96, relChgIso < 0.07 !! optimal
 print('>> Input pt wgts sub-campaign: %s'%ptwgts_subcampaign)
 
 # Output bkg campaign
 #this_campaign = 'bkgPtWgts-Era04Dec2020v1' # using bkgNoPtWgts-Era04Dec2020v1/bdtgtm0p98_relChgIsolt0p05_etalt1p44
 #this_campaign = 'bkgPtWgts-Era04Dec2020v2' # using bkgNoPtWgts-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44
-this_campaign = 'bkgPtWgts-Era04Dec2020v3' # using bkgNoPtWgts-Era04Dec2020v3/bdtgtm0p98_relChgIsolt0p05_etalt1p44 [same as v2 + nVtx, nPU plots]
+#this_campaign = 'bkgPtWgts-Era04Dec2020v3' # using bkgNoPtWgts-Era04Dec2020v3/bdtgtm0p98_relChgIsolt0p05_etalt1p44 [same as v2 + nVtx, nPU plots]
+this_campaign = 'bkgPtWgts-Era22Jun2021v1' # maNtuples-Era22Jun2021v1 + bkgNoPtWgts-Era22Jun2021v1/bdtgtm0p96_relChgIsolt0p07_etalt1p44 [mgg95 trgs]
 print('>> Output campaign:',this_campaign)
 
 exec_file = 'run_bkg_ptwgts.sh'

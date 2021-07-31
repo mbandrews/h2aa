@@ -22,7 +22,8 @@ Since only using gluon-fusion hgg MC, introduce normalization syst wrt total hgg
 vs glusion fusion xsec component only.
 '''
 
-k2dpt = 'pt0vpt1'
+#k2dpt = 'pt0vpt1'
+k2dpt = 'nEvtsWgtd'
 k2dma = 'ma0vma1'
 distns = [k2dpt, k2dma]
 ma_blind_input = None
@@ -50,8 +51,10 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #sub_campaign = 'bdtgtm0p97_relChgIsolt0p06_etalt1p44/nom-%s'%sel # bdt > -0.97, relChgIso < 0.06
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.08
-campaign_noptwgts = 'bkgNoPtWgts-Era04Dec2020v2/%s'%sub_campaign
-campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/%s'%sub_campaign
+#campaign_noptwgts = 'bkgNoPtWgts-Era04Dec2020v2/%s'%sub_campaign
+campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v1/%s'%sub_campaign
+#campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/%s'%sub_campaign
+campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v1/%s'%sub_campaign
 if doRun2: campaign_ptwgts += '/%s'%run2dir
 
 br_hgg = 2.27e-3 # BR(h->gg)
@@ -68,12 +71,49 @@ nhgg = {
 # Calculated using:
 #   [1] cmslpc:~mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/crab/run_getLumis.py
 #   [2] lxplus:~mandrews/work/h2aa/brilcalc_work/getLumis_byEra.sh
-intlumi = {'2016': 35.38e3,
+intlumi = {'2016': 36.25e3,
            '2017': 41.53e3,
-           '2018': 56.90e3} # /pb.
+           '2018': 58.75e3} # /pb. Run2: 136.53/pb
 
 #flo_nom = 0.645897591246
 #flo_ins = [0.5040, flo_nom, 0.7910]
+# Input f_hggs. Calculated using get_fhgg.py
+'''
+fhggs = {
+        '2016nom': [0.                       , 1.29409e-03, 1.29409e-03 + 2.71978e-0],
+        '2016inv': [8.39948e-03 - 3.85741e-03, ]
+
+        '2017nom': [1.24404e-02 - 5.74877e-03, 1.24404e-02, 1.24404e-02 + 5.74877e-03],
+        '2017inv': [],
+
+        '2018nom': [0.                       , 1.23262e-02, 1.23262e-02 + 4.81454e-02],
+        '2018inv': [5.98173e-03 - 3.48104e-03, 5.98173e-03, 5.98173e-03 + 3.48104e-03]
+         }
+# Make sure f_hgg scenarios are in increasing order and positive-valued
+for k in fhggs:
+    assert (fhggs[k][1] > fhggs[k][0]) and (fhggs[k][1] < fhggs[k][2])
+    if fhggs[k][0] < 0:
+        fhggs[k][0] = 0.
+    print(fhggs[k])
+fhggs = {
+        '2016nom': [1.29409e-03, 2.71978e-03],
+        '2016inv': [8.39948e-03, 3.85741e-03],
+
+        '2017nom': [1.24404e-02, 5.74877e-03],
+        '2017inv': [5.26839e-03, 2.54058e-03],
+
+        '2018nom': [1.23262e-02, 4.81454e-02],
+        '2018inv': [5.98173e-03, 3.48104e-03]
+         } # [nom fit value, fit uncert]
+fhggs = {
+        'nom': [3.28431e-03, 2.77196e-03],
+        'inv': [1.92478e-03, 2.46728e-03]
+         } # [nom fit value, fit uncert]
+'''
+fhggs = {
+        'nom': [2.88903e-03, 2.78887e-03],
+        'inv': [1.42361e-03, 1.22762e-03],
+         } # [nom fit value, fit uncert]
 
 runs = ['2016', '2017', '2018']
 
@@ -160,15 +200,31 @@ for r in runs:
         khgg_2dpt = '%s_sr_%s'%(sample_hgg, k2dpt)
         ksr_2dpt = '%s_sr_%s'%(sample_data, k2dpt)
 
+        '''
         # Loop over hgg xsecs: nom: total SM inclusive: 50.94, syst: gluglu-only: 43.92
         # If doing flo_nom, only need to do nom xsec
         #xs_nom, xs_syst = 50.94, 43.92 # [pb] gluglu only:48.58->43.92
-        xs_syst, xs_nom = 50.94, 43.92 # [pb] gluglu only:48.58->43.92
-        xsecs = [xs_nom, xs_syst] if flo_in == flo_nom else [xs_nom]
-        for xsec_hgg in xsecs:
+        #xs_syst, xs_nom = 50.94, 43.92 # [pb] gluglu only:48.58->43.92
+        #xsecs = [xs_nom, xs_syst] if flo_in == flo_nom else [xs_nom]
+        #for xsec_hgg in xsecs:
+        '''
 
-            print('  >> Doing xsec(hgg):',xsec_hgg)
+        # Loop over f_hggs: nominal fit from get_fhgg +/- fit uncert
+        # If varying f_sblo, only use nominal f_hgg, else loop over all f_hgg syst shifts
+        #fhgg_nom = fhggs[r+sel][0] # nominal is 1st element
+        #fhgg_err = fhggs[r+sel][1] # fit uncert is 2nd element
+        fhgg_nom = fhggs[sel][0] # nominal is 1st element
+        fhgg_err = fhggs[sel][1] # fit uncert is 2nd element
+        if flo_in == flo_nom:
+            fhggs_ = [fhgg_nom-fhgg_err if fhgg_nom > fhgg_err else 0., fhgg_nom, fhgg_nom+fhgg_err]
+        else:
+            fhggs_ = [fhgg_nom]
+        for fhgg in fhggs_:
 
+            assert fhgg >= 0.
+            print('  >> Doing f_hgg:',fhgg)
+
+            '''
             fhgg = br_hgg*xsec_hgg*intlumi[r]*nevts[khgg_2dpt]/nhgg[r]
             fhgg /= nevts[ksr_2dpt]
             print('  .. fhgg, 2017:', fhgg)
@@ -176,6 +232,7 @@ for r in runs:
                 fhgg = 0.00395577246287 if xsec_hgg == xs_nom else 0.00458804756964
             else:
                 fhgg = 3.84666817207e-05 if xsec_hgg == xs_nom else 4.46150447826e-05
+            '''
             fsb = 1.-fhgg
             print('  .. fhgg:',fhgg)
             print('  .. fsb:',fsb)
@@ -242,8 +299,10 @@ for r in runs:
             elif flo_in > flo_nom:
                 syst_str += '_floUp'
             # hgg yield
-            if xsec_hgg == xs_syst:
-                syst_str += '_hggSyst'
+            if fhgg < fhgg_nom:
+                syst_str += '_hggDn'
+            elif fhgg > fhgg_nom:
+                syst_str += '_hggUp'
 
             #print(hblind.keys())
             #print(hnorm.keys())

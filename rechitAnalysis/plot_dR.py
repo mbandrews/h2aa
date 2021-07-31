@@ -84,7 +84,8 @@ for mass in masses:
 
     h_in.GetYaxis().SetLabelSize(0.05)
     h_in.GetYaxis().SetLabelFont(62)
-    h_in.GetYaxis().SetTitle("#Deltai#eta(#gamma,#gamma)_{gen}")
+    #h_in.GetYaxis().SetTitle("#Deltai#eta(#gamma,#gamma)_{gen}")
+    h_in.GetYaxis().SetTitle("#Delta#eta(#gamma_{1},#gamma_{2})_{gen}")
     h_in.GetYaxis().SetTitleOffset(0.8)
     h_in.GetYaxis().SetTitleSize(0.07)
     h_in.GetYaxis().SetTitleFont(62)
@@ -92,7 +93,8 @@ for mass in masses:
 
     h_in.GetXaxis().SetLabelSize(0.05)
     h_in.GetXaxis().SetLabelFont(62)
-    h_in.GetXaxis().SetTitle("#Deltai#varphi(#gamma,#gamma)_{gen}")
+    #h_in.GetXaxis().SetTitle("#Deltai#varphi(#gamma,#gamma)_{gen}")
+    h_in.GetXaxis().SetTitle("#Delta#phi(#gamma_{1},#gamma_{2})_{gen}")
     h_in.GetXaxis().SetTitleOffset(1.)
     h_in.GetXaxis().SetTitleSize(0.07)
     h_in.GetXaxis().SetTitleFont(62)

@@ -4,7 +4,8 @@ from data_utils import *
 
 #campaign = 'Era24Sep2020_v1'
 #campaign = 'Era04Dec2020_v1' # Fixed mc diphoton trg
-campaign = 'Era06Sep2020_v1' # 2017 bkg mc only
+#campaign = 'Era06Sep2020_v1' # 2017 bkg mc only
+campaign = 'Era20May2021_v2' # 2017 bkg mc only. Include mass95 trg. 20May2021_ggntuplev2
 
 eos_redir, eos_basedir, samples = {}, {}, {}
 
@@ -14,7 +15,8 @@ if not os.path.isdir(output_dir):
 
 #mc_campaign = '06Sep2020_ggntuplev1' # h4g,hgg: wrong diphoton trg, DY: ok
 #mc_campaign = '04Dec2020_ggntuplev1' # h4g,hgg: fixed diphoton trg
-mc_campaign = '06Sep2020_ggntuplev1' # h4g,hgg: fixed diphoton trg
+#mc_campaign = '06Sep2020_ggntuplev1' # h4g,hgg: fixed diphoton trg
+mc_campaign = '20May2021_ggntuplev2' # Include mass95 trg
 
 sample_maps = {
     'diphotonjets': 'DiPhotonJets',
@@ -35,7 +37,6 @@ samples['bg2016'] = [
 samples['bg2017'] = [s for s in sample_maps.keys()]
 samples['bg2018'] = [
     ]
-
 
 for d in ['bg']:
 

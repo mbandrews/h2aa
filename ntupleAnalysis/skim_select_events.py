@@ -201,7 +201,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
     # Get event weight
     #wgt = 1. if 'Data' in args.treename else tree.weight
     wgt = 1. if tree.isData else tree.genWeight
-    wgtPt, wgtSF, wgtPU = 1., 1., 1.
+    #wgtPt, wgtSF, wgtPU = 1., 1., 1.
+    wgtPt, wgtTrgSF, wgtSF, wgtPU = 1., 1., 1., 1.
     if do_pt_rwgt:
         wgtPt = get_ptwgt(tree, hpt)
         wgt = wgt*wgtPt
@@ -216,7 +217,7 @@ for iEvt in range(iEvtStart,iEvtEnd):
         wgt = wgt*wgtPU
 
     # Fill histograms with appropriate weight
-    fill_hists(hists, tree, wgt, wgtPt, wgtPU, wgtSF, systScale, systSmear, magen, outvars)
+    fill_hists(hists, tree, wgt, wgtPt, wgtPU, wgtSF, wgtTrgSF, systScale, systSmear, magen, outvars)
 
     if write_pts:
         evtId = '%f:%f:%f:%f:%f'%(tree.phoEt[0], tree.phoEt[1], tree.phoIDMVA[0], tree.phoIDMVA[1], tree.mgg)

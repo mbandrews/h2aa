@@ -10,7 +10,10 @@ MEM = '__MEM__'
 
 # Input ntuples
 indir = '../maNtuples'
-input_campaign = 'Era04Dec2020v1' # fixed mc diphoton trg
+#input_campaign = 'Era04Dec2020v1' # fixed mc diphoton trg
+#input_campaign = 'Era22Jun2021v1' # data, h4g, hgg. mgg95 trgs. gg:ggNtuples-Era20May2021v1_ggSkim-v1 + img:Era22Jun2021_AOD-IMGv1 [EB-only AOD skims]
+#input_campaign = 'Era22Jun2021v2' # h4g w/o HLT. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
+input_campaign = 'Era22Jun2021v3' # Era22Jun2021v2 + interpolated mass samples
 print('>> Input maNtuple campaign:',input_campaign)
 
 # Define sg campaign
@@ -20,8 +23,19 @@ print('>> Input maNtuple campaign:',input_campaign)
 #this_campaign = 'sg-Era04Dec2020v4' # add 2016+17+18 phoid, 2017+18 ss. 2016 ss missing: use 2017 ss
 #this_campaign = 'sg-Era04Dec2020v5' # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
 #this_campaign = 'sg-Era04Dec2020v6' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
-this_campaign = 'sg-Era04Dec2020v7' #  v6 + nVtx plots
+#this_campaign = 'sg-Era04Dec2020v7' #  v6 + nVtx plots
+#this_campaign = 'sg-Era22Jun2021v1' # h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims], HLT applied, no trgSF
+#this_campaign = 'sg-Era22Jun2021v2' # h4g w/o HLT applied, with trgSF
+this_campaign = 'sg-Era22Jun2021v3' # sg-Era22Jun2021v2 + interpolated mass samples
 print('>> Signal selection campaign:',this_campaign)
+
+# If applying trg SFs, make sure HLT trigger was NOT applied
+# trg SFs emulate trg eff already!
+#do_trgSF = False # if HLT applied in skim
+#do_trgSF = True # if HLT *not* applied in skim
+do_trgSF = False
+if this_campaign == 'sg-Era22Jun2021v2' or this_campaign == 'sg-Era22Jun2021v3':
+    do_trgSF = True
 
 sel = 'nom'
 #sel = 'inv'
@@ -37,7 +51,6 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.08
 print('>> Output sub-campaign:',sub_campaign)
-
 
 # Define jdl exec, tar, etc
 exec_file = 'run_sg.sh'
@@ -76,6 +89,8 @@ for l in inlist:
     year = re.findall('(201[6-8])', sample.split('-')[0])[0]
     print('>> For sample:',sample)
 
+    #if 'hgg' not in sample: continue
+
     # Output EOS tgt
     #eos_tgtdir = '/store/user/lpchaa4g/mandrews/%s/%s'%(year, this_campaign)
     eos_tgtdir = '/store/user/lpchaa4g/mandrews/%s/%s/%s'%(year, this_campaign, sub_campaign)
@@ -104,6 +119,7 @@ for l in inlist:
     jdl_args = '%s %s %s %s'%(sample, l.split('/')[-1], pu_data.split('/')[-1], eos_tgtdir)
     jdl_args += ' %s'%(syst_file.split('/')[-1] if syst_file is not None else 'NONE')
     jdl_args += ' %s'%(tar_file)
+    jdl_args += ' %s'%('TRUE' if do_trgSF else 'FALSE')
     #print(jdl_args)
 
     # Read in crabConfig template

@@ -159,3 +159,18 @@ def get_mc2data_norm(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_basedir='r
     #print(norm)
     print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %.f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
     return norm
+
+#def get_mceff(sample, selected_path, skim_path):
+def get_mcgenevents(sample, eos_basedir, hgg_campaign, skim_campaign):
+
+    # Get nEvtsGen
+    inpath = '%s/%s/ggSkims/%s_cut_hists.root'%(eos_basedir, skim_campaign, sample)
+    cut = str(None) # no cuts applied to get gen level event count
+    var = 'nEvtsWgtd'
+    key = cut+'_'+var
+    hf = ROOT.TFile.Open(inpath, "READ")
+    h = hf.Get('%s/%s'%(cut, key))
+    nEvtsGen = h.GetBinContent(2)
+
+    return nEvtsGen
+

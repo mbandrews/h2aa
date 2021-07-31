@@ -15,8 +15,9 @@ CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
 CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Preliminary"
+CMS_lumi.cmsTextOffset = 0.
 #CMS_lumi.lumi_sqrtS = "41.5 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
-CMS_lumi.lumi_sqrtS = "134 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+CMS_lumi.lumi_sqrtS = "136 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod = 0
@@ -163,7 +164,8 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     pUp.cd()
 
     k = sr_k
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
+    #h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
     hc[k+'dummy'] = h[k].Clone()
 
     k = k+'dummy'
@@ -289,7 +291,7 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
-    fUnity.GetXaxis().SetTitle("m_{a,pred} [GeV]")
+    fUnity.GetXaxis().SetTitle("m_{#Gamma,pred} [GeV]")
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
@@ -485,7 +487,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     pUp.cd()
 
     k = sr_k
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
     hc[k+'dummy'] = h[k].Clone()
 
     k = k+'dummy'
@@ -604,7 +606,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     legend[k] = ROOT.TLegend(0.62, posY_-0.2 if plot_syst else posY_-0.13, 0.92, posY_) #(x1, y1, x2, y2)
     #legend[k].AddEntry(hc[sr_k].GetName(), 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp" if is_h4g else 'p')
     #legend[k].AddEntry(hc[sb2sr_k].GetName(), "Bkg, stat", "fel")
-    legend[k].AddEntry(kobs+'errs', 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
+    legend[k].AddEntry(kobs+'errs', 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
     legend[k].AddEntry(sb2sr_k+'errs', "Bkg, stat", "fel")
     if plot_syst:
         legend[k].AddEntry(h[ksyst].GetName(), 'Sg, syst' if is_h4g else 'Bkg, syst', "fel")
@@ -622,7 +624,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
-    fUnity.GetXaxis().SetTitle("m_{a,pred} [GeV]")
+    fUnity.GetXaxis().SetTitle("m_{#Gamma,pred} [GeV]")
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
@@ -1545,35 +1547,19 @@ hatch, hatch2 = {}, {}
 ax, ay = {}, {}
 c = {}
 
-sample_data = 'Run2017'
-#sample_data = 'Run2017B-F'
-sample = sample_data
 keys = ['ma0vma1']
-#keys = ['ma0vma1', 'ma1']
-#keys = ['ma0vma1', 'ma0', 'ma1']
 #valid_blind = 'sg'
 valid_blind = 'diag_lo_hi'
 limit_blind = 'offdiag_lo_hi'
 blinds = [valid_blind, limit_blind]
 #blinds = [valid_blind]
-#syst = 'ptrwgt_resample'
-#syst = 'ptrwgt'
-#syst = 'tempfrac'
-#systs = ['ptrwgt', 'tempfrace1', 'tempfrace2']
 #systs = ['flo']
 systs = ['flo', 'hgg']
 #cr = 'a0noma1inv'
 syst_shifts = {}
-#syst_shifts['flo'] = ['0p406', '1p000']
-#syst_shifts['flo'] = ['0p406', '0p758']
-#syst_shifts['flo'] = ['0p504', '0p791']
-#syst_shifts['flo_None_hgg'] = ['dn', 'up']
 syst_shifts['flo'] = ['Dn', 'Up']
-syst_shifts['hgg'] = ['Nom', 'Syst']
-#indir = 'Templates/scan_ptrwgt'
-#indir = 'Templates/scan_ptrwgt/nom-nom'
-#indir = 'Templates/prod_normblind_diaglohi/nom-nom'
-indir = 'Templates/prod_fixsb2srnorm/nom-nom'
+#syst_shifts['hgg'] = ['Nom', 'Syst']
+syst_shifts['hgg'] = ['Dn', 'Up']
 apply_blinding = True
 #apply_blinding = False
 plot_syst = False
@@ -1598,12 +1584,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso <
 #sub_campaign = 'bdtgtm0p97_relChgIsolt0p06_etalt1p44' # bdt > -0.97, relChgIso < 0.06
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44' # bdt > -0.96, relChgIso < 0.08
-##campaign = 'runBkg_ptwgts_bdtgtm0p99-v2noceil/Templates_bkg'
-##campaign = 'bkgPtWgts-Era04Dec2020v1/%s/nom-nom/Templates_bkg'%sub_campaign # no 2018A, 2016H+2018 failed lumis
-##campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Templates_bkg'%sub_campaign # 2016H+2018 failed lumis, run = '2017'
-#campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Run2/Templates_bkg'%sub_campaign # yr-by-yr with Run2 ptwgts, 2016H+2018 failed lumis, run = '2017'
-campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Templates_bkg'%sub_campaign # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
-#2018/bkgPtWgts-Era04Dec2020v1/bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom/Templates_bkg/
+#campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Templates_bkg'%sub_campaign # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+campaign = 'bkgPtWgts-Era22Jun2021v1/%s/nom-nom/Templates_bkg'%sub_campaign # combined full Run2, mgg95
 
 # Nominals
 inpath = '%s/%s/%s_sb2sr+hgg.root'%(indir, campaign, sample)
@@ -1653,28 +1635,19 @@ ma_bins = array('d', ma_bins)
 if dMa == 50:
     nbins = {valid_blind:420, limit_blind:196} #dM50
 elif dMa == 100:
-    nbins = {valid_blind:110, limit_blind:54} #dM100
+    #nbins = {valid_blind:110, limit_blind:54} #dM100, blind_w = 200MeV
+    nbins = {valid_blind:90, limit_blind:72} #dM100, blind_w = 300MeV
 else:
     #nbins = {valid_blind:1640, limit_blind:664} #dM25, blind_w = 200MeV
     nbins = {valid_blind:1332, limit_blind:972} #dM25, blind_w = 300MeV
 
 hvalid, hlimit = {}, {}
 
-xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
+#xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
+xtitle, ytitle, ztitle = "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
 #zrange = None
 #zrange = [0., 650.]
 if dMa == 100:
-    #ymax_1d = 15.e3
-    #ymax_flat = 4.e3
-    # 2016
-    #ymax_1d = 12.e3
-    #ymax_flat = 5.e3
-    # 2017
-    #ymax_1d = 18.e3
-    #ymax_flat = 6.e3
-    # 2018
-    #ymax_1d = 24.e3
-    #ymax_flat = 8.e3
     # Run2
     ymax_1d = 54.e3
     ymax_flat = 18.e3
@@ -1683,13 +1656,9 @@ elif dMa == 50:
     ymax_1d = 30.e3
     ymax_flat = 5.4e3
 else:
-    # 25 MeV
-    # 2017
-    #ymax_1d = 4.e3
-    #ymax_flat = 350
     # Run2
-    ymax_1d = 14.e3 # 16.e3
-    ymax_flat = 1.4e3
+    ymax_1d = 18.e3 # 16.e3
+    ymax_flat = 1.6e3
 zrange = [0., ymax_flat]
 do_trunc = True
 do_log = False if do_trunc else True
@@ -1720,7 +1689,7 @@ for kidx in h:
 #    if key != 'ma0' and key != 'ma1': continue
 #
 #    #print(kidx)
-#    #plot_1dma(kidx, "", yrange=None, new_canvas=True, color=1, titles=["m_{a,pred} [GeV]", "N_{evts} / 25 MeV"])
+#    #plot_1dma(kidx, "", yrange=None, new_canvas=True, color=1, titles=["m_{#Gamma,pred} [GeV]", "N_{evts} / 25 MeV"])
 #
 ##keys_1d = ['ma0', 'ma1']
 #keys_1d = keys[1:]
@@ -1754,63 +1723,16 @@ k = kfitpol
 #h[k] = ROOT.TF2(k, pol2_2d_x_bkg, -0.4, 1.2, -0.4, 1.2, nparams)
 h[k] = ROOT.TF2(k, pol2_2d_x_bkg, 0., 1.2, 0., 1.2, nparams)
 ## Run2, nom-nom
-#'bdtgtm0p98_relChgIsolt0p05_etalt1p44' # nominal
-#'bdtgtm0p99_relChgIsolt0p05_etalt1p44' # bdt > -0.99
-#'bdtgtm0p96_relChgIsolt0p05_etalt1p44' # bdt > -0.96
-#'bdtgtm0p98_relChgIsolt0p03_etalt1p44' # relChgIso < 0.03
-#'bdtgtm0p98_relChgIsolt0p07_etalt1p44' # relChgIso < 0.07
 if dMa == 25:
     pass
 #    h[k].FixParameter(0,  9.86310e-01)
 #    h[k].FixParameter(1, -6.07111e-03)
 #    h[k].FixParameter(2,  3.15883e-02)
-#    h[k].FixParameter(0,  9.94601e-01)
-#    h[k].FixParameter(1, -1.19847e-02)
-#    h[k].FixParameter(2,  2.00016e-02)
-#    h[k].FixParameter(0,  9.85770e-01)
-#    h[k].FixParameter(1, -1.11777e-02)
-#    h[k].FixParameter(2,  3.70487e-02)
-#    h[k].FixParameter(0,  9.84844e-01)
-#    h[k].FixParameter(1, -4.33492e-03)
-#    h[k].FixParameter(2,  3.30299e-02)
-#    h[k].FixParameter(0,  9.89707e-01)
-#    h[k].FixParameter(1, -9.86390e-03)
-#    h[k].FixParameter(2,  2.79949e-02)
-#    h[k].FixParameter(0,  9.95226e-01)
-#    h[k].FixParameter(1, -1.54637e-02)
-#    h[k].FixParameter(2,  2.14290e-02)
-#    h[k].FixParameter(0,  9.88623e-01)
-#    h[k].FixParameter(1, -1.48400e-02)
-#    h[k].FixParameter(2,  3.43419e-02)
-#    h[k].FixParameter(0,  9.84700e-01)
-#    h[k].FixParameter(1, -8.21132e-03)
-#    h[k].FixParameter(2,  3.67385e-02)
 elif dMa == 50:
     pass
 #    h[k].FixParameter(0,  9.85385e-01)
 #    h[k].FixParameter(1, -5.41274e-03)
 #    h[k].FixParameter(2,  3.23650e-02)
-#    h[k].FixParameter(0,  9.94127e-01)
-#    h[k].FixParameter(1, -1.16004e-02)
-#    h[k].FixParameter(2,  2.06105e-02)
-#    h[k].FixParameter(0,  9.85292e-01)
-#    h[k].FixParameter(1, -1.09174e-02)
-#    h[k].FixParameter(2,  3.77911e-02)
-#    h[k].FixParameter(0,  9.84141e-01)
-#    h[k].FixParameter(1, -3.73403e-03)
-#    h[k].FixParameter(2,  3.39289e-02)
-#    h[k].FixParameter(0,  9.89025e-01)
-#    h[k].FixParameter(1, -9.32034e-03)
-#    h[k].FixParameter(2,  2.88988e-02)
-#    h[k].FixParameter(0,  9.94628e-01)
-#    h[k].FixParameter(1, -1.49709e-02)
-#    h[k].FixParameter(2,  2.22029e-02)
-#    h[k].FixParameter(0,  9.88039e-01)
-#    h[k].FixParameter(1, -1.44068e-02)
-#    h[k].FixParameter(2,  3.51611e-02)
-#    h[k].FixParameter(0,  9.83916e-01)
-#    h[k].FixParameter(1, -7.56216e-03)
-#    h[k].FixParameter(2,  3.77678e-02)
 elif dMa == 100:
     pass
 #    h[k].FixParameter(0,  9.85385e-01)
@@ -1818,18 +1740,6 @@ elif dMa == 100:
 #    h[k].FixParameter(2,  3.26524e-02)
 else:
     raise Exception('Invalid dMa',dMa)
-# 2016
-#h[k].FixParameter(0, 9.60924e-01)
-#h[k].FixParameter(1, 1.36569e-02)
-#h[k].FixParameter(2, 6.80024e-02)
-# 2017
-#h[k].FixParameter(0, 9.75586e-01)
-#h[k].FixParameter(1, 1.48966e-02)
-#h[k].FixParameter(2, 3.55535e-02)
-# 2018
-#h[k].FixParameter(0, 1.00610e+00)
-#h[k].FixParameter(1, -2.97482e-02)
-#h[k].FixParameter(2, 1.17133e-02)
 
 #fitResult = h[kfittgt].Fit(h[k], "LLIEMNS")
 # Set fit tgt to have stat errs of bkg+tgt
@@ -1875,130 +1785,43 @@ for ix in range(1, h[kfitsrc].GetNbinsX()+1):
         h[k].SetBinContent(ix, iy, pol_val)
 print('pol_hist:%s, min:%f, max:%f'%(k, h[k].GetMinimum(), h[k].GetMaximum()))
 #plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.05, 1.+0.05])
-plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1], do_trunc=do_trunc)
+#plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1], do_trunc=do_trunc)
+plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.04, 1.+0.04], do_trunc=do_trunc)
 
 # Eigenvariations from solving covariance matrix
 # Must be hardcoded here
-# a0 nom, a1 inv
-#floNone, dM50
-#np.sqrt(3.930942e-04) * np.array([ 0.603954327138,-0.56766240213,-0.559462749376 ]),
-#np.sqrt(1.164696e-05) * np.array([ -0.778729579015,-0.270772601254,-0.565917344828 ]),
-#np.sqrt(1.440589e-04) * np.array([ -0.169762815419,-0.777458420507,0.605589787631 ]),
-#floNone, dM100
-#np.sqrt(3.861450e-04) * np.array([ 0.607758680651,-0.560912162028,-0.562144939124 ]),
-#np.sqrt(1.139487e-05) * np.array([ -0.777720829331,-0.27728825569,-0.564146731694 ]),
-#np.sqrt(1.387601e-04) * np.array([ -0.16056057336,-0.780056901608,0.604757416272 ])
-#flo0p756, dM50
-#np.sqrt(3.861450e-04) * np.array([ 0.607758680651,-0.560912162028,-0.562144939124 ]),
-#np.sqrt(1.139487e-05) * np.array([ -0.777720829331,-0.27728825569,-0.564146731694 ]),
-#np.sqrt(1.387601e-04) * np.array([ -0.16056057336,-0.780056901608,0.604757416272 ])
-# a0 nom, a1 nom
-#'bdtgtm0p98_relChgIsolt0p05_etalt1p44' # nominal
-#'bdtgtm0p99_relChgIsolt0p05_etalt1p44' # bdt > -0.99
-#'bdtgtm0p96_relChgIsolt0p05_etalt1p44' # bdt > -0.96
-#'bdtgtm0p98_relChgIsolt0p03_etalt1p44' # relChgIso < 0.03
-#'bdtgtm0p98_relChgIsolt0p07_etalt1p44' # relChgIso < 0.07
 if dMa == 25:
     pass
     varvec = np.array([
     # nominal
-    #np.sqrt(1.066691e-04) * np.array([ 0.562404198284,-0.603508915393,-0.565224297774 ]),
-    #np.sqrt(3.911051e-06) * np.array([ -0.823753446486,-0.349720460483,-0.44623520583 ]),
-    #np.sqrt(3.639982e-05) * np.array([ -0.0716364233867,-0.71657001651,0.693826804241 ])
-    #np.sqrt(1.066970e-04) * np.array([ 0.562141898226,-0.60363721573,-0.565348209553 ]),
-    #np.sqrt(3.913354e-06) * np.array([ -0.823934361917,-0.349560657841,-0.446026359918 ]),
-    #np.sqrt(3.640968e-05) * np.array([ -0.0716146180024,-0.716539920922,0.693860135916 ])
-    #np.sqrt(9.274539e-05) * np.array([ 0.570464706512,-0.593332275499,-0.567914456124 ]),
-    #np.sqrt(3.336513e-06) * np.array([ -0.818792763574,-0.356616170753,-0.449892561703 ]),
-    #np.sqrt(3.157810e-05) * np.array([ -0.0644082987076,-0.721652075178,0.68925311276 ])
-    #np.sqrt(1.244557e-04) * np.array([ 0.55434389349,-0.612662957566,-0.563335555576 ]),
-    #np.sqrt(4.626777e-06) * np.array([ -0.828763080315,-0.344109493935,-0.44129402091 ]),
-    #np.sqrt(4.222753e-05) * np.array([ -0.0765153870617,-0.711500356015,0.698507436562 ])
-    #np.sqrt(1.356939e-04) * np.array([ 0.560020499389,-0.60721732788,-0.563617030427 ]),
-    #np.sqrt(4.984923e-06) * np.array([ -0.82496478583,-0.346123745446,-0.446801359644 ]),
-    #np.sqrt(4.659117e-05) * np.array([ -0.0762242901278,-0.715182123351,0.694769305621 ])
-    #np.sqrt(9.261172e-05) * np.array([ 0.56436012354,-0.600305017641,-0.566684689005 ]),
-    #np.sqrt(3.381959e-06) * np.array([ -0.822753383395,-0.352769101001,-0.4456801897 ]),
-    #np.sqrt(3.139632e-05) * np.array([ -0.0676352058492,-0.717765872116,0.692991797755 ])
-    #np.sqrt(1.183220e-04) * np.array([ 0.568722918788,-0.596219763873,-0.566635892627 ]),
-    #np.sqrt(4.285811e-06) * np.array([ -0.819679317641,-0.353520679579,-0.450720473622 ]),
-    #np.sqrt(4.054224e-05) * np.array([ -0.0684109485198,-0.720794785135,0.689764321957 ])
-    #sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
-    #np.sqrt(1.088091e-04) * np.array([ 0.556336452982,-0.609615795254,-0.56467542293 ]),
-    #np.sqrt(4.023956e-06) * np.array([ -0.827742255736,-0.346848222679,-0.44106583238 ]),
-    #np.sqrt(3.664693e-05) * np.array([ -0.0730240313319,-0.712786709052,0.697569063424 ])
     #blind_w = 300MeV
-    np.sqrt(1.776221e-04) * np.array([ 0.576481906876,-0.588928336931,-0.56642036069 ]),
-    np.sqrt(4.943718e-06) * np.array([ -0.813627583437,-0.349795992221,-0.46438445204 ]),
-    np.sqrt(3.837421e-05) * np.array([ -0.075357590955,-0.728564463713,0.680819400208 ])
-    #np.sqrt(1.080694e-04) * np.array([ 0.558236081284,-0.607522628593,-0.565056398335 ]),
-    #np.sqrt(3.984901e-06) * np.array([ -0.826546953893,-0.348064712515,-0.442347249243 ]),
-    #np.sqrt(3.662565e-05) * np.array([ -0.0720597707699,-0.713979839806,0.696448259232 ])
-    #np.sqrt(9.885980e-05) * np.array([ 0.558028565657,-0.607385726654,-0.565408435529 ]),
-    #np.sqrt(3.643369e-06) * np.array([ -0.826814669823,-0.349014069259,-0.441097133549 ]),
-    #np.sqrt(3.307683e-05) * np.array([ -0.0705806041089,-0.713632789687,0.696955249501 ])
-    #np.sqrt(1.034312e-04) * np.array([ 0.557400973971,-0.608234618522,-0.565114858279 ]),
-    #np.sqrt(3.823405e-06) * np.array([ -0.827139744297,-0.348024419126,-0.44126958551 ]),
-    #np.sqrt(3.470536e-05) * np.array([ -0.0717216677156,-0.713393056123,0.697084177023 ])
+    #np.sqrt(1.083130e-04) * np.array([ 0.587484331363,-0.571860187163,-0.572571468675 ]),
+    #np.sqrt(3.032697e-06) * np.array([ -0.807475967646,-0.367619503654,-0.461344190607 ]),
+    #np.sqrt(2.450429e-05) * np.array([ -0.0533359360665,-0.733370184062,0.677734056288 ])
+    #fhggv2
+    #np.sqrt(1.083969e-04) * np.array([ 0.586567939731,-0.572481966161,-0.572889562219 ]),
+    #np.sqrt(3.039681e-06) * np.array([ -0.808148208137,-0.367222218812,-0.460482698584 ]),
+    #np.sqrt(2.453346e-05) * np.array([ -0.0532402644964,-0.733084060959,0.678051055456 ])
+    #fhggv3
+    # no neg
+    np.sqrt(1.083035e-04) * np.array([ 0.58764846401,-0.571807582417,-0.572455562849 ]),
+    np.sqrt(3.036732e-06) * np.array([ -0.807346534633,-0.36761639508,-0.461573135142 ]),
+    np.sqrt(2.449972e-05) * np.array([ -0.0534869681563,-0.733412758792,0.677676080055 ])
     ])
 elif dMa == 50:
     pass
     varvec = np.array([
-    #np.sqrt(1.070820e-04) * np.array([ 0.562222554638,-0.603912346959,-0.56497404918 ]),
-    #np.sqrt(3.911583e-06) * np.array([ -0.823884389223,-0.349914522139,-0.445841160493 ]),
-    #np.sqrt(3.649641e-05) * np.array([ -0.0715563571648,-0.716135255651,0.694283791661 ])
-    #np.sqrt(9.303974e-05) * np.array([ 0.570517131429,-0.593627532918,-0.56755312959 ]),
-    #np.sqrt(3.348944e-06) * np.array([ -0.818751781792,-0.356856341245,-0.449776690732 ]),
-    #np.sqrt(3.165132e-05) * np.array([ -0.0644648939956,-0.721290443494,0.689626256437 ])
-    #np.sqrt(1.249070e-04) * np.array([ 0.554514743442,-0.612819235978,-0.562997320883 ]),
-    #np.sqrt(4.623120e-06) * np.array([ -0.82864382312,-0.344367862079,-0.441316428395 ]),
-    #np.sqrt(4.234983e-05) * np.array([ -0.0765690127254,-0.711240718451,0.698765931273 ])
-    #np.sqrt(1.361485e-04) * np.array([ 0.560144404114,-0.607357365514,-0.56334294803 ]),
-    #np.sqrt(4.982947e-06) * np.array([ -0.824883250176,-0.346391527098,-0.446744371575 ]),
-    #np.sqrt(4.671853e-05) * np.array([ -0.0761962605302,-0.714933521742,0.69502819322 ])
-    #np.sqrt(9.294303e-05) * np.array([ 0.564459255671,-0.600594398531,-0.566279186568 ]),
-    #np.sqrt(3.388717e-06) * np.array([ -0.822695096421,-0.353205725027,-0.44544190882 ]),
-    #np.sqrt(3.146825e-05) * np.array([ -0.0675168646492,-0.717308918292,0.693476307257 ])
-    #np.sqrt(1.186929e-04) * np.array([ 0.568841942332,-0.596398319889,-0.566328428279 ]),
-    #np.sqrt(4.275905e-06) * np.array([ -0.819585354896,-0.353670582687,-0.450773740341 ]),
-    #np.sqrt(4.065121e-05) * np.array([ -0.0685469961677,-0.720573495887,0.689981989867 ])
-    #np.sqrt(1.092173e-04) * np.array([ 0.556480124376,-0.609832874604,-0.564299332117 ]),
-    #np.sqrt(4.019297e-06) * np.array([ -0.827654711325,-0.347258949718,-0.440906907025 ]),
-    #np.sqrt(3.674336e-05) * np.array([ -0.0729215331464,-0.712400931283,0.697973755316 ])
-    #np.sqrt(1.084577e-04) * np.array([ 0.558367153849,-0.607763066168,-0.564668200721 ]),
-    #np.sqrt(3.990140e-06) * np.array([ -0.826465976577,-0.348467518347,-0.442181386105 ]),
-    #np.sqrt(3.673217e-05) * np.array([ -0.0719729884273,-0.713578617995,0.696868312436 ])
     ])
 elif dMa == 100:
     pass
     varvec = np.array([
-    # nominal
-    #np.sqrt(1.085777e-04) * np.array([ 0.56320956309,-0.604355907366,-0.563514795969 ]),
-    #np.sqrt(3.906831e-06) * np.array([ -0.823166042651,-0.350883563225,-0.446406083387 ]),
-    #np.sqrt(3.684545e-05) * np.array([ -0.0720600740395,-0.715286419758,0.695106238958 ])
-    #np.sqrt(1.085660e-04) * np.array([ 0.562889609916,-0.604562017175,-0.563613390933 ]),
-    #np.sqrt(3.909766e-06) * np.array([ -0.823396164029,-0.350816165202,-0.446034500118 ]),
-    #np.sqrt(3.685422e-05) * np.array([ -0.0719308286576,-0.71514528987,0.695264820242 ])
-    #sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
-    np.sqrt(1.108096e-04) * np.array([ 0.557303057842,-0.610185829298,-0.563104391249 ]),
-    np.sqrt(4.015238e-06) * np.array([ -0.827102877713,-0.348432602205,-0.441016497877 ]),
-    np.sqrt(3.710513e-05) * np.array([ -0.0728980891351,-0.711525105281,0.698869010013 ])
+    # !! dummy values !!
+    np.sqrt(1.083035e-04) * np.array([ 0.58764846401,-0.571807582417,-0.572455562849 ]),
+    np.sqrt(3.036732e-06) * np.array([ -0.807346534633,-0.36761639508,-0.461573135142 ]),
+    np.sqrt(2.449972e-05) * np.array([ -0.0534869681563,-0.733412758792,0.677676080055 ])
     ])
 else:
     raise Exception('invalid dMa',dMa)
-#varvec = np.array([
-# 2016
-#np.sqrt(4.787525e-04) * np.array([ 0.55001623775,-0.627928268382,-0.550625306337 ]),
-#np.sqrt(1.721833e-05) * np.array([ -0.831546149018,-0.35053769438,-0.430876231501 ]),
-#np.sqrt(1.601292e-04) * np.array([ -0.0775444405827,-0.694859276822,0.714952757285 ])
-# 2017
-#np.sqrt(3.248286e-04) * np.array([ 0.564048681007,-0.599969634809,-0.567349559584 ]),
-#np.sqrt(1.176815e-05) * np.array([ -0.822505893027,-0.347457125189,-0.450286133576 ]),
-#np.sqrt(1.114032e-04) * np.array([ -0.0730283601712,-0.720631655884,0.689461293438 ])
-# 2018
-#np.sqrt(2.480435e-04) * np.array([ 0.568880484219,-0.594577232667,-0.568201468731 ]),
-#np.sqrt(8.869191e-06) * np.array([ -0.819680183314,-0.353558105642,-0.450689541722 ]),
-#np.sqrt(8.399734e-05) * np.array([ -0.0670775056012,-0.722131968776,0.688495481404 ])
 varvec *= 1.
 for v in varvec:
     print(v)
@@ -2184,7 +2007,8 @@ k1dmas = [k for k in k1dmas if 'offdiag' in k]
 print('>> 1D-mA, all offdiag ks:',k1dmas)
 
 ##########################
-xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
+#xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
+xtitle, ytitle, ztitle = "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "(Data/Bkg) / %d MeV"%(dMa)
 zrange = [0., 2.]
 
 sr_k = sample+'sr'+valid_blind+key
@@ -2321,38 +2145,24 @@ file_out.Close()
 #########################
 regions = ['sr']
 blinds = [limit_blind]
-#sample_data = 'Run2017B-F'
-#sample = sample_data
 sample_sg = 'h4g'
 
-#systs = ['offset', 'scale']
-#systs = ['scale', 'smear']
-#syst_shifts['smear'] = ['dn', 'up']
-#syst_shifts['scale'] = ['dn', 'up']
-#indir = 'Templates/prod_fixsb2srnorm/nom-nom/h4g'
-
-#systs = ['PhoIdSF']
-#systs = ['PhoIdSF', 'Scale', 'Smear']
-systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi']
+#systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi']
+systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi', 'TrgSF']
 syst_shifts['PhoIdSF'] = ['dn', 'up']
 syst_shifts['Scale'] = ['dn', 'up']
 syst_shifts['Smear'] = ['dn', 'up']
+syst_shifts['Lumi'] = ['dn', 'up']
+syst_shifts['TrgSF'] = ['dn', 'up']
 #systs = ['TEST'] # dummy to force output of nominal sg plots
 #syst_shifts['TEST'] = ['dn', 'up']
-#systs = ['Lumi']
-syst_shifts['Lumi'] = ['dn', 'up']
-#systs = []
 keys = ['ma0vma1']
 
 #run = 'Run2'
 #run = '2017'
 indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
-#/eos/uscms/store/user/lpchaa4g/mandrews/Run2/sg-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom/Templates/systNom_nom/h4g_blind_offdiag_lo_hi_templates.root
-#campaign = 'sg-Era04Dec2020v2/%s/nom-nom/Templates'%sub_campaign
-#campaign = 'sg-Era04Dec2020v3/%s/nom-nom/Templates'%sub_campaign #old 2017 ss, SFs
-#campaign = 'sg-Era04Dec2020v4/%s/nom-nom/Templates'%sub_campaign # 2016-18 SFs. 2017-18 ss. 2016 ss uses 2017.
-#campaign = 'sg-Era04Dec2020v5/%s/nom-nom/Templates'%sub_campaign # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
-campaign = 'sg-Era04Dec2020v6/%s/nom-nom/Templates'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era04Dec2020v6/%s/nom-nom/Templates'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+campaign = 'sg-Era22Jun2021v2/%s/nom-nom/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
 
 ma_pts = ['0p1', '0p2', '0p4', '0p6', '0p8', '1p0', '1p2']
 #ma_pts = ['0p1']
@@ -2606,53 +2416,3 @@ for ma in ma_pts:
 
     file_out.Write()
     file_out.Close()
-
-#'''
-#xtitle, ytitle, ztitle = "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "N_{evts} / %d MeV"%(dMa)
-#zrange = None
-#zrange = [1., 4100.]
-#for blind in blinds:
-#    for r in regions:
-#
-#        kbkg = 'Run2017B-F'+'sb2sr'+blind+key+'rebin'
-#        kreg = sample+r+blind+key
-#        k = kreg+'rebin'
-#
-#        if ma_bins is not None:
-#            h[k] = rebin2d(h[kreg], ma_bins)
-#
-#        for ix in range(1, h[k].GetNbinsX()+1):
-#            for iy in range(1, h[k].GetNbinsY()+1):
-#                binc = h[k].GetBinContent(ix, iy)
-#                h[k].SetBinContent(ix, iy, binc)
-#
-#        plot_2dma(k, "", xtitle, ytitle, ztitle, zrange, do_log=True)
-#
-#        region = 'limit'
-#
-#        ksrcs = [kbkg, k]
-#        ktgts = [sample+'_Obs']
-#        get_datavmc_flat(region, ksrcs, [None], ktgts, nbins[region])
-#        #yrange = [0., 600.]
-#        plot_1dma('flat_'+ktgts[0], color=4, yrange=yrange_flat)
-#
-#        file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%region, "UPDATE")
-#        #file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%region, "RECREATE")
-#        hout = hvalid if region == 'valid' else hlimit
-#        #k_ = 'flat_%sh4g100MeV'%region
-#        k_ = 'flat_%sh4g'%region
-#        hout[k_] = h['flat_'+ktgts[0]].Clone()
-#        hout[k_].SetName(k_)
-#        #for shift in ['Up', 'Down']:
-#        #    k_shift = k_+'_stat'+shift
-#        #    hout[k_shift] = hout[k_].Clone()
-#        #    hout[k_shift].Reset()
-#        #    hout[k_shift].SetName(k_shift)
-#        #    for ib in range(1, hout[k_shift].GetNbinsX()+1):
-#        #        binc = hout[k_].GetBinContent(ib)
-#        #        binerr = hout[k_].GetBinError(ib)
-#        #        binout = binc + binerr if shift == 'Up' else binc - binerr
-#        #        hout[k_shift].SetBinContent(ib, binout)
-#        file_out.Write()
-#        file_out.Close()
-#'''

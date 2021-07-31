@@ -12,7 +12,7 @@ CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
 CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Simulation"
-CMS_lumi.lumi_sqrtS = "134 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+CMS_lumi.lumi_sqrtS = "136 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 #CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 CMS_lumi.cmsTextOffset = 0.
 iPos = 11 # CMS in frame
@@ -60,7 +60,7 @@ def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
     h[k].GetYaxis().SetTitleSize(0.06)
     h[k].GetYaxis().SetTitleFont(62)
 
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / 25 MeV", "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / 25 MeV", "")
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     #h[k].SetLineColor(9)
@@ -174,10 +174,12 @@ c = {}
 eos_redir = 'root://cmseos.fnal.gov'
 eos_basedir = '/store/user/lpchaa4g/mandrews/'#$ root -l 2017/maNtuples-Era03Dec2020v1/h4g2017-mA0p4GeV_mantuple.root
 #campaign = 'Templates/templates-Era04Dec2020v1'
-campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+#campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+campaign = 'sg-Era22Jun2021v2/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
 
 # For mc->data normalization
-ggntuple_campaign = 'Era04Dec2020v1_ggSkim-v1' # fixed h4g mc triggers
+#ggntuple_campaign = 'Era04Dec2020v1_ggSkim-v1' # fixed h4g mc triggers
+ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign.split('/')[0][-1]
 xs_sg = 1. #pb
 # Official lumis: https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM
 #tgt_lumis = {'2016': 36.33e3, #35.92e3,
@@ -187,9 +189,9 @@ xs_sg = 1. #pb
 # Calculated using:
 #   [1] cmslpc:~mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/crab/run_getLumis.py
 #   [2] lxplus:~mandrews/work/h2aa/brilcalc_work/getLumis_byEra.sh
-tgt_lumis = {'2016': 35.38e3,
+tgt_lumis = {'2016': 36.25e3,
              '2017': 41.53e3,
-             '2018': 56.90e3} # /pb.
+             '2018': 58.75e3} # /pb. Run2: 136.53/pb
 
 runs = ['2016', '2017', '2018']
 #runs = ['2017'] # eta study
@@ -205,7 +207,8 @@ keys = ['ma0','ma1']
 #keys = ['maxy']
 
 nit = len(keys)
-ymaxs = {'0p1':2.e3, '0p4':2.5e3, '1p0':500.}
+#ymaxs = {'0p1':2.e3, '0p4':2.5e3, '1p0':500.}
+ymaxs = {'0p1':2.4e3, '0p4':2.8e3, '1p0':800.}
 
 # /eos/uscms/store/user/lpchaa4g/mandrews/2017/sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom/
 for r in runs:

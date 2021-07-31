@@ -20,6 +20,7 @@ function xrdmv_with_check {
 INLIST=${1}
 EOSTGT=${2}
 TARFILE=${3}
+SKIPTRG=${4}
 
 cd ${_CONDOR_SCRATCH_DIR}
 
@@ -35,14 +36,18 @@ cd ${_CONDOR_SCRATCH_DIR}
 
 echo ">> Extracting tarball containing work files..."
 mkdir -p CMSSW_10_5_0/src/h2aa
-#tar -xvf h2aa.tgz -C CMSSW_10_5_0/src/h2aa/
 tar -xvf $TARFILE -C CMSSW_10_5_0/src/h2aa/
 mv $INLIST CMSSW_10_5_0/src/h2aa/ntupleAnalysis/
 cd CMSSW_10_5_0/src/h2aa/ntupleAnalysis
 
 echo ">> Starting python script..."
+if [ $SKIPTRG == "TRUE" ]; then
+    echo "   .. skipping HLT triggers"
+    python skim_events.py -i $INLIST --skip_trg
+else
+    python skim_events.py -i $INLIST
+fi
 #python skim_ntuple.py -i $INLIST
-python skim_events.py -i $INLIST
 
 #----------------
 

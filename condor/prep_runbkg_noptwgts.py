@@ -10,14 +10,16 @@ MEM = '__MEM__'
 
 # Input maNtuple campaign
 indir = '../maNtuples'
-input_campaign = 'Era04Dec2020v1' # 2018A added later
+#input_campaign = 'Era04Dec2020v1' # 2018A added later
+input_campaign = 'Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
 print('>> Input campaign: maNtuples-%s'%input_campaign)
 
 # Output bkg campaign
 #this_campaign = 'bkgNoPtWgts-Era11Dec2020v1' # no eta cut applied, no 2018A, 2016H+2018 failed lumis
 #this_campaign = 'bkgNoPtWgts-Era04Dec2020v1' # rename of Era11Dec2020v1
 #this_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # redo with 2018A
-this_campaign = 'bkgNoPtWgts-Era04Dec2020v3' # redo v2 with nVtx, nPU plots
+#this_campaign = 'bkgNoPtWgts-Era04Dec2020v3' # redo v2 with nVtx, nPU plots
+this_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
 print('>> Output campaign:',this_campaign)
 
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv
@@ -34,8 +36,8 @@ print('>> Output campaign:',this_campaign)
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.08
 
-sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.07 !! optimal
-#sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-inv' # bdt > -0.96, relChgIso < 0.07 !! optimal
+#sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.07 !! optimal
+sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-inv' # bdt > -0.96, relChgIso < 0.07 !! optimal
 print('>> Output sub-campaign:',sub_campaign)
 
 exec_file = 'run_bkg_noptwgts.sh'

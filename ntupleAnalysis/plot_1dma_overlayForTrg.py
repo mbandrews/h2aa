@@ -230,7 +230,7 @@ def draw_hist_1dma_overlay_ratio(k_, h, hc, c, l, hatch, legend, it, ymax_=None)
     if it == nit-1:
         outfile = 'Plots/1dma_trgs/mAvRun_%s.pdf'%(k)
         #outfile = 'Plots/mAvEtaCut_%s_norm_%s.eps'%(k, normalize)
-        c.Print(outfile)
+        #c.Print(outfile)
 
 def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
 
@@ -346,9 +346,9 @@ c = {}
 
 eos_redir = 'root://cmseos.fnal.gov'
 eos_basedir = '/store/user/lpchaa4g/mandrews/'#$ root -l 2017/maNtuples-Era03Dec2020v1/h4g2017-mA0p4GeV_mantuple.root
-#campaign = 'Templates/templates-Era04Dec2020v1'
-campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+indir = 'Templates/h4g'
 #expts = ['', '-eta1p4', '-eta1p3', '-eta1p2'] # eta study
+#expts = ['systNom_nom', 'systTrgSF_dn', 'systTrgSF_up', 'systNom_nom_noTrgSF']
 expts = ['systNom_nom', 'systTrgSF_dn', 'systTrgSF_up', 'systNom_nom_noTrgSF']
 #expts = ['systNom_nom', 'systNom_nom_noTrgSF']
 #expts = ['systTrgSF_dn', 'systTrgSF_up']
@@ -383,9 +383,9 @@ for r in runs:
         for e in expts:
             #filepath = "%s/%s/%s/%s/h4g%s%s-mA%sGeV_sr_blind_None_templates.root"%(eos_redir, eos_basedir, r, campaign, r, e, m)
             if m == '0p0':
-                filepath = "Templates/%s/bg%s-hgg_sr_blind_None_templates.root"%(e, r)
+                filepath = "%s/%s/bg%s-hgg_sr_blind_None_templates.root"%(indir, e, r)
             else:
-                filepath = "Templates/%s/h4g%s-mA%sGeV_sr_blind_None_templates.root"%(e, r, m)
+                filepath = "%s/%s/h4g%s-mA%sGeV_sr_blind_None_templates.root"%(indir, e, r, m)
             print('>> Opening: %s'%filepath)
             hf[r+m+e] = ROOT.TFile.Open(filepath)
             for k in keys:

@@ -32,7 +32,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #sub_campaign = 'bdtgtm0p97_relChgIsolt0p06_etalt1p44/nom-%s'%sel # bdt > -0.97, relChgIso < 0.06
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.08
-campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/%s'%sub_campaign
+#campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/%s'%sub_campaign
+campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v1/%s'%sub_campaign
 print('.. input campaign: %s'%campaign_ptwgts)
 
 # Output combined templates to lpchaa4g/mandrews/Run2/

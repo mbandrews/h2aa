@@ -23,7 +23,7 @@ distns = [k2dma]
 #distns = [k2dma, 'ma0', 'ma0']
 ma_blind_input = None
 ma_blind_output = 'offdiag_lo_hi'
-#ma_blind_output = 'diag_lo_hi'
+#ma_blind_output = 'diag_lo_hi' # for making unblinded plots in plot_2dma.py: both offdiag+diag blinding needed
 #ma_blind_output = 'lo_hi'
 #ma_blind_output = 'offdiag'
 
@@ -33,7 +33,9 @@ ma_blind_output = 'offdiag_lo_hi'
 #campaign = 'sg-Era04Dec2020v3' # use old (bdt+chgiso cuts) 2017 s+s for all yrs
 #campaign = 'sg-Era04Dec2020v4' # 2016-18 SFs. 2017-18 ss. 2016 ss uses 2017.
 #campaign = 'sg-Era04Dec2020v5' # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
-campaign = 'sg-Era04Dec2020v6' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era04Dec2020v6' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era22Jun2021v1' # h4g, hgg: mgg95 trgs, w/ HLT, no trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v1 + img:Era22Jun2021_AOD-IMGv1
+campaign = 'sg-Era22Jun2021v2' # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
 print('>> Signal selection campaign:',campaign)
 
 sel = 'nom'
@@ -53,8 +55,12 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 
 print('>> sub-campaign:',sub_campaign)
 
+# ggSkim campaign
 # For mc->data normalization
-ggntuple_campaign = 'Era04Dec2020v1_ggSkim-v1' # fixed h4g mc triggers
+#ggntuple_campaign = 'Era04Dec2020v1_ggSkim-v1' # fixed h4g mc triggers
+#ggntuple_campaign = 'Era20May2021v1_ggSkim-v1' # h4g, hgg: mgg95 trgs, w/ HLT req
+#ggntuple_campaign = 'Era20May2021v1_ggSkim-v2' # h4g, hgg: mgg95 trgs, no HLT req
+ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign[-1]
 xs_sg = 1. #pb
 # Official lumis: https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM
 #tgt_lumis = {'2016': 36.33e3, #35.92e3,
@@ -64,9 +70,9 @@ xs_sg = 1. #pb
 # Calculated using:
 #   [1] cmslpc:~mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/crab/run_getLumis.py
 #   [2] lxplus:~mandrews/work/h2aa/brilcalc_work/getLumis_byEra.sh
-tgt_lumis = {'2016': 35.38e3,
+tgt_lumis = {'2016': 36.25e3,
              '2017': 41.53e3,
-             '2018': 56.90e3} # /pb.
+             '2018': 58.75e3} # /pb. Run2: 136.53/pb
 lumi_uncerts = {'2016': 0.012, #0.025,
                 '2017': 0.023,
                 '2018': 0.025} # f_lumi

@@ -19,7 +19,10 @@ NCPU = '__NCPU__'
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v3_v1' # use old (bdt+chgiso cuts) 2017 s+s for all yrs
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v4_v1' # add 2016+17+18 phoid, 2017+18 ss. 2016 ss missing: use 2017 ss
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v5_v1' # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
-this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v6_v1' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v6_v1' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v1' # phoid+trg SFs. mgg95. no HLT applied.
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v2' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter
+this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v3' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter with full Run2, no neg bins
 print('>> Limit setting campaign:',this_campaign)
 
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv
@@ -88,6 +91,7 @@ systs = [
     'Scale',
     'Smear',
     'PhoIdSF',
+    'TrgSF',
     '* autoMCStats'
 ]
 
@@ -179,7 +183,8 @@ for m in masses:
     file_data = file_data.replace(INPUTS, jdl_inputs)
     file_data = file_data.replace(ARGS,   jdl_args)
     #file_data = file_data.replace(MEM,    '2800')
-    file_data = file_data.replace(MEM,    '8000')
+    #file_data = file_data.replace(MEM,    '8000')
+    file_data = file_data.replace(MEM,    '16000')
     file_data = file_data.replace(NCPU,   '10') #10
 
     # Write out sample-specific jdl

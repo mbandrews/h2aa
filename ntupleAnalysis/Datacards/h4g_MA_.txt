@@ -23,4 +23,5 @@ Lumi         shape   1.              -
 Scale        shape   1.              -
 Smear        shape   1.              -
 PhoIdSF      shape   1.              -
+TrgSF        shape   1.              -
 * autoMCStats 0.

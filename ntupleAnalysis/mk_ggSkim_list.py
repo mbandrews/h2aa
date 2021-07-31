@@ -4,7 +4,9 @@ from data_utils import *
 
 #campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v2' # h4g,hgg bad dipho trgs, data,dy: ok
 #campaign = 'ggNtuples-Era04Dec2020v1_ggSkim-v1' # h4g,hgg dipho trgs fixed
-campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v4' # data only pi0 skim: trg-npho-presel(hgg hoe)
+#campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v4' # data only pi0 skim: trg-npho-presel(hgg hoe)
+#campaign = 'ggNtuples-Era20May2021v1_ggSkim-v1' # data, h4g, hgg. mgg95 trgs
+campaign = 'ggNtuples-Era20May2021v1_ggSkim-v2' # h4g, hgg mgg95 trgs, no HLT req: do NOT apply HLT dipho trg--applied later using trg SFs instead
 
 eos_redir, eos_basedir, samples = {}, {}, {}
 
@@ -22,32 +24,28 @@ eos_basedir['2017'] = '/store/user/lpchaa4g/mandrews/2017/%s/ggSkims'%campaign
 eos_basedir['2018'] = '/store/user/lpchaa4g/mandrews/2018/%s/ggSkims'%campaign
 
 samples['data2016'] = [
-    'B'
-    ,'C'
-    ,'D'
-    ,'E'
-    ,'F'
-    ,'G'
-    ,'H'
+    'B0', 'B1',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G0', 'G1',
+    'H0', 'H1'
     ]
 
 samples['data2017'] = [
-    'B'
-    ,'C'
-    ,'D'
-    ,'E'
-    ,'F'
+    'B',
+    'C0', 'C1',
+    'D',
+    'E0', 'E1',
+    'F0', 'F1'
     ]
 
 samples['data2018'] = [
-    'A'
-    ,'B'
-    ,'C'
-    #,'D'
-    ,'D0'
-    ,'D1'
-    ,'D2'
-    ,'D3'
+    'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7',
+    'B0', 'B1', 'B2', 'B3', 'B4',
+    'C0', 'C1', 'C2', 'C3',
+    'D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'
     ]
 
 # Signal MC
@@ -94,20 +92,23 @@ samples['bg2018'] = [
 
 for r in ['2016', '2017', '2018']:
 
+    #if r != '2018': continue
     #if r != '2016': continue
+    #if r != '2017': continue
 
     print('Run:',r)
 
     for d in ['data', 'h4g', 'bg']:
 
-        if d != 'data': continue
+        #if d != 'data': continue
+        #if d != 'h4g': continue
         #if d == 'data': continue
 
         print('Data:',d)
 
         for s in samples[d+r]:
 
-            #if s != 'hgg': continue
+            if s != 'hgg': continue
             #if s == 'dy': continue
 
             print('Sample:',s)

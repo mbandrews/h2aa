@@ -15,11 +15,11 @@ import argparse
 
 # Register command line options
 parser = argparse.ArgumentParser(description='Run h2aa sg selection.')
-parser.add_argument('-s', '--sample', default='h4g2016-mA0p1GeV', type=str, help='Sample name.')
-#parser.add_argument('-s', '--sample', default='bg2016-hgg', type=str, help='Sample name.')
+parser.add_argument('-s', '--sample', default='h4g2017-mA0p4GeV', type=str, help='Sample name.')
+#parser.add_argument('-s', '--sample', default='bg2017-hgg', type=str, help='Sample name.')
 parser.add_argument('-r', '--region', default='sr', type=str, help='mH-region: sr, sb, sblo, sbhi, all')
-parser.add_argument('-i', '--inlist', default='../maNtuples/Era04Dec2020v1/h4g2016-mA0p1GeV_file_list.txt', type=str, help='Input list of mantuples.')
-#parser.add_argument('-i', '--inlist', default='../maNtuples/Era04Dec2020v1/bg2016-hgg_file_list.txt', type=str, help='Input list of mantuples.')
+parser.add_argument('-i', '--inlist', default='../maNtuples/Era22Jun2021v1/h4g2017-mA0p4GeV_file_list.txt', type=str, help='Input list of mantuples.')
+#parser.add_argument('-i', '--inlist', default='../maNtuples/Era22Jun2021v1/bg2016-hgg_file_list.txt', type=str, help='Input list of mantuples.')
 parser.add_argument('--pu_data', default='PU/dataPU_2016.root', type=str, help='PU data ref file.')
 parser.add_argument('--systPhoIdFile', default='SF/SF2016_egammaEffi.txt_EGM2D.root', type=str, help='Photon ID syst reweighting file if to be applied.')
 #parser.add_argument('--systPhoIdFile', default=None, type=str, help='Photon ID syst reweighting file if to be applied.')
@@ -122,7 +122,7 @@ pu_dir = mkoutdir('PU')
 pu_file = '%s/puwgts_datao%s.root'%(pu_dir, sample)
 pyargs = 'get_pu_distn.py -s %s --inlist %s -p %s -o %s'%(sample, inlist, pu_data, pu_file)
 print('>> Deriving MC->Data PU wgts: %s'%pyargs)
-#os.system('python %s'%pyargs)
+os.system('python %s'%pyargs)
 assert os.path.isfile(pu_file), '!! PU wgts file not found: %s'%pu_file
 
 # Nominal scenario
@@ -140,6 +140,7 @@ if do_systTrgSF:
 print('>> Making nominal MC templates: %s'%pyargs)
 os.system('python %s'%pyargs)
 
+'''
 # Syst: trg SF
 print('>> Doing systTrgSF...')
 for systTrgSF in systTrgSFs:
@@ -155,8 +156,8 @@ for systTrgSF in systTrgSFs:
     pyargs += ' --systTrgSF %s'% systTrgSF
     print('   >> Making templates: %s'%pyargs)
     os.system('python %s'%pyargs)
-
 '''
+
 # Syst: photon ID SFs
 if systPhoIdFile is not None:
 
@@ -249,4 +250,3 @@ for systSmear in systSmears:
         #pyargs += ' --systSmear %s'%(' '.join(str(s) for s in enSmearShift[year]))
         print('   >> Making templates: %s'%pyargs)
         os.system('python %s'%pyargs)
-'''

@@ -10,17 +10,28 @@ MEM = '__MEM__'
 
 # Input ntuple list
 indir = '../ggNtuples'
-input_campaign = 'Era06Sep2020_v1' # bkg mc ggntuples (i.e. no ma). NOTE: hgg list copied from Era04Dec2020_v1.
-print('>> Input maNtuple campaign:',input_campaign)
+#input_campaign = 'Era06Sep2020_v1' # bkg mc ggntuples (i.e. no ma). NOTE: hgg list copied from Era04Dec2020_v1.
+input_campaign = 'Era20May2021_v2' # Include mass95 trg
+print('>> Input ggNtuple campaign:',input_campaign)
 
 # Define bg campaign
-this_campaign = 'bgmc-Era06Dec2020v1' # miniaod bkg mc, ggntuples only (i.e. no ma)
+#this_campaign = 'bgmc-Era06Dec2020v1' # miniaod bkg mc, ggntuples only (i.e. no ma)
+this_campaign = 'bgmc-Era20May2021v1' # miniaod bkg mc, ggntuples only (i.e. no ma). Include mass95 trg. Era20May2021_v2
 print('>> Bkg selection campaign:',this_campaign)
 
 #sel = 'nom'
 sel = 'inv'
 sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.07 !! optimal
 print('>> Output sub-campaign:',sub_campaign)
+
+# pt wgts (for SB re-weighting only)
+eos_redir = 'root://cmseos.fnal.gov'
+# Input pt wgts campaign
+#ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis
+ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs.
+print('>> Input pt wgts campaign: %s'%ptwgts_campaign)
+ptwgts_indir = '/store/group/lpchaa4g/mandrews/Run2/%s/%s/Weights'%(ptwgts_campaign, sub_campaign)
+print('   .. pt wgts indir:', ptwgts_indir)
 
 # Define jdl exec, tar, etc
 exec_file = 'run_bgmc.sh'
@@ -52,14 +63,6 @@ print('>> jdl folder:',jdl_folder)
 inlist = glob.glob('%s/%s/*file_list.txt'%(indir, input_campaign))
 inlist = [l for l in inlist if 'bg' in l]
 assert(len(inlist) >= 1)
-
-# pt wgts (for SB re-weighting only)
-eos_redir = 'root://cmseos.fnal.gov'
-# Input pt wgts campaign
-ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis
-print('>> Input pt wgts campaign: %s'%ptwgts_campaign)
-ptwgts_indir = '/store/group/lpchaa4g/mandrews/Run2/%s/%s/Weights'%(ptwgts_campaign, sub_campaign)
-print('   .. pt wgts indir:', ptwgts_indir)
 
 mhregions = ['sblo', 'sr', 'sbhi']
 
@@ -127,7 +130,8 @@ for l in inlist:
         file_data = file_data.replace(EXEC,   cwd+exec_file)
         file_data = file_data.replace(INPUTS, jdl_inputs)
         file_data = file_data.replace(ARGS,   jdl_args)
-        file_data = file_data.replace(MEM, '2800')
+        #file_data = file_data.replace(MEM, '2800')
+        file_data = file_data.replace(MEM, '8000')
 
         # Write out sample-specific crabConfig
         with open('%s/condor_runbgmc_%s_mh%s.jdl'%(jdl_folder, sample, region), "w") as sample_file:
@@ -168,9 +172,9 @@ for l in inlist:
             file_data = file_data.replace(EXEC,   cwd+exec_file)
             file_data = file_data.replace(INPUTS, jdl_inputs)
             file_data = file_data.replace(ARGS,   jdl_args)
-            file_data = file_data.replace(MEM, '2800')
+            #file_data = file_data.replace(MEM, '2800')
+            file_data = file_data.replace(MEM, '8000')
 
             # Write out sample-specific crabConfig
             with open('%s/condor_runbgmc_%s_mh%s_flo%s.jdl'%(jdl_folder, sample, region, flo), "w") as sample_file:
                 sample_file.write(file_data)
-
