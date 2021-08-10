@@ -39,7 +39,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #campaign = 'sg-Era04Dec2020v4/%s'%sub_campaign # 2016-18 SFs. 2017-18 ss. 2016 ss uses 2017.
 #campaign = 'sg-Era04Dec2020v5/%s'%sub_campaign # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
 #campaign = 'sg-Era04Dec2020v6/%s'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
-campaign = 'sg-Era22Jun2021v2/%s'%sub_campaign # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
+#campaign = 'sg-Era22Jun2021v2/%s'%sub_campaign # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
+campaign = 'sg-Era22Jun2021v3/%s'%sub_campaign # v2 + interpolated masses
 print('.. input campaign: %s'%campaign)
 
 # Define ggnutple campaign for mc normalization

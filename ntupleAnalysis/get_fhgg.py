@@ -23,8 +23,8 @@ k2dpt = 'nEvtsWgtd'
 k2dma = 'ma0vma1'
 distns = [k2dpt, k2dma]
 ma_blind_input = None
-#ma_blind_norm = 'diag_lo_hi'
-ma_blind_norm = 'diag_hi'
+ma_blind_norm = 'diag_lo_hi' # nominal blinding
+#ma_blind_norm = 'diag_hi' # if allowing negative masses: does not give reasonable results. Could be due to using a single large occ negative mass bin.
 
 remove_negs = args.nonegs
 do_fit = args.fit
@@ -266,56 +266,59 @@ if do_fit:
     status = fit.Fit() # seg faults at deconstruction (not supported in PyROOT)
     print('   .. fit status:', int(status))
     print('   .. X^2 / ndf = %f / %d = %f'%(fit.GetChisquare(), fit.GetNDF(), fit.GetChisquare()/fit.GetNDF()))
+    print('   .. p-val:', fit.GetProb())
     print(hsum[khgg_blind_run2].Integral())
-
-# Calculate BR from f_hgg
-# br = N_hgg,gen * N_hgg,sel,data-norm / (N_hgg,sel * intlumi * xs)
-if sel == 'nom':
-    # nom selection
-    # with neg
-    #fhgg = 4.15379e-03
-    #fhgg_err = 4.78402e-03
-    # no neg
-    fhgg = 2.88903e-03
-    fhgg_err = 2.78887e-03
 else:
-    # inv selection
-    # no neg
-    #fhgg = 1.56042e-03
-    #fhgg_err = 9.26691e-04 #1.23826e-01
-    # no neg, with norm
-    fhgg = 1.42361e-03
-    fhgg_err = 1.22762e-03
+    #'''
+    # Calculate BR from f_hgg
+    # br = N_hgg,gen * N_hgg,sel,data-norm / (N_hgg,sel * intlumi * xs)
+    if sel == 'nom':
+        # nom selection
+        # with neg
+        #fhgg = 4.15379e-03
+        #fhgg_err = 4.78402e-03
+        # no neg
+        fhgg = 2.88903e-03
+        fhgg_err = 2.78887e-03
+    else:
+        # inv selection
+        # no neg
+        #fhgg = 1.56042e-03
+        #fhgg_err = 9.26691e-04 #1.23826e-01
+        # no neg, with norm
+        fhgg = 1.42361e-03
+        fhgg_err = 1.22762e-03
 
-print('>> Calculating BR(h->gg)...')
-print('.. br = N_hgg,gen * N_hgg,sel,data-norm / (N_hgg,sel * intlumi * xs)')
-for frac in [fhgg-fhgg_err, fhgg, fhgg+fhgg_err]:
+    print('>> Calculating BR(h->gg)...')
+    print('.. br = N_hgg,gen * N_hgg,sel,data-norm / (N_hgg,sel * intlumi * xs)')
+    for frac in [fhgg-fhgg_err, fhgg, fhgg+fhgg_err]:
 
-    if frac < 0.: frac = 0.
-    print('>> For fhgg: %E'%(frac))
+        if frac < 0.: frac = 0.
+        print('>> For fhgg: %E'%(frac))
 
-    brs = {}
-    for r in runs:
-        print('   >> For run:',r)
-        # Get keys
-        sample_hgg = 'bg%s-hgg'%r
-        khgg = '%s_sr_%s'%(sample_hgg, k2dma)
-        khgg_blind = '%s-%s'%(khgg, ma_blind_norm)
-        sample_data = 'data%s'%r
-        ksr = '%s_sr_%s'%(sample_data, k2dma)
-        ksr_blind = '%s-%s'%(ksr, ma_blind_norm)
-        # Get nevts
-        nhgg_gen = nevtsgen[sample_hgg]
-        nhggsel = hblind[khgg_blind].Integral()
-        nhggsel_datanorm = hblind[ksr_blind].Integral()*frac
-        # Get br
-        #print('   .. %.f * %.f / ( %.f * %E * %f )'%(nhgg_gen, nhggsel_datanorm, nhggsel, intlumi[r], xs_hgg))
-        brs[r] = ( nhgg_gen * nhggsel_datanorm ) / ( nhggsel * intlumi[r] * xs_hgg )
-        print('      .. BR[%s]: %E'%(r, brs[r]))
+        brs = {}
+        for r in runs:
+            print('   >> For run:',r)
+            # Get keys
+            sample_hgg = 'bg%s-hgg'%r
+            khgg = '%s_sr_%s'%(sample_hgg, k2dma)
+            khgg_blind = '%s-%s'%(khgg, ma_blind_norm)
+            sample_data = 'data%s'%r
+            ksr = '%s_sr_%s'%(sample_data, k2dma)
+            ksr_blind = '%s-%s'%(ksr, ma_blind_norm)
+            # Get nevts
+            nhgg_gen = nevtsgen[sample_hgg]
+            nhggsel = hblind[khgg_blind].Integral()
+            nhggsel_datanorm = hblind[ksr_blind].Integral()*frac
+            # Get br
+            #print('   .. %.f * %.f / ( %.f * %E * %f )'%(nhgg_gen, nhggsel_datanorm, nhggsel, intlumi[r], xs_hgg))
+            brs[r] = ( nhgg_gen * nhggsel_datanorm ) / ( nhggsel * intlumi[r] * xs_hgg )
+            print('      .. BR[%s]: %E'%(r, brs[r]))
 
-    # Get wgtd ave br
-    br_ave = 0
-    for r in runs:
-        br_ave += brs[r]*intlumi[r]
-    br_ave /= sum(intlumi[r] for r in intlumi)
-    print('   .. Run2 est BR: %E'%br_ave)
+        # Get wgtd ave br
+        br_ave = 0
+        for r in runs:
+            br_ave += brs[r]*intlumi[r]
+        br_ave /= sum(intlumi[r] for r in intlumi)
+        print('   .. Run2 est BR: %E'%br_ave)
+    #'''

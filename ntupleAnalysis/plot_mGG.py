@@ -11,6 +11,7 @@ ROOT.gStyle.SetPadTickY(1)
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Simulation"
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+CMS_lumi.cmsTextOffset = 0.
 iPos = 11
 if( iPos==0 ): CMS_lumi.relPosX = 0.12
 iPeriod = 0

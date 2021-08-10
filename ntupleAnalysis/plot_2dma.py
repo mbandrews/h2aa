@@ -147,16 +147,18 @@ indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
 sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
 k = keys[0]
 
-'''
+#'''
 # Sg model
 sel = 'nom'
 CMS_lumi.extraText = "Simulation"
-ma_pts = ['0p1', '0p4', '1p0']
-#ma_pts = ['0p1']
+#ma_pts = ['0p1', '0p4', '1p0']
+ma_pts = ['0p5']
 regions = [r_sr]
-blinds = [limit_blind, valid_blind] # to get fully unblinded plots, run mk_sg_temp and combine_sg_temp with both blinding settings!
+#blinds = [limit_blind, valid_blind] # to get fully unblinded plots, run mk_sg_temp and combine_sg_temp with both blinding settings!
+blinds = [limit_blind] # to get fully unblinded plots, run mk_sg_temp and combine_sg_temp with both blinding settings!
 #campaign = 'sg-Era04Dec2020v6/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
-campaign = 'sg-Era22Jun2021v2/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era22Jun2021v2/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+campaign = 'sg-Era22Jun2021v3/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # v2 + interpolated mass pts
 do_blind = True
 #do_blind = False
 for ma in ma_pts:
@@ -190,9 +192,9 @@ for ma in ma_pts:
     for r in regions:
         srk = '%s_%s_%s'%(sample, r, k)
         draw_hist_2dma(srk, h, c, sample, limit_blind if do_blind and r == r_sr else None, ymax_=np.max(maxzs), do_trunc=True)
-'''
-
 #'''
+
+'''
 # Bkg model
 sample = 'data'
 sel = 'nom'
@@ -240,7 +242,7 @@ h[kratio].SetName(kratio)
 h[kratio].Divide(h[kbkg])
 #print('h[%s], min,max: %f, %f'%(kratio, h[kratio].GetMinimum(), h[kratio].GetMaximum()))
 draw_hist_2dma(kratio, h, c, sample, limit_blind if do_blind else None, ymax_=2., ymin_=0., do_trunc=True, label='(Obs/Bkg)')
-#'''
+'''
 
 '''
 # rebinned ratios

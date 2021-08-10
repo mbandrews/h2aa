@@ -2162,9 +2162,12 @@ keys = ['ma0vma1']
 #run = '2017'
 indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
 #campaign = 'sg-Era04Dec2020v6/%s/nom-nom/Templates'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
-campaign = 'sg-Era22Jun2021v2/%s/nom-nom/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
+#campaign = 'sg-Era22Jun2021v2/%s/nom-nom/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
+campaign = 'sg-Era22Jun2021v3/%s/nom-nom/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
 
-ma_pts = ['0p1', '0p2', '0p4', '0p6', '0p8', '1p0', '1p2']
+#ma_pts = ['0p1', '0p2', '0p4', '0p6', '0p8', '1p0', '1p2']
+ma_pts = (np.arange(12)+1.)/10.
+ma_pts = [str(m_).replace('.','p') for m_ in ma_pts]
 #ma_pts = ['0p1']
 #for ma in ['100MeV', '400MeV', '1GeV']:
 #for ma in ['0p1', '0p4', '1p0']:

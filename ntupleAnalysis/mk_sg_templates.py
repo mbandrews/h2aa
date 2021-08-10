@@ -35,7 +35,8 @@ ma_blind_output = 'offdiag_lo_hi'
 #campaign = 'sg-Era04Dec2020v5' # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
 #campaign = 'sg-Era04Dec2020v6' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
 #campaign = 'sg-Era22Jun2021v1' # h4g, hgg: mgg95 trgs, w/ HLT, no trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v1 + img:Era22Jun2021_AOD-IMGv1
-campaign = 'sg-Era22Jun2021v2' # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
+#campaign = 'sg-Era22Jun2021v2' # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
+campaign = 'sg-Era22Jun2021v3' # v2 + interpolated masses
 print('>> Signal selection campaign:',campaign)
 
 sel = 'nom'
@@ -60,7 +61,8 @@ print('>> sub-campaign:',sub_campaign)
 #ggntuple_campaign = 'Era04Dec2020v1_ggSkim-v1' # fixed h4g mc triggers
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v1' # h4g, hgg: mgg95 trgs, w/ HLT req
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v2' # h4g, hgg: mgg95 trgs, no HLT req
-ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign[-1]
+#ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign[-1]
+ggntuple_campaign = 'Era20May2021v1_ggSkim-v2'
 xs_sg = 1. #pb
 # Official lumis: https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM
 #tgt_lumis = {'2016': 36.33e3, #35.92e3,
@@ -117,6 +119,9 @@ for r in runs:
         for i,s in enumerate(samples):
 
             #if 'mA0p4GeV' not in s: continue
+            #if ('mA1p2GeV' not in s) and ('mA1p1GeV' not in s) and ('mA1p0GeV' not in s): continue # DEBUG: for verifying interpolation
+            #if ('mA0p2GeV' not in s) and ('mA0p3GeV' not in s) and ('mA0p4GeV' not in s): continue # DEBUG: for verifying interpolation
+            #if ('mA0p5GeV' not in s) and ('mA0p4GeV' not in s) and ('mA0p6GeV' not in s): continue # DEBUG: for verifying interpolation
             #if ('mA0p1GeV' not in s) and ('mA0p4GeV' not in s) and ('mA1p0GeV' not in s): continue # DEBUG: for printing out ma-ROI only
             if 'hgg' in s: continue
             print('      >> Doing sample:', s)
@@ -142,7 +147,8 @@ for r in runs:
             print('      .. nevts[%s]: %f'%(kblind, hblind[kblind].Integral()))
 
             # Get mc->data lumi normalization
-            mcnorm = get_mc2data_norm(s, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
+            #mcnorm = get_mc2data_norm(s, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
+            mcnorm = get_mc2data_norm_interp(s, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
             hblind[kblind].Scale(mcnorm)
             print('      .. nevts[%s], mc2data: %f'%(kblind, hblind[kblind].Integral()))
 

@@ -22,7 +22,8 @@ NCPU = '__NCPU__'
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v6_v1' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v1' # phoid+trg SFs. mgg95. no HLT applied.
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v2' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter
-this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v3' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter with full Run2, no neg bins
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v3' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter with full Run2, no neg bins
+this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v3_v1' # interpolated masses, otherwise same as above
 print('>> Limit setting campaign:',this_campaign)
 
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv

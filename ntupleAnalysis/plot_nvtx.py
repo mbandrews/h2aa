@@ -392,8 +392,8 @@ c = {}
 
 #run = 'Run2'
 run = '2016'
-run = '2017'
-run = '2018'
+#run = '2017'
+#run = '2018'
 r_sb2sr, r_sr = 'sb2sr+hgg', 'sr'
 valid_blind = 'diag_lo_hi'
 limit_blind = 'offdiag_lo_hi'
@@ -406,7 +406,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso <
 CMS_lumi.extraText = "Simulation"
 sel = 'nom'
 #campaign = 'sg-Era04Dec2020v7/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
-campaign = 'sg-Era22Jun2021v2/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # phoid+trg SFs. no HLT applied.
+#campaign = 'sg-Era22Jun2021v2/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # mgg90, phoid+trg SFs. no HLT applied.
+campaign = 'sg-Era22Jun2021v3/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # v2 + interpolated masses
 
 #nit = len(runs)*len(expts)
 #normalize = False
