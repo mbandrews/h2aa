@@ -157,7 +157,7 @@ def get_mc2data_norm(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_basedir='r
     #print(nevts_gen)
     norm = xsec*tgt_lumi/nevts_gen
     #print(norm)
-    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %.f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
+    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
     return norm
 
 def get_mc2data_norm_interp(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_basedir='root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews'): # xsec:pb, tgt_lumi:/pb
@@ -209,7 +209,7 @@ def get_mc2data_norm_interp(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_bas
     #print(nevts_gen)
     norm = xsec*tgt_lumi/nevts_gen
     #print(norm)
-    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %.f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
+    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
     return norm
 
 #def get_mceff(sample, selected_path, skim_path):

@@ -27,7 +27,7 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso <
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44' # bdt > -0.96, relChgIso < 0.08
 sel = 'nom'
-sel = 'inv'
+#sel = 'inv'
 
 norm_scale = 150.e3
 #distn = 'pt0vpt1'
@@ -36,6 +36,7 @@ ma_blind = None
 mh_regions = ['sblo', 'sr', 'sbhi']
 
 runs = ['Run2'] # use full run2 stats
+#runs = ['2018'] # use full run2 stats
 for r in runs:
 
     print('>> Doing run:',r)

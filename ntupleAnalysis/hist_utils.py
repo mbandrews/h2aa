@@ -9,6 +9,7 @@ def create_hists(h):
     k = 'ma0'
 
     ma_bins = list(range(0,1200+25,25))
+    #ma_bins = list(range(0,1200+50,50))
     ma_bins = [-400]+ma_bins
     #ma_bins = [-400, -200]+ma_bins
     ma_bins = [float(m)/1.e3 for m in ma_bins]
@@ -469,28 +470,28 @@ def write_hists(h, out_filename):
     file_out.Close()
 
 #def set_hist(h, c, xtitle, ytitle, htitle):
-def set_hist(h, xtitle, ytitle, htitle):
+def set_hist(h, xtitle, ytitle, htitle, kfont=62):
     #c.SetLeftMargin(0.16)
     #c.SetRightMargin(0.15)
     #c.SetBottomMargin(0.13)
     ROOT.gStyle.SetOptStat(0)
 
     h.GetXaxis().SetLabelSize(0.04)
-    h.GetXaxis().SetLabelFont(62)
+    h.GetXaxis().SetLabelFont(kfont)
     h.GetXaxis().SetTitle(xtitle)
     h.GetXaxis().SetTitleOffset(0.09)
     h.GetXaxis().SetTitleSize(0.06)
-    h.GetXaxis().SetTitleFont(62)
+    h.GetXaxis().SetTitleFont(kfont)
 
     h.GetYaxis().SetLabelSize(0.04)
-    h.GetYaxis().SetLabelFont(62)
+    h.GetYaxis().SetLabelFont(kfont)
     h.GetYaxis().SetTitleOffset(1.2)
     h.GetYaxis().SetTitleSize(0.06)
-    h.GetYaxis().SetTitleFont(62)
+    h.GetYaxis().SetTitleFont(kfont)
     h.GetYaxis().SetTitle(ytitle)
 
     h.SetTitleSize(0.04)
-    h.SetTitleFont(62)
+    h.SetTitleFont(kfont)
     h.SetTitle(htitle)
     h.SetTitleOffset(1.2)
 

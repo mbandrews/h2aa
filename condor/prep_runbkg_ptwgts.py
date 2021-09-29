@@ -33,15 +33,16 @@ print('>> Input pt wgts campaign: %s'%ptwgts_campaign)
 #ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.09
 #ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.08
 
-#ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.07 !! optimal
-ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-inv' # bdt > -0.96, relChgIso < 0.07 !! optimal
+ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.07 !! optimal
+#ptwgts_subcampaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-inv' # bdt > -0.96, relChgIso < 0.07 !! optimal
 print('>> Input pt wgts sub-campaign: %s'%ptwgts_subcampaign)
 
 # Output bkg campaign
 #this_campaign = 'bkgPtWgts-Era04Dec2020v1' # using bkgNoPtWgts-Era04Dec2020v1/bdtgtm0p98_relChgIsolt0p05_etalt1p44
 #this_campaign = 'bkgPtWgts-Era04Dec2020v2' # using bkgNoPtWgts-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44
 #this_campaign = 'bkgPtWgts-Era04Dec2020v3' # using bkgNoPtWgts-Era04Dec2020v3/bdtgtm0p98_relChgIsolt0p05_etalt1p44 [same as v2 + nVtx, nPU plots]
-this_campaign = 'bkgPtWgts-Era22Jun2021v1' # maNtuples-Era22Jun2021v1 + bkgNoPtWgts-Era22Jun2021v1/bdtgtm0p96_relChgIsolt0p07_etalt1p44 [mgg95 trgs]
+#this_campaign = 'bkgPtWgts-Era22Jun2021v1' # maNtuples-Era22Jun2021v1 + bkgNoPtWgts-Era22Jun2021v1/bdtgtm0p96_relChgIsolt0p07_etalt1p44 [mgg95 trgs]
+this_campaign = 'bkgPtWgts-Era22Jun2021v2' # bkgPtWgts-Era22Jun2021v1, bin50MeV
 print('>> Output campaign:',this_campaign)
 
 exec_file = 'run_bkg_ptwgts.sh'

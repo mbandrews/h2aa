@@ -75,6 +75,7 @@ plotImpacts.py -i impacts_${SAMPLE}.json -o impacts &>> ${SAMPLE}_impacts.log
 
 echo ">> Running limits..."
 # MAIN
+#combine -M AsymptoticLimits --freezeParameters sgScale $DCARD &> ${SAMPLE}.log #--rAbsAcc 5.e-6
 combine -M AsymptoticLimits $DCARD &> ${SAMPLE}.log #--rAbsAcc 5.e-6
 
 echo ">> Making limit plot..."

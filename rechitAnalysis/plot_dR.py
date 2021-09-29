@@ -10,7 +10,7 @@ CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Simulation"
 iPeriod = 0
 iPos = 0
-if( iPos==0 ): CMS_lumi.relPosX = 0.14
+if( iPos==0 ): CMS_lumi.relPosX = 0.17
 
 histname = "dPhidEta_GG"
 hist = "fevt/%s"%histname
@@ -22,6 +22,7 @@ eosDir = '/eos/uscms/store/user/lpcml/mandrews/IMG/dPhidEta'
 #eosDir = 'root://cmseos.fnal.gov//store/user/lpcml/mandrews/IMG/dPhidEta'
 
 masses = [100, 400, 1000]
+#masses = [100]
 
 for mass in masses:
 
@@ -68,10 +69,10 @@ for mass in masses:
     #ROOT.gPad.SetLogy()
     c.cd()
 
-    ROOT.gPad.SetLeftMargin(0.14)
+    ROOT.gPad.SetLeftMargin(0.15)
     ROOT.gPad.SetRightMargin(0.2)
-    ROOT.gPad.SetBottomMargin(0.17)
-    ROOT.gPad.SetTopMargin(0.07)
+    ROOT.gPad.SetBottomMargin(0.18)
+    ROOT.gPad.SetTopMargin(0.08)
 
     ymax = 0.18
     h_in.SetTitle('')
@@ -82,31 +83,34 @@ for mass in masses:
     #h_in.SetTitle('p_{T,#gamma}/p_{T,#Gamma}(#Delta#phi,#Delta#eta)_{reco}')
     #h_in.SetLineColor(2)
 
+    txtFont = 62 #bold
+    txtFont = 42 #regular
     h_in.GetYaxis().SetLabelSize(0.05)
-    h_in.GetYaxis().SetLabelFont(62)
+    h_in.GetYaxis().SetLabelFont(txtFont)
     #h_in.GetYaxis().SetTitle("#Deltai#eta(#gamma,#gamma)_{gen}")
-    h_in.GetYaxis().SetTitle("#Delta#eta(#gamma_{1},#gamma_{2})_{gen}")
-    h_in.GetYaxis().SetTitleOffset(0.8)
-    h_in.GetYaxis().SetTitleSize(0.07)
-    h_in.GetYaxis().SetTitleFont(62)
+    h_in.GetYaxis().SetTitle("#Delta#eta(#gamma_{1},#gamma_{2})^{gen}")
+    h_in.GetYaxis().SetTitleOffset(0.9)
+    h_in.GetYaxis().SetTitleSize(0.06)
+    h_in.GetYaxis().SetTitleFont(txtFont)
     h_in.GetYaxis().SetRangeUser(0.,xtalWindow*xtalWidth)
 
     h_in.GetXaxis().SetLabelSize(0.05)
-    h_in.GetXaxis().SetLabelFont(62)
+    h_in.GetXaxis().SetLabelFont(txtFont)
     #h_in.GetXaxis().SetTitle("#Deltai#varphi(#gamma,#gamma)_{gen}")
-    h_in.GetXaxis().SetTitle("#Delta#phi(#gamma_{1},#gamma_{2})_{gen}")
-    h_in.GetXaxis().SetTitleOffset(1.)
-    h_in.GetXaxis().SetTitleSize(0.07)
-    h_in.GetXaxis().SetTitleFont(62)
+    h_in.GetXaxis().SetTitle("#Delta#phi(#gamma_{1},#gamma_{2})^{gen}")
+    h_in.GetXaxis().SetTitleOffset(1.2)
+    h_in.GetXaxis().SetTitleSize(0.06)
+    h_in.GetXaxis().SetTitleFont(txtFont)
     h_in.GetXaxis().SetRangeUser(0.,xtalWindow*xtalWidth)
 
     #h_in.GetZaxis().SetTitle("f_{events}")
     h_in.GetZaxis().SetTitle("f_{a#rightarrow#gamma#gamma}")
-    h_in.GetZaxis().SetTitleOffset(0.95)
-    h_in.GetZaxis().SetTitleSize(0.07)
-    h_in.GetZaxis().SetTitleFont(62)
+    h_in.GetZaxis().SetTitleOffset(1.05)
+    h_in.GetZaxis().SetTitleSize(0.06)
+    h_in.GetZaxis().SetTitleFont(txtFont)
     h_in.GetZaxis().SetLabelSize(0.05)
-    h_in.GetZaxis().SetLabelFont(62)
+    h_in.GetZaxis().SetLabelFont(txtFont)
+    h_in.GetZaxis().SetNdivisions(5);
 
     h_in.SetMarkerColor(0)
     h_in.SetContour(100)

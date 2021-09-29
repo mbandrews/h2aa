@@ -6,13 +6,15 @@ from data_utils import *
 from hist_utils import *
 from template_utils import *
 
+# DEPRECATED: fhgg now determined using theory+MC, not using fit to data
+# fitting to data can absorb a potential sg contribution into defintion of bkg model
 '''
 Calculate f_hgg for each year/sel combo
 '''
 import argparse
 parser = argparse.ArgumentParser(description='Run h2aa bkg model.')
 parser.add_argument('-s', '--sel', default='nom', type=str, help='Event selection: nom or inv.')
-parser.add_argument('-r', '--run', default='2018', type=str, help='Run era: 2016, 2017, 2018.')
+parser.add_argument('-r', '--run', default='2017', type=str, help='Run era: 2016, 2017, 2018.')
 parser.add_argument('--nonegs', action='store_true', help='Remove negative bins.')
 parser.add_argument('--fit', action='store_true', help='Do template frac fit.')
 parser.add_argument('--norm', action='store_true', help='Set fit normalization to 1.e6.')
@@ -47,15 +49,19 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.08
 #campaign_noptwgts = 'bkgNoPtWgts-Era04Dec2020v2/%s'%sub_campaign
-campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v1/%s'%sub_campaign
+campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v1/%s'%sub_campaign # bin25MeV
+#campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v2/%s'%sub_campaign # bin50MeV
 #campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/%s'%sub_campaign
-campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v1/%s'%sub_campaign
+campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v1/%s'%sub_campaign # bin25MeV
+#campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v2/%s'%sub_campaign # bin50MeV
 if doRun2: campaign_ptwgts += '/%s'%run2dir
 
 # N_hgg,sel,data-norm  = intlumi * xs * br * N_hgg,sel / N_hgg,gen
 # NOTE: The above equality holds whether `sel` is defined as events passing evt sel only
 # or passing evt sel and diag_lo_hi blinding
-hgg_campaign = 'sg-Era22Jun2021v2/%s'%sub_campaign # for getting mc templates
+#hgg_campaign = 'sg-Era22Jun2021v2/%s'%sub_campaign # for getting mc templates
+#hgg_campaign = 'sg-Era22Jun2021v4/%s'%sub_campaign # sg-Era22Jun2021v2 + interp masses (v3) + bin50MeV [overwritten]
+hgg_campaign = 'sg-Era22Jun2021v4/%s'%sub_campaign # sg-Era22Jun2021v2 + interp masses (v3) + ss with SFs
 skim_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v2' # for getting mc nevtsgen
 # https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV2014
 # total SM inclusive higgs prodn: 50.94, gluglu-only: 43.92
@@ -280,6 +286,7 @@ else:
         # no neg
         fhgg = 2.88903e-03
         fhgg_err = 2.78887e-03
+        #fhgg = 0.000909422776646
     else:
         # inv selection
         # no neg
@@ -291,6 +298,7 @@ else:
 
     print('>> Calculating BR(h->gg)...')
     print('.. br = N_hgg,gen * N_hgg,sel,data-norm / (N_hgg,sel * intlumi * xs)')
+    #for frac in [fhgg]:
     for frac in [fhgg-fhgg_err, fhgg, fhgg+fhgg_err]:
 
         if frac < 0.: frac = 0.
@@ -312,6 +320,13 @@ else:
             nhggsel_datanorm = hblind[ksr_blind].Integral()*frac
             # Get br
             #print('   .. %.f * %.f / ( %.f * %E * %f )'%(nhgg_gen, nhggsel_datanorm, nhggsel, intlumi[r], xs_hgg))
+            #print('nhgg_gen:',nhgg_gen)
+            ##print('nhggsel_datanorm:',nhggsel_datanorm)
+            #print('hblind[ksr_blind].Integral():',hblind[ksr_blind].Integral())
+            #print('nhggsel:',nhggsel)
+            #print('intlumi[r]:',intlumi[r])
+            #print('xs_hgg:',xs_hgg)
+            #print('fhgg:',frac)
             brs[r] = ( nhgg_gen * nhggsel_datanorm ) / ( nhggsel * intlumi[r] * xs_hgg )
             print('      .. BR[%s]: %E'%(r, brs[r]))
 

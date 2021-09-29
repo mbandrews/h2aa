@@ -36,7 +36,9 @@ ma_blind_output = 'offdiag_lo_hi'
 #campaign = 'sg-Era04Dec2020v6' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
 #campaign = 'sg-Era22Jun2021v1' # h4g, hgg: mgg95 trgs, w/ HLT, no trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v1 + img:Era22Jun2021_AOD-IMGv1
 #campaign = 'sg-Era22Jun2021v2' # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
-campaign = 'sg-Era22Jun2021v3' # v2 + interpolated masses
+#campaign = 'sg-Era22Jun2021v3' # v2 + interpolated masses
+#campaign = 'sg-Era22Jun2021v4' # duplicate of v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
+campaign = 'sg-Era22Jun2021v5' # duplicate of v3 + ss with SFs + (xs_sg = 1pb for all)
 print('>> Signal selection campaign:',campaign)
 
 sel = 'nom'
@@ -64,6 +66,8 @@ print('>> sub-campaign:',sub_campaign)
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign[-1]
 ggntuple_campaign = 'Era20May2021v1_ggSkim-v2'
 xs_sg = 1. #pb
+#xs_sg = 0.05 #pb
+#xs_sg = 0.05104 #pb
 # Official lumis: https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM
 #tgt_lumis = {'2016': 36.33e3, #35.92e3,
 #             '2017': 41.53e3,

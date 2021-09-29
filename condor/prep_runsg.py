@@ -26,19 +26,21 @@ print('>> Input maNtuple campaign:',input_campaign)
 #this_campaign = 'sg-Era04Dec2020v7' #  v6 + nVtx plots
 #this_campaign = 'sg-Era22Jun2021v1' # h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims], HLT applied, no trgSF
 #this_campaign = 'sg-Era22Jun2021v2' # h4g w/o HLT applied, with trgSF
-this_campaign = 'sg-Era22Jun2021v3' # sg-Era22Jun2021v2 + interpolated mass samples
+#this_campaign = 'sg-Era22Jun2021v3' # sg-Era22Jun2021v2 + interpolated mass samples
+this_campaign = 'sg-Era22Jun2021v4' # sg-Era22Jun2021v3 + ss with SFs
 print('>> Signal selection campaign:',this_campaign)
 
 # If applying trg SFs, make sure HLT trigger was NOT applied
 # trg SFs emulate trg eff already!
 #do_trgSF = False # if HLT applied in skim
 #do_trgSF = True # if HLT *not* applied in skim
-do_trgSF = False
-if this_campaign == 'sg-Era22Jun2021v2' or this_campaign == 'sg-Era22Jun2021v3':
+#do_trgSF = False
+do_trgSF = True
+if this_campaign == 'sg-Era22Jun2021v2' or this_campaign == 'sg-Era22Jun2021v3' or this_campaign == 'sg-Era22Jun2021v4':
     do_trgSF = True
 
 sel = 'nom'
-#sel = 'inv'
+sel = 'inv'
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom' # a0nom-a1nom
 #sub_campaign = 'bdtgtm0p99_relChgIsolt0p05_etalt1p44/nom-nom' # bdt > -0.99

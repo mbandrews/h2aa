@@ -102,9 +102,9 @@ eos_redir = 'root://cmseos.fnal.gov'
 eos_basedir = '/store/user/lpchaa4g/mandrews'
 eos_tgtdir = '%s/%s/%s/%s'%(eos_redir, eos_basedir, year, ma_campaign)
 #eos_tgtdir = 'MAntuples/%s'%(ma_campaign)
-#eos_tgtdir = 'MAntuples'
-#if not os.path.isdir(eos_tgtdir):
-#    os.makedirs(eos_tgtdir)
+eos_tgtdir = 'MAntuples'
+if not os.path.isdir(eos_tgtdir):
+    os.makedirs(eos_tgtdir)
 print('>> EOS tgt dir:', eos_tgtdir)
 #run_eosmkdir(eos_tgtdir, eos_redir)
 

@@ -51,7 +51,8 @@ def draw_hist_2dma(k_, h, c, sample, blind, ymax_=None, ymin_=None, do_trunc=Tru
     c[k] = ROOT.TCanvas("c%s"%k,"c%s"%k,wd,ht)
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a-lead,pred} [GeV]", "m_{a-sublead,pred} [GeV]", "m_{a_{1},pred} vs. m_{a_{0},pred}")
     #h[k] = set_hist(h[k], "m_{a_{1},pred} [GeV]", "m_{a_{2},pred} [GeV]", "")
-    h[k] = set_hist(h[k], "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "")
+    #h[k] = set_hist(h[k], "m_{#Gamma_{1},pred} [GeV]", "m_{#Gamma_{2},pred} [GeV]", "")
+    h[k] = set_hist(h[k], "m_{#Gamma_{1}} [GeV]", "m_{#Gamma_{2}} [GeV]", "")
     ROOT.gPad.SetRightMargin(0.19)
     ROOT.gPad.SetLeftMargin(0.14)
     #ROOT.gPad.SetTopMargin(0.05) # no cms
@@ -147,7 +148,7 @@ indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
 sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso < 0.07 !! optimal
 k = keys[0]
 
-#'''
+'''
 # Sg model
 sel = 'nom'
 CMS_lumi.extraText = "Simulation"
@@ -192,15 +193,16 @@ for ma in ma_pts:
     for r in regions:
         srk = '%s_%s_%s'%(sample, r, k)
         draw_hist_2dma(srk, h, c, sample, limit_blind if do_blind and r == r_sr else None, ymax_=np.max(maxzs), do_trunc=True)
-#'''
-
 '''
+
+#'''
 # Bkg model
 sample = 'data'
 sel = 'nom'
 #sel = 'inv'
 #campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
-campaign = 'bkgPtWgts-Era22Jun2021v1/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+#campaign = 'bkgPtWgts-Era22Jun2021v1/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+campaign = 'bkgPtWgts-Era22Jun2021v4/%s/nom-%s/Templates_bkg'%(sub_campaign, sel) # combined full Run2, mgg95, hgg template with SFs, fhgg from br(hgg)
 regions = [r_sb2sr, r_sr]
 blinds = [valid_blind, limit_blind]
 #regions = [r_sb2sr]
@@ -229,6 +231,18 @@ for r in regions:
     maxzs.append(h[srk].GetMaximum())
     print('h[%s], max: %f'%(srk, h[srk].GetMaximum()))
 
+# Overwrite bkg plot with pol-optimized one from running `get_2dsyst+pol*.py`
+hf['bkgxpol'] = ROOT.TFile.Open('Fits/bkgxpol.root', "READ")
+# data_sb2sr_diag_lo_hi_ma0vma1_rebin
+kbkg = '%s_%s_%s'%(sample, r_sb2sr, k)
+srkb = 'data_sb2sr_%s_%s_rebin'%(valid_blind, k)
+h[kbkg].Reset()
+h[kbkg] = hf['bkgxpol'].Get(srkb)
+if not do_blind:
+    srkb = 'data_sb2sr_%s_%s_rebin'%(limit_blind, k)
+    h[kbkg].Add(hf['bkgxpol'].Get(srkb))
+h[kbkg].SetName('data_sb2sr_%s'%k)
+
 for r in regions:
     srk = '%s_%s_%s'%(sample, r, k)
     draw_hist_2dma(srk, h, c, sample, limit_blind if do_blind and r == r_sr else None, ymax_=np.max(maxzs), do_trunc=True)
@@ -242,7 +256,7 @@ h[kratio].SetName(kratio)
 h[kratio].Divide(h[kbkg])
 #print('h[%s], min,max: %f, %f'%(kratio, h[kratio].GetMinimum(), h[kratio].GetMaximum()))
 draw_hist_2dma(kratio, h, c, sample, limit_blind if do_blind else None, ymax_=2., ymin_=0., do_trunc=True, label='(Obs/Bkg)')
-'''
+#'''
 
 '''
 # rebinned ratios
@@ -308,7 +322,7 @@ for ix in range(1, h[kpull].GetNbinsX()+1):
         h[kpull].SetBinContent(ix, iy, pull)
 
 #h[kpull].Divide(h['%s_%s_%s'%(sample, r_sb2sr, k)])
-#print('h[%s], min,max: %f, %f'%(kpull, h[kpull].GetMinimum(), h[kpull].GetMaximum()))
-#draw_hist_2dma(kpull, h, c, sample, limit_blind if do_blind else None, ymax_=1.+2., ymin_=1.-2., do_trunc=True, label='pull')
-draw_hist_2dma(kpull, h, c, sample, limit_blind if do_blind else None, ymax_=1.+2., ymin_=0., do_trunc=True, label='pull')
+print('h[%s], min,max: %f, %f'%(kpull, h[kpull].GetMinimum(), h[kpull].GetMaximum()))
+draw_hist_2dma(kpull, h, c, sample, limit_blind if do_blind else None, ymax_=8., ymin_=-8., do_trunc=True, label='pull')
+#draw_hist_2dma(kpull, h, c, sample, limit_blind if do_blind else None, ymax_=1.+2., ymin_=0., do_trunc=True, label='pull')
 '''
