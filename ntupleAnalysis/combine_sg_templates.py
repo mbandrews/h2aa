@@ -12,6 +12,7 @@ sample_sg = 'h4g'
 mh_region = 'sr'
 #ma_blinds = ['diag_lo_hi', 'offdiag_lo_hi']
 ma_blind = 'offdiag_lo_hi'
+#ma_blind = 'lo_hi'
 #ma_blind = 'diag_lo_hi'
 #ma_blind = None
 distns = ['%s-%s'%(k2dma, ma_blind)]
@@ -37,7 +38,11 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #campaign = 'sg-Era04Dec2020v3/%s'%sub_campaign # use old (bdt+chgiso cuts) 2017 s+s for all yrs
 #campaign = 'sg-Era04Dec2020v4/%s'%sub_campaign # 2016-18 SFs. 2017-18 ss. 2016 ss uses 2017.
 #campaign = 'sg-Era04Dec2020v5/%s'%sub_campaign # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
-campaign = 'sg-Era04Dec2020v6/%s'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era04Dec2020v6/%s'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era22Jun2021v2/%s'%sub_campaign # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
+#campaign = 'sg-Era22Jun2021v3/%s'%sub_campaign # v2 + interpolated masses
+#campaign = 'sg-Era22Jun2021v4/%s'%sub_campaign # duplicate of v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
+campaign = 'sg-Era22Jun2021v5/%s'%sub_campaign # duplicate of v3 + ss with SFs + (xs_sg = 0.05104pb for by era but xs_sg = 1pb for run2 for making plots)
 print('.. input campaign: %s'%campaign)
 
 # Define ggnutple campaign for mc normalization

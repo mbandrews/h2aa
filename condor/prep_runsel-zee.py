@@ -20,8 +20,8 @@ print('>> Input campaign: maNtuples-%s'%input_campaign)
 #this_campaign = 'ZeeSel-Era09Feb2021v1' # dy+data zee skim(nele+presel)
 #this_campaign = 'ZeeSel-Era16Feb2021-Zeev1' # zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee). For massreg paper only (no chgiso+bdt). model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
 #this_campaign = 'ZeeSel-Era16Feb2021-Zeev2' # zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
-#this_campaign = 'ZeeSel-Era16Feb2021-Zeev3' # ZeeSel-Era16Feb2021-Zeev2 + r9 for trg SFs: zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
-this_campaign = 'ZeeSel-Era16Feb2021-Zeev4' # ZeeSel-Era16Feb2021-Zeev3 except hgg preselection. For hgg vs h4g trg SF comparison.
+this_campaign = 'ZeeSel-Era16Feb2021-Zeev3' # ZeeSel-Era16Feb2021-Zeev2 + r9 for trg SFs: zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
+#this_campaign = 'ZeeSel-Era16Feb2021-Zeev4' # ZeeSel-Era16Feb2021-Zeev3 except hgg preselection. For hgg vs h4g trg SF comparison.
 print('>> Output campaign:',this_campaign)
 
 exec_file = 'run_sel-zee.sh'
@@ -56,7 +56,8 @@ for l in inlist:
     #if 'h4g' not in l: continue
     #if 'hgg' not in l: continue
     #if 'dy' not in l: continue
-    if '2016' not in l: continue
+    #if '2016' not in l: continue
+    if '2016' in l: continue
 
     sample = l.split('/')[-1].split('_')[0]
     print('>> For sample:',sample)

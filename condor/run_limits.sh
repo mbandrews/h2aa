@@ -71,6 +71,7 @@ echo ">> Running limits..."
 
 # MAIN
 ValidateDatacards.py $DCARD &> ${SAMPLE}.log
+#combine -M AsymptoticLimits --freezeParameters sgScale $DCARD &>> ${SAMPLE}.log #--rAbsAcc 5.e-6
 combine -M AsymptoticLimits $DCARD &>> ${SAMPLE}.log #--rAbsAcc 5.e-6
 
 echo ">> Done processing"

@@ -50,11 +50,13 @@ mv $MODELS $DCARD ${CMSSW_REL}/src/
 
 echo ">> Compiling combine tools..."
 cd ${CMSSW_REL}/src/
-eval `scramv1 build` #
+#eval `scramv1 build` #
+scramv1 build
 
 # MAIN
 echo ">> Making limit plot..."
-python get_limits.py -i $DCARD -o . &> upperlimits.log
+#python get_limits.py -i $DCARD -o . &> upperlimits.log
+python get_limits.py -d $DCARD -o . &> upperlimits.log
 
 echo ">> Done processing"
 echo ">> Copying files to $EOSTGT"

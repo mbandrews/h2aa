@@ -11,6 +11,7 @@ CMS_lumi.lumi_7TeV = "4.8 fb^{-1}"
 CMS_lumi.lumi_8TeV = "18.3 fb^{-1}"
 CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Simulation"
+CMS_lumi.cmsTextOffset = 0.
 #CMS_lumi.lumi_sqrtS = "41.9 fb^{-1} (13 TeV)" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 CMS_lumi.lumi_sqrtS = "13 TeV" # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
 iPos = 11
@@ -46,7 +47,7 @@ def draw_hist_1dma_ratio(ks, h, c, sample, blind, ymax_=None, blind_diag=True):
     pUp.cd()
     #h[k], c[k] = set_hist(h[k], c[k], "m_{a,pred} [GeV]", "N_{a}", "")
     #h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a}", "")
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / 25 MeV", "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / 25 MeV", "")
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     #h[k].SetLineColor(9)
@@ -126,7 +127,7 @@ def draw_hist_1dma_ratio(ks, h, c, sample, blind, ymax_=None, blind_diag=True):
     #fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
-    fUnity.GetXaxis().SetTitle("m_{a,pred} [GeV]")
+    fUnity.GetXaxis().SetTitle("m_{#Gamma,pred} [GeV]")
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
@@ -237,7 +238,7 @@ def draw_hist_1dma(region, k_, h, c, sample, blind, ymax_=None):
     h[k].GetYaxis().SetTitleSize(0.06)
     h[k].GetYaxis().SetTitleFont(62)
 
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / 25 MeV", "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / 25 MeV", "")
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     h[k].SetLineColor(9)
@@ -348,7 +349,7 @@ def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
     h[k].GetYaxis().SetTitleSize(0.06)
     h[k].GetYaxis().SetTitleFont(62)
 
-    h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "f_{a} / 25 MeV", "")
+    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "f_{#Gamma} / 25 MeV", "")
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     #h[k].SetLineColor(9)
@@ -457,7 +458,8 @@ c = {}
 eos_redir = 'root://cmseos.fnal.gov'
 eos_basedir = '/store/user/lpchaa4g/mandrews/'#$ root -l 2017/maNtuples-Era03Dec2020v1/h4g2017-mA0p4GeV_mantuple.root
 #campaign = 'Templates/templates-Era04Dec2020v1'
-campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+#campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+campaign = 'sg-Era22Jun2021v2/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
 #expts = ['', '-eta1p4', '-eta1p3', '-eta1p2'] # eta study
 expts = ['']
 

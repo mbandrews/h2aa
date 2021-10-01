@@ -7,7 +7,8 @@ WORKDIR=$(pwd)
 COMBINEDIR=~/nobackup/h2aa/CMSSW_10_2_13/src
 #cd $COMBINEDIR && tar -zcvf $WORKDIR/combineTool.tgz HiggsAnalysis && cd $WORKDIR
 #cd $COMBINEDIR && tar -zcvf $WORKDIR/combineTool.tgz HiggsAnalysis CombineHarvester && cd $WORKDIR
-cd $COMBINEDIR && tar -zcvf $WORKDIR/combineTool.tgz get_limits.py HiggsAnalysis CombineHarvester && cd $WORKDIR
+#cd $COMBINEDIR && tar -zcvf $WORKDIR/combineTool.tgz get_limits.py HiggsAnalysis CombineHarvester && cd $WORKDIR
+cd $COMBINEDIR && tar -zcvf $WORKDIR/combineTool.tgz get_limits.py CMS_lumi.py HiggsAnalysis CombineHarvester && cd $WORKDIR
 
 # condor_submit jdls/condor_nom-nom.jdl
 # condor_q

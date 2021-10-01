@@ -16,6 +16,7 @@ import ROOT
 parser = argparse.ArgumentParser(description='Skim ggntuples.')
 parser.add_argument('-i', '--inlist', default='../ggNtuples/Era24Sep2020_v1/data2017-Run2017B_file_list.txt', type=str, help='Input list of ggntuples.')
 parser.add_argument('-o', '--outdir', default='ggSkims', type=str, help='Output directory.')
+parser.add_argument('--skip_trg', action='store_true', help='Do NOT apply HLT for signal MC (to be emulated by trg SFs instead).')
 args = parser.parse_args()
 
 inlist = args.inlist
@@ -31,9 +32,14 @@ sample = inlist.split('/')[-1].split('_')[0]
 print('>> Sample name:',sample)
 year = re.findall('(201[6-8])', sample.split('-')[0])[0]
 print('>> Doing year:',year)
+skip_trg = args.skip_trg
+print('>> Skip HLT trigger?', skip_trg)
 
 #cuts = [str(None), 'trg', 'npho', 'presel', 'mgg']
-cuts = [str(None), 'trg', 'npho', 'presel', 'mgg', 'ptomGG', 'bdt'] # sg skim
+if skip_trg:
+    cuts = [str(None),        'npho', 'presel', 'mgg', 'ptomGG', 'bdt'] # sg skim
+else:
+    cuts = [str(None), 'trg', 'npho', 'presel', 'mgg', 'ptomGG', 'bdt'] # sg skim
 #cuts = [str(None), 'trg', 'npho', 'presel'] # pi0 skim
 #cuts = [str(None), 'ptomGG', 'chgiso', 'bdt']
 hists = OrderedDict()

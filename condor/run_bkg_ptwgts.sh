@@ -27,9 +27,8 @@ PTWGT=${6}
 OUTDIR="Templates_flo${FLO}"
 TARFILE=${7}
 
-# Get input files
-echo ">> Getting input files..."
-echo $INLIST
+echo "Sample: $SAMPLE"
+echo "Input list: $INLIST"
 
 cd ${_CONDOR_SCRATCH_DIR}
 
@@ -45,8 +44,6 @@ cd ${_CONDOR_SCRATCH_DIR}
 
 echo ">> Extracting tarball containing work files..."
 mkdir -p CMSSW_10_5_0/src/h2aa
-#tar -xvf h2aa.tgz -C CMSSW_10_5_0/src/h2aa/
-#tar -xvf h2aa-inv.tgz -C CMSSW_10_5_0/src/h2aa/
 tar -xvf $TARFILE -C CMSSW_10_5_0/src/h2aa/
 mv $INLIST CMSSW_10_5_0/src/h2aa/ntupleAnalysis/
 cd CMSSW_10_5_0/src/h2aa/ntupleAnalysis

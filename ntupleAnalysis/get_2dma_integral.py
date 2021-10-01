@@ -14,7 +14,8 @@ eos_basedir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews'
 #sample = 'Run2017'
 #campaign = 'Run2/runBkg_noptwgts_bdtgtm0p99-v1'
 #in_campaign = 'bkgNoPtWgts-Era04Dec2020v1' # missing 2018A, 2016H+2018 failed lumis
-in_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis still
+#in_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis still
+in_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44' # nominal
 #sub_campaign = 'bdtgtm0p99_relChgIsolt0p05_etalt1p44' # bdt > -0.99
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p05_etalt1p44' # bdt > -0.96
@@ -35,6 +36,7 @@ ma_blind = None
 mh_regions = ['sblo', 'sr', 'sbhi']
 
 runs = ['Run2'] # use full run2 stats
+#runs = ['2018'] # use full run2 stats
 for r in runs:
 
     print('>> Doing run:',r)

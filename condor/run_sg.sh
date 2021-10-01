@@ -8,6 +8,7 @@ INPUDATA=${3}
 EOSTGT=${4}
 INPHOIDSYST=${5}
 TARFILE=${6}
+DOTRGSF=${7}
 
 # Get input files
 echo ">> Getting input files..."
@@ -35,12 +36,24 @@ if [ $INPHOIDSYST == "NONE" ]; then
     echo "   .. running without pho ID systs"
     mv $INLIST $INPUDATA CMSSW_10_5_0/src/h2aa/ntupleAnalysis/
     cd CMSSW_10_5_0/src/h2aa/ntupleAnalysis
-    python run_sg_selection.py -s $SAMPLE --inlist $INLIST --pu_data $INPUDATA
+    if [ $DOTRGSF == "TRUE" ]; then
+        echo "   .. will apply trg SFs"
+        python run_sg_selection.py -s $SAMPLE --inlist $INLIST --pu_data $INPUDATA --do_systTrgSF
+    else
+        echo "   .. will NOT apply trg SFs"
+        python run_sg_selection.py -s $SAMPLE --inlist $INLIST --pu_data $INPUDATA
+    fi
 else
     echo "   .. running with pho ID systs"
     mv $INLIST $INPUDATA $INPHOIDSYST CMSSW_10_5_0/src/h2aa/ntupleAnalysis/
     cd CMSSW_10_5_0/src/h2aa/ntupleAnalysis
-    python run_sg_selection.py -s $SAMPLE --inlist $INLIST --pu_data $INPUDATA --systPhoIdFile $INPHOIDSYST
+    if [ $DOTRGSF == "TRUE" ]; then
+        echo "   .. will apply trg SFs"
+        python run_sg_selection.py -s $SAMPLE --inlist $INLIST --pu_data $INPUDATA --systPhoIdFile $INPHOIDSYST --do_systTrgSF
+    else
+        echo "   .. will NOT apply trg SFs"
+        python run_sg_selection.py -s $SAMPLE --inlist $INLIST --pu_data $INPUDATA --systPhoIdFile $INPHOIDSYST
+    fi
 fi
 
 #----------------

@@ -1,26 +1,49 @@
 imax 1  number of channels
-jmax 1  number of backgrounds
+jmax 3  number of backgrounds
 kmax *  number of nuisance parameters (sources of systematical uncertainties)
 ---------------
-#shapes * * /uscms/home/mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/ntupleAnalysis/Fits/Bkgfits_flat_regionlimit.root $PROCESS $PROCESS_$SYSTEMATIC
-shapes * * Bkgfits_flat_regionlimit.root $PROCESS $PROCESS_$SYSTEMATIC
+shapes * * CMS_h4g_sgbg_shapes.root $PROCESS $PROCESS_$SYSTEMATIC
 ---------------
 bin h4g_$MA
 observation -1
-----------------------------------------------
-bin                 h4g_$MA      h4g_$MA
-process             h4g_$MA      bkg
-process              0              1
-rate                -1              -1
-----------------------------------------------
+--------------------------------------------------------------------------------------------
+bin                                     h4g_$MA        h4g_$MA        h4g_$MA        h4g_$MA
+process                                 h4g_$MA_2016   h4g_$MA_2017   h4g_$MA_2018   bkg
+process                                 -1             -1              0              1
+rate                                    -1             -1             -1             -1
+--------------------------------------------------------------------------------------------
 # Systs
-flo          shape   -               1.
-hgg          shape   -               1.
-pol2de0      shape   -               1.
-pol2de1      shape   -               1.
-pol2de2      shape   -               1.
-Lumi         shape   1.              -
-Scale        shape   1.              -
-Smear        shape   1.              -
-PhoIdSF      shape   1.              -
+# Signal
+lumi_13TeV_Uncorrelated_2016    lnN      1.010          -              -              -
+lumi_13TeV_Uncorrelated_2017    lnN      -              1.020          -              -
+lumi_13TeV_Uncorrelated_2018    lnN      -              -              1.015          -
+lumi_13TeV_Correlated           lnN      1.006          1.009          1.020          -
+lumi_13TeV_Correlated_1718      lnN      -              1.006          1.002          -
+CMS_h4g_mGamma_scale_2016       shape    1.             -              -              -
+CMS_h4g_mGamma_scale_2017       shape    -              1.             -              -
+CMS_h4g_mGamma_scale_2018       shape    -              -              1.             -
+CMS_h4g_mGamma_smear_2016       shape    1.             -              -              -
+CMS_h4g_mGamma_smear_2017       shape    -              1.             -              -
+CMS_h4g_mGamma_smear_2018       shape    -              -              1.             -
+CMS_h4g_preselSF_2016           shape    1.             -              -              -
+CMS_h4g_preselSF_2017           shape    -              1.             -              -
+CMS_h4g_preselSF_2018           shape    -              -              1.             -
+CMS_h4g_hltSF_2016              shape    1.             -              -              -
+CMS_h4g_hltSF_2017              shape    -              1.             -              -
+CMS_h4g_hltSF_2018              shape    -              -              1.             -
+# Bkg
+CMS_h4g_bgFracSBlo              shape    -              -              -              1.
+CMS_h4g_bgFracHgg               shape    -              -              -              1.
+CMS_h4g_bgRewgtPolEigen0        shape    -              -              -              1.
+CMS_h4g_bgRewgtPolEigen1        shape    -              -              -              1.
+CMS_h4g_bgRewgtPolEigen2        shape    -              -              -              1.
+CMS_h4g_bgRewgtPolEigen3        shape    -              -              -              1.
+CMS_h4g_bgRewgtPolEigen4        shape    -              -              -              1.
+CMS_h4g_bgRewgtPolEigen5        shape    -              -              -              1.
 * autoMCStats 0.
+
+# scale down sg template so that signal strength r ~ 1
+# helps stabilize combine fits but must be accompanied by the arg
+# `--freezeParameters sgScale` in all combine commands,
+# and inverted when reporting final signal strengths and limits
+#sgScale rateParam * h4g* 0.05

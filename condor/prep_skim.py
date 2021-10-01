@@ -30,12 +30,11 @@ input_campaign = 'Era20May2021_v1' # Add mgg95 trgs for data, h4g, hgg
 # [CANCELLED-wrong 2017 mgg90 trg] ggNtuples-Era24Sep2020v1_ggSkim-v5: data skim, mgg90 trgs
 # mgg95
 # ggNtuples-Era20May2021v1_ggSkim-v1: data, h4g, hgg. mgg95 trgs
+# ggNtuples-Era20May2021v1_ggSkim-v2: h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
 this_campaign = '%s-%s'%(indir.split('/')[-1], input_campaign.replace('_',''))
 #this_campaign = '%s_%s'%(this_campaign, 'ggSkim-vTEST')
-this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v1')
-#this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v2')
-#this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v4')
-#this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v5')
+#this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v1')
+this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v2')
 print('ggSkim campaign:',this_campaign)
 
 exec_file = 'run_skim.sh'
@@ -59,9 +58,9 @@ for l in inlist:
     #if 'Run2018D' not in l: continue
     #if 'Run2016' in l: continue
     #if 'Run2016' not in l: continue
-    if 'Run2016G' not in l: continue
+    #if 'Run2016G' not in l: continue
     #if 'h4g' not in l: continue
-    #if 'hgg' not in l: continue
+    if 'hgg' not in l: continue
     #if 'dy' in l: continue
 
     sample = l.split('/')[-1].split('_')[0]
@@ -77,9 +76,10 @@ for l in inlist:
 
     # Replace crabConfig template strings with sample-specific values
     lfile = l.split('/')[-1]
+    skip_trg = 'TRUE' if 'h4g' in sample else 'FALSE'
     file_data = file_data.replace(EXEC,   cwd+exec_file)
     file_data = file_data.replace(INPUTS, '%s, %s, %s'%(cwd+exec_file, cwd+tar_file, cwd+l))
-    file_data = file_data.replace(ARGS,   '%s %s %s'%(lfile, eos_tgtdir, tar_file))
+    file_data = file_data.replace(ARGS,   '%s %s %s %s'%(lfile, eos_tgtdir, tar_file, skip_trg))
     if 'Run2018D' in l:
         file_data = file_data.replace(MEM, '16000') #25600
     elif ('Run2018A' in l):

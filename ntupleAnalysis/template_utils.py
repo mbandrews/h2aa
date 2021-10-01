@@ -157,5 +157,72 @@ def get_mc2data_norm(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_basedir='r
     #print(nevts_gen)
     norm = xsec*tgt_lumi/nevts_gen
     #print(norm)
-    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %.f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
+    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
     return norm
+
+def get_mc2data_norm_interp(sample, campaign, tgt_lumi=41.9e3, xsec=50., eos_basedir='root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews'): # xsec:pb, tgt_lumi:/pb
+
+    # root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/2018/ggNtuples-Era04Dec2020v1_ggSkim-v1/ggSkims//h4g2018-mA1p2GeV_cut_hists.root
+    year = re.findall('(201[6-8])', sample.split('-')[0])[0]
+
+    # If using an interpolated mass, will need to add nevts_gen between
+    # upper and lower mass pts used to perform the interpolation
+    interp_masses = [0.3, 0.5, 0.7, 0.9, 1.1]
+    magen_instr = sample.split('-')[1].replace('mA','').replace('GeV','')
+    magen_in = float(magen_instr.replace('p','.'))
+    if magen_in in interp_masses:
+        magen_tgts = [magen_in-0.1, magen_in+0.1]
+    else:
+        magen_tgts = [magen_in]
+
+    #print(magen_tgts)
+    nevts_gen = 0.
+    # In general, one should use sum of wgtd evts to calculate `nevts_gen`
+    # not just the raw event count. Only valid for samples with wgt = 1.
+    # such as is the case for all h4g sg samples, but not for some bkg mc samples
+    for magen_tgt in magen_tgts:
+
+        magen_tgtstr = str(magen_tgt).replace('.','p')
+        sample_ = sample.replace(magen_instr, magen_tgtstr)
+        #print(sample)
+        assert 'h4g' in sample_
+
+        inpath = '%s/%s/ggNtuples-%s/ggSkims/%s_cut_hists.root'%(eos_basedir, year, campaign, sample_)
+
+        # Get cut flow hist
+        cut = str(None) # no cuts applied to get gen level event count
+        var = 'npho' # any var that has 1 count per evt will do
+        key = cut+'_'+var
+        hf = ROOT.TFile.Open(inpath, "READ")
+        h = hf.Get('%s/%s'%(cut, key))
+
+        # Get nevts
+        #nevts_gen = h.GetEntries()
+        nevts_gen += h.GetEntries()
+        #print(sample_, nevts_gen)
+
+    ## Sum of wgts
+    #if sample == 'DiPhotonJets':
+    #    nevts_gen = 1118685275.488525
+    #elif sample == 'GluGluHToGG':
+    #    nevts_gen = 214099989.445038
+    #print(nevts_gen)
+    norm = xsec*tgt_lumi/nevts_gen
+    #print(norm)
+    print('>> For sample %s | norm(mc->data) from Ngen: %.f to data int. lumi: %.f /pb @ sg prodn xs: %f pb: %f'%(sample, nevts_gen, tgt_lumi, xsec, norm))
+    return norm
+
+#def get_mceff(sample, selected_path, skim_path):
+def get_mcgenevents(sample, eos_basedir, hgg_campaign, skim_campaign):
+
+    # Get nEvtsGen
+    inpath = '%s/%s/ggSkims/%s_cut_hists.root'%(eos_basedir, skim_campaign, sample)
+    cut = str(None) # no cuts applied to get gen level event count
+    var = 'nEvtsWgtd'
+    key = cut+'_'+var
+    hf = ROOT.TFile.Open(inpath, "READ")
+    h = hf.Get('%s/%s'%(cut, key))
+    nEvtsGen = h.GetBinContent(2)
+
+    return nEvtsGen
+

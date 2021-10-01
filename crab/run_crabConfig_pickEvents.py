@@ -17,7 +17,8 @@ SPLIT = '__SPLIT__'
 #input_campaign = 'ggNtuples-Era24Sep2020v1_ggSkimZee-v1' # zee
 #input_campaign = 'ggNtuples-Era04Dec2020v1_ggSkim-v1' # h4g+hgg, fixed dipho trgs
 #input_campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v4' # data only pi0 skim: trg-npho-presel(hgg hoe)
-input_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v1'  # Add mgg95 trgs for data, h4g, hgg
+#input_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v1' # Add mgg95 trgs for data, h4g, hgg
+input_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v2' # h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
 
 #this_campaign = 'Era2017_17Dec2019_MINIAOD-skimv1'
 #this_campaign = 'Era2017_29Jan2020_MINIAOD-skimv1'
@@ -54,9 +55,14 @@ input_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v1'  # Add mgg95 trgs for data
 #this_campaign = 'Era2018_15Mar2021_MINIAOD-skimv2' # lower jobUnits
 
 # Add mgg95 trgs for data, h4g, hgg
-this_campaign = 'Era2016_20May2021_MINIAOD-skimv1'
+#this_campaign = 'Era2016_20May2021_MINIAOD-skimv1'
 #this_campaign = 'Era2017_20May2021_MINIAOD-skimv1'
 #this_campaign = 'Era2018_20May2021_MINIAOD-skimv1'
+
+# h4g: do NOT apply HLT dipho trg--applied later using trg SFs instead
+this_campaign = 'Era2016_20May2021_MINIAOD-skimv2'
+#this_campaign = 'Era2017_20May2021_MINIAOD-skimv2'
+#this_campaign = 'Era2018_20May2021_MINIAOD-skimv2'
 
 crab_folder = 'crab_%s'%this_campaign
 if not os.path.isdir(crab_folder):
@@ -154,6 +160,7 @@ for s,dset in samples.iteritems(): #python3: samples.items()
     #if '2017' not in s: continue
     #if '2018' not in s: continue
 
+    if 'hgg' not in s: continue
     #if 'h4g' not in s and 'hgg' not in s: continue
 
     print('For sample:',s)

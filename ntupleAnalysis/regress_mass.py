@@ -20,6 +20,7 @@ from array import array
 # Register command line options
 parser = argparse.ArgumentParser(description='Run STEALTH selection.')
 parser.add_argument('-s', '--sample', default='test', type=str, help='Sample name.')
+parser.add_argument('-t', '--magen_tgt', default=None, type=float, help='magen tgt in GeV, if doing an interpolation.')
 parser.add_argument('-i', '--img_list', default='img_inputs.txt', type=str, help='List file of imgNtuple inputs.')
 parser.add_argument('-g', '--gg_list', default='gg_inputs.txt', type=str, help='List file of ggNtuple inputs.')
 parser.add_argument('-m', '--model', default='Models/model_epoch80_mae0.1906.pkl', type=str, help='Regressor model file.')
@@ -33,6 +34,11 @@ gg_list = args.gg_list
 model = args.model
 outdir = args.outdir
 log_file = args.log_file
+magen_tgt = args.magen_tgt
+
+magen_instr = sample.split('-')[1].replace('mA','').replace('GeV','')
+magen_in = float(magen_instr.replace('p','.'))
+magen_tgtstr = None if magen_tgt is None else str(magen_tgt).replace('.','p')
 
 flog = open(log_file, 'w+')
 def logger(log_file, log):
@@ -45,6 +51,16 @@ logger(flog, '>> Input imgNtuple list: %s'%img_list)
 logger(flog, '>> Input ggSkim list: %s'%gg_list)
 logger(flog, '>> Output maNtuple dir: %s'%outdir)
 logger(flog, '>> Log file: %s'%log_file)
+logger(flog, '>> magen,in: %s'%magen_in)
+logger(flog, '>> magen,tgt: %s'%magen_tgt)
+if magen_tgt is not None:
+    sample = sample.replace(magen_instr, magen_tgtstr)
+    if magen_tgt > magen_in:
+        sample += 'up'
+    else:
+        sample += 'dn'
+    logger(flog, '.. Interpolating mass !!')
+    logger(flog, '>> Sample: %s'%sample)
 
 # Crop out EB shower from full EB image
 def crop_EBshower(imgEB, ieta, iphi, window=32):
@@ -122,6 +138,93 @@ def crop_EBshower_padded(imgEB, ieta, iphi, window=32):
     assert img_crop.shape[2] == window, '!! img_crop.shape[2]:%d != window:%d'%(img_crop.shape[2], window)
 
     return img_crop
+
+###########################################################
+# Functions for getting seed ieta,iphi given photon eta,phi
+
+# xtal eta edges
+xtal_etas = np.linspace(0, 1.479, 85+1)
+# stitch [-1.479,...,0],(0,...,1.479] removing repeated `0.`
+xtal_etas = np.concatenate([-np.flipud(xtal_etas), xtal_etas[1:]])
+
+# xtal phi edges
+xtal_phis = np.linspace(-np.pi, np.pi, 360+1)[:-1] # -pi and pi are same edge
+# detector iphi = 0 does not correspond to phi = -pi
+# shift `xtal_phis` to align with origin of detector iphis
+xtal_phi_origin = 170
+xtal_phis = np.concatenate([xtal_phis[xtal_phi_origin:], xtal_phis[:xtal_phi_origin]])
+xtal_dphi = 2.*np.pi/360. # phi granularity
+
+# Calculate deltaPhi
+def deltaPhi(phi1, phi2):
+    # returns the angular displacement from phi1 to phi2 within (0, 2pi)
+    # ported from: https://github.com/cms-sw/cmssw/blob/master/DataFormats/Math/interface/deltaPhi.h
+    angle = phi1 - phi2
+    twoPi = 2. * np.pi
+    oneOverTwoPi = 1. / (2. * np.pi)
+    epsilon = 1.e-6
+    if (abs(angle) <= epsilon) or (abs(twoPi - abs(angle)) <= epsilon):
+        return 0.
+    if abs(angle) > twoPi:
+        nFac = np.trunc(angle * oneOverTwoPi)
+        angle -= (nFac * twoPi)
+        if abs(angle) <= epsilon:
+            return 0.
+    if angle < 0.:
+        angle += twoPi
+
+    # restrict to magnitude (0, pi)
+    # NOTE: gives distance not displacement,
+    # so can't be used to get info about "leftmost" edge closest to `phi`
+    #if angle > np.pi:
+    #    angle = 2.*np.pi - angle
+
+    return angle
+
+def lookup_ieta(eta, etas):
+    # get leftmost edge of xtals closest to `eta`
+    ieta = np.argwhere(eta > etas)[-1][0]
+    return ieta
+
+def lookup_iphi(phi, xtal_phis):
+    # get angular displacement in (0, 2pi) between `phi` and all xtal edges `xtal_phis`
+    dphis = np.array([deltaPhi(phi, p) for p in xtal_phis])
+    # get leftmost edge of xtals closest to `phi`
+    iphi = np.argwhere(dphis < xtal_dphi)[0][0]
+    return iphi
+
+# Get closest xtal ieta,iphi coords of photon eta, phi
+def get_xtal_coords(eta, phi):
+    # Get ieta
+    ieta = lookup_ieta(eta, xtal_etas)
+    #print(ieta, eta)
+    # Get iphi
+    iphi = lookup_iphi(phi, xtal_phis)
+    #print(iphi, phi)
+    return ieta, iphi
+
+# Get ieta, iphi coords of xtal energy max ("seed") given photon eta, phi coordinates
+def get_seed_ieta_iphi(eta, phi, X_EB, search_window=12):
+    assert abs(eta) < 1.479
+    # get xtal coords associated with photon `eta`, `phi`
+    pho_ieta, pho_iphi = get_xtal_coords(eta, phi)
+    # look for energy max ("seed") in `search_window` x `search_window` window around (pho_ieta, pho_iphi)
+    X_w = crop_EBshower_padded(X_EB, [pho_ieta], [pho_iphi], window=search_window)
+    # get coordinates of seed in search window `X_w`
+    seed_wcoords = np.argwhere(X_w == X_w.max())[0]
+    # get position of photon in search window `X_w`
+    # If `search_window` == 12, will always be at [5, 5]
+    # use np.argwhere() anyway in case `search_window` is of different size
+    pho_wcoords = np.argwhere(X_w == X_EB[0, pho_ieta, pho_iphi])[0]
+    # get offset of seed from pho coords
+    seed_off = seed_wcoords - pho_wcoords
+    # get global seed coords, i.e. in EB frame
+    # shift `pho_ieta` and `pho_iphi` by seed offset `seed_off`
+    seed_ieta, seed_iphi = pho_ieta+seed_off[-2], pho_iphi+seed_off[-1]
+    # if `iphi` >= 360, wrap-around
+    if seed_iphi >= 360:
+        seed_iphi -= 360
+    return seed_ieta, seed_iphi
 
 # Create an event list containing run:lumi:event:idx IDs for some input `tree`
 # Defaults to ggNtuple so events can be skipped if not present here.
@@ -318,8 +421,12 @@ for iEvt in range(iEvtStart,iEvtEnd):
     # Check photon indices correspond to same objects
     p4 = {}
     pho_idx = {}
+    X_EB = np.array(img_tree.EB_energy).reshape(1,170,360) # Etot, for consistency with seed-finding in SCRegressor
+    #X_EB = np.array(img_tree.EB_energyT).reshape(1,170,360) # Et
+    seed_ietas, seed_iphis = [], []
     for i in range(len(gg_tree.phoPreselIdxs)):
         pho_idx[i] = gg_tree.phoPreselIdxs[i]
+        '''
         # ggntuple photon vector
         p4['gg'] = ROOT.TVector3()
         p4['gg'].SetPtEtaPhi(gg_tree.phoEt[pho_idx[i]], gg_tree.phoEta[pho_idx[i]], gg_tree.phoPhi[pho_idx[i]])
@@ -331,10 +438,17 @@ for iEvt in range(iEvtStart,iEvtEnd):
         assert dR == 0.
         h['ieta'].Fill(img_tree.SC_ieta[pho_idx[i]])
         h['iphi'].Fill(img_tree.SC_iphi[pho_idx[i]])
+        '''
+        sieta, siphi = get_seed_ieta_iphi(gg_tree.phoEta[pho_idx[i]], gg_tree.phoPhi[pho_idx[i]], X_EB)
+        h['ieta'].Fill(sieta)
+        h['iphi'].Fill(siphi)
+        seed_ietas.append(sieta)
+        seed_iphis.append(siphi)
 
     # Only keep events with photons within ieta image window
     #npho_roi = sum([0 if (img_tree.SC_ieta[pho_idx[i]] < 15) or (img_tree.SC_ieta[pho_idx[i]]+16 > 169) else 1 for i in range(len(pho_idx))])
-    npho_roi = sum([1 if (img_tree.SC_ieta[pho_idx[i]] >= 0) and (img_tree.SC_ieta[pho_idx[i]] < 170) else 0 for i in range(len(pho_idx))])
+    #npho_roi = sum([1 if (img_tree.SC_ieta[pho_idx[i]] >= 0) and (img_tree.SC_ieta[pho_idx[i]] < 170) else 0 for i in range(len(pho_idx))])
+    npho_roi = sum([1 if (seed_ietas[i] >= 0) and (seed_ietas[i] < 170) else 0 for i in range(len(pho_idx))])
     if npho_roi != 2:
         #print(img_tree.SC_ieta[pho_idx[0]], img_tree.SC_ieta[pho_idx[1]])
         continue
@@ -346,8 +460,12 @@ for iEvt in range(iEvtStart,iEvtEnd):
     X_EBz = np.array(img_tree.EB_energyZ).reshape(1,170,360) # Ez
     X_cms = np.concatenate([X_EBt, X_EBz], axis=0)
     for i in range(npho_roi):
+        '''
         ieta.append([img_tree.SC_ieta[pho_idx[i]]])
         iphi.append([img_tree.SC_iphi[pho_idx[i]]])
+        '''
+        ieta.append([seed_ietas[i]])
+        iphi.append([seed_iphis[i]])
         #sc_cms_ = crop_EBshower(X_cms, ieta[-1], iphi[-1])
         sc_cms_ = crop_EBshower_padded(X_cms, ieta[-1], iphi[-1])
         sc_cms.append(sc_cms_)
@@ -358,17 +476,23 @@ for iEvt in range(iEvtStart,iEvtEnd):
                                torch.Tensor(ieta).cuda()/170.
                               ])).tolist()
 
+    m0_rescale = 1. if magen_tgt is None else magen_tgt/magen_in
+    #print(m0_rescale)
+    #break
     # Fill output variables
-    ma0_, ma1_ = ma[0][0], ma[1][0]
+    #ma0_, ma1_ = ma[0][0], ma[1][0]
+    ma0_, ma1_ = ma[0][0]*m0_rescale, ma[1][0]*m0_rescale
     ma0[0] = ma0_
     ma1[0] = ma1_
     tree_out.Fill()
     h['ma0'].Fill(ma0_)
     h['ma1'].Fill(ma1_)
     h['ma0vma1'].Fill(ma0_, ma1_)
+    #print(ma0_, ma1_)
 
     nWrite += 1
 
+file_out.Write()
 sw.Stop()
 logger(flog, ">> N events written / IMG processed: %d / %d"%(nWrite, iEvtEnd-iEvtStart))
 logger(flog, ">> N events written / GG processed: %d / %d"%(nWrite, nEvts_gg_proc))

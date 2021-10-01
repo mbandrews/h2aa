@@ -3,8 +3,10 @@ import os, glob, re
 from data_utils import *
 
 #campaign = '06Sep2020_AOD-IMGv1' # data, dy: ok, h4g, hgg: bad dipho trgs, data: missing lumis in 2016H, 2018. 2018A missing.
-campaign = '06Sep2020_AOD-IMGv6' # 2018A
+#campaign = '06Sep2020_AOD-IMGv6' # 2018A
 #campaign = '04Dec2020_AOD-IMGv1' # h4g, hgg only: fixed dipho trgs
+#campaign = '22Jun2021_AOD-IMGv1' # !! EB images only !! data, h4g, hgg: redo with mgg95 trgs.
+campaign = '22Jun2021_AOD-IMGv2' # h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
 
 eos_redir, eos_basedir, samples = {}, {}, {}
 
@@ -21,32 +23,35 @@ eos_basedir['data2017'] = '/store/user/mandrews/Run2017/Era2017_%s/DoubleEG'%cam
 eos_basedir['data2018'] = '/store/user/mandrews/Run2018/Era2018_%s/EGamma'%campaign
 
 samples['data2016'] = [
-    'B'
-    ,'C'
-    ,'D'
-    ,'E'
-    ,'F'
-    ,'G'
-    ,'H'
+    'B0', 'B1',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G0', 'G1',
+    'H0', 'H1'
     ]
 
 samples['data2017'] = [
-    'B'
-    ,'C'
-    ,'D'
-    ,'E'
-    ,'F'
+    'B',
+    'C0', 'C1',
+    'D',
+    'E0', 'E1',
+    'F0', 'F1'
     ]
 
 samples['data2018'] = [
-    'A'
-    ,'B'
-    ,'C'
+    'A0', 'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7',
+    'B0', 'B1', 'B2', 'B3', 'B4',
+    'C0', 'C1', 'C2', 'C3',
+    'D0', 'D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8'
+    #,'B'
+    #,'C'
     #,'D'
-    ,'D0'
-    ,'D1'
-    ,'D2'
-    ,'D3'
+    #,'D0'
+    #,'D1'
+    #,'D2'
+    #,'D3'
     ]
 
 # Signal MC
@@ -108,15 +113,15 @@ for d in ['data', 'h4g', 'bg']:
 
     #if d != 'h4g' and d != 'bg': continue
     #if d != 'h4g': continue
-    #if d != 'bg': continue
+    if d != 'bg': continue
     #if d == 'data': continue
-    if d != 'data': continue
+    #if d != 'data': continue
 
     print('Data:',d)
 
     for r in ['2016', '2017', '2018']:
 
-        if r != '2018': continue
+        #if r != '2018': continue
         #if r != '2017': continue
         #if r != '2016': continue
 
@@ -124,12 +129,13 @@ for d in ['data', 'h4g', 'bg']:
 
         for s in samples[d+r]:
 
-            if s == 'dy': continue
-            #if s != 'hgg': continue
+            #if s == 'dy': continue
+            if s != 'hgg': continue
             #if s != 'D': continue
             #if s == 'H': continue
             #if s != '1p0': continue
-            if s != 'A': continue
+            #if s != '0p1': continue
+            #if s != 'A': continue
 
             print('Sample:',s)
 

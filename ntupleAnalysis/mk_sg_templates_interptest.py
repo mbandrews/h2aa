@@ -38,7 +38,7 @@ ma_blind_output = 'offdiag_lo_hi'
 #campaign = 'sg-Era22Jun2021v2' # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
 #campaign = 'sg-Era22Jun2021v3' # v2 + interpolated masses
 #campaign = 'sg-Era22Jun2021v4' # duplicate of v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
-campaign = 'sg-Era22Jun2021v5' # duplicate of v3 + ss with SFs + (xs_sg = 1pb for all)
+campaign = 'sg-Era22Jun2021v5' # duplicate of v3 + ss with SFs + (xs_sg = 0.05104pb for by era but xs_sg = 1pb for run2 for making plots)
 print('>> Signal selection campaign:',campaign)
 
 sel = 'nom'
@@ -65,9 +65,9 @@ print('>> sub-campaign:',sub_campaign)
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v2' # h4g, hgg: mgg95 trgs, no HLT req
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign[-1]
 ggntuple_campaign = 'Era20May2021v1_ggSkim-v2'
-xs_sg = 1. #pb
+#xs_sg = 1. #pb
 #xs_sg = 0.05 #pb
-#xs_sg = 0.05104 #pb
+xs_sg = 0.05104 #pb
 # Official lumis: https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM
 #tgt_lumis = {'2016': 36.33e3, #35.92e3,
 #             '2017': 41.53e3,
@@ -93,28 +93,31 @@ syst_lumi = 'systLumi'
 cwd = os.getcwd()+'/'
 
 runs = ['2016', '2017', '2018']
-#runs = ['2018']
+runs = ['2017']
 
 for r in runs:
 
     #if r != '2018': continue
     print('>> Doing run:', r)
 
-    workdir = '%s/%s/%s/%s/Templates'%(eos_basedir, r, campaign, sub_campaign)
+    #workdir = '%s/%s/%s/%s/Templates'%(eos_basedir, r, campaign, sub_campaign)
+    workdir = 'Templates'
     print('.. input dir:', workdir)
 
-    systs = run_eosls(workdir) # returns dirs in relative path only
+    #systs = run_eosls(workdir) # returns dirs in relative path only
+    systs = [syst_nom]
     assert(len(systs) >= 1)
     for syst in systs:
 
-        #if syst != syst_nom: continue # DEBUG: for printing out ma-ROI only
+        if syst != syst_nom: continue # DEBUG: for printing out ma-ROI only
         if 'TEST' in syst: continue
         if 'Lumi' in syst: continue # lumi syst derived separately by shifting sytNom_nom
         print('   >> Doing syst:', syst)
 
         # Get list of samples
         syst_dir = '%s/%s'%(workdir, syst)
-        sample_files = run_eosls(syst_dir)
+        #sample_files = run_eosls(syst_dir)
+        sample_files = os.listdir(syst_dir)
         sample_files = [s for s in sample_files if 'templates.root' in s]
         samples = set([s.split('_')[0] for s in sample_files]) # in case of multiple mH regions, get unique sample names
         samples = sorted(samples)
@@ -122,7 +125,7 @@ for r in runs:
 
         for i,s in enumerate(samples):
 
-            #if 'mA0p4GeV' not in s: continue
+            if 'mA0p4GeV' not in s: continue
             #if ('mA1p2GeV' not in s) and ('mA1p1GeV' not in s) and ('mA1p0GeV' not in s): continue # DEBUG: for verifying interpolation
             #if ('mA0p2GeV' not in s) and ('mA0p3GeV' not in s) and ('mA0p4GeV' not in s): continue # DEBUG: for verifying interpolation
             #if ('mA0p5GeV' not in s) and ('mA0p4GeV' not in s) and ('mA0p6GeV' not in s): continue # DEBUG: for verifying interpolation
@@ -132,7 +135,7 @@ for r in runs:
 
             c, h, hblind, hf = {}, {}, {}, {}
             #load_hists(h, hf, [s], mh_regions, distns, ma_blind_input, '%s/%s'%(eos_redir, syst_dir))
-            load_hists(h, hf, [s], [mh_region], distns, ma_blind_input, '%s/%s'%(eos_redir, syst_dir))
+            load_hists(h, hf, [s], [mh_region], distns, ma_blind_input, '%s/%s'%('/uscms/home/mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/ntupleAnalysis', syst_dir))
             #print(h.keys())
 
             #ksrc = '%s_sr_%s'%(s, k2dma)
@@ -162,9 +165,9 @@ for r in runs:
                 c[kblind].Draw()
                 c[kblind].Update()
 
-            #''' # comment below if DEBUG: for printout out ma-ROI only
+            # comment below if DEBUG: for printout out ma-ROI only
             # Write to file
-            outpath = '%s/%s/%s_%s_blind_%s_templates.root'%(eos_redir, syst_dir, s, mh_region, ma_blind_output)
+            outpath = '%s/%s/%s_%s_blind_%s_templates.root'%('/uscms/home/mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/ntupleAnalysis', syst_dir, s, mh_region, ma_blind_output)
             print('      .. writing to:',outpath)
 
             hfout = ROOT.TFile.Open(outpath, 'RECREATE')
@@ -172,7 +175,7 @@ for r in runs:
                 hblind[k].Write()
             hfout.Close()
 
-            # Do lumi shifts of nominal template
+            ''' # Do lumi shifts of nominal template
             if syst == syst_nom:
                 print('         >> Doing lumi syst...')
 
@@ -201,5 +204,5 @@ for r in runs:
                     hlumi[shift].Write()
                     hfout.Close()
 
-            #''' # end of DEBUG
+            ''' # end of DEBUG
 #'''

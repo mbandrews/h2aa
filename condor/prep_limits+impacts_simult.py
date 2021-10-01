@@ -99,7 +99,8 @@ for m in masses:
     print('   .. eos tgt:', eos_tgtdir)
 
     # Get sg+bkg templates
-    model_file = '%s/Fits/Bkgfits_flat_regionlimit.root'%(analysis_dir)
+    #model_file = '%s/Fits/Bkgfits_flat_regionlimit.root'%(analysis_dir)
+    model_file = '%s/Fits/CMS_h4g_sgbg_shapes.root'%(analysis_dir)
     print('   .. sg+bkg model file:', model_file)
     assert os.path.isfile(model_file), '!! Model file %s not found!'%(model_file)
 

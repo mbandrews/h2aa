@@ -19,7 +19,16 @@ NCPU = '__NCPU__'
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v3_v1' # use old (bdt+chgiso cuts) 2017 s+s for all yrs
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v4_v1' # add 2016+17+18 phoid, 2017+18 ss. 2016 ss missing: use 2017 ss
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v5_v1' # v4 + nominals use best-fit ss over full m_a, shifted uses best-fit ss over ele peak only.
-this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v6_v1' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era04Dec2020v2_sg-Era04Dec2020v6_v1' # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v1' # phoid+trg SFs. mgg95. no HLT applied.
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v2' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v2_v3' # phoid+trg SFs. mgg95. no HLT applied. fhgg using fracfitter with full Run2, no neg bins
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v3_v1' # interpolated masses, otherwise same as above
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v3_v2' # fix dcard syst names, split sg by era
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v3_v3' # bin50MeV
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v3_sg-Era22Jun2021v4_v1' # hgg bkg template with SFs, updated sg ss uncerts, fix lumi2018 uncert, obs limits, xs=0.05pb
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v4_sg-Era22Jun2021v5_v1' # ^ but fhgg from br(hgg) and xs = 0.05104pb
+this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v4_sg-Era22Jun2021v5_v1' # ^ but fhgg from br(hgg) and xs = 1 pb
 print('>> Limit setting campaign:',this_campaign)
 
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv
@@ -34,8 +43,12 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, rel
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.08
 #sub_campaign = '%s/bin100MeV'%sub_campaign
+#sub_campaign = '%s/bin50MeV'%sub_campaign
 sub_campaign = '%s/bin25MeV'%sub_campaign
 print('>> Output sub-campaign:',sub_campaign)
+
+# Skip impacts if running 25MeV bins--too long!
+run_impacts = False if '25MeV' in sub_campaign else True
 
 # Define jdl exec, tar, etc
 tar_file = 'combineTool.tgz'
@@ -69,7 +82,8 @@ if not os.path.isdir(jdl_folder):
 print('>> jdl folder:',jdl_folder)
 
 # Get sg+bkg templates
-model_file = '%s/Fits/Bkgfits_flat_regionlimit.root'%(analysis_dir)
+#model_file = '%s/Fits/Bkgfits_flat_regionlimit.root'%(analysis_dir)
+model_file = '%s/Fits/CMS_h4g_sgbg_shapes.root'%(analysis_dir)
 print('   .. sg+bkg model file:', model_file)
 assert os.path.isfile(model_file), '!! Model file %s not found!'%(model_file)
 
@@ -79,15 +93,30 @@ assert os.path.isfile(dcard_path), '!! input datacard %s not found!'%dcard_path
 
 # Define systs
 systs = [
-    'flo',
-    'hgg',
-    'pol2de0',
-    'pol2de1',
-    'pol2de2',
-    'Lumi',
-    'Scale',
-    'Smear',
-    'PhoIdSF',
+#    'flo',
+#    'hgg',
+#    'pol2de0',
+#    'pol2de1',
+#    'pol2de2',
+#    'Lumi',
+#    'Scale',
+#    'Smear',
+#    'PhoIdSF',
+#    'TrgSF',
+#    '* autoMCStats'
+    'lumi_13TeV',
+    'CMS_h4g_mGamma_scale',
+    'CMS_h4g_mGamma_smear',
+    'CMS_h4g_preselSF',
+    'CMS_h4g_hltSF',
+    'CMS_h4g_bgFracSBlo',
+    'CMS_h4g_bgFracHgg',
+    'CMS_h4g_bgRewgtPolEigen0',
+    'CMS_h4g_bgRewgtPolEigen1',
+    'CMS_h4g_bgRewgtPolEigen2',
+    'CMS_h4g_bgRewgtPolEigen3',
+    'CMS_h4g_bgRewgtPolEigen4',
+    'CMS_h4g_bgRewgtPolEigen5',
     '* autoMCStats'
 ]
 
@@ -145,46 +174,50 @@ for m in masses:
     sample = 'h4g_%s'%m
     print('>> For sample:',sample)
 
-    # Read in datacard template
-    with open(dcard_path, "r") as dcard_file:
-        dcard_data = dcard_file.read()
+    # Skip impacts if running 25MeV bins--too long!
+    if run_impacts:
 
-    dcard_data = dcard_data.replace(MA, m)
+        # Read in datacard template
+        with open(dcard_path, "r") as dcard_file:
+            dcard_data = dcard_file.read()
 
-    # Write out mass-specific datacard, all systs
-    dcard_tgt = cwd+'%s/%s.txt'%(jdl_folder, sample)
-    with open(dcard_tgt, "w") as sample_card:
-        sample_card.write(dcard_data)
+        dcard_data = dcard_data.replace(MA, m)
 
-    # Output EOS tgt
-    eos_tgtdir = '/store/user/lpchaa4g/mandrews/Run2/%s/%s/%s'%(this_campaign, sub_campaign, sample)
-    print('   .. eos tgt:', eos_tgtdir)
+        # Write out mass-specific datacard, all systs
+        dcard_tgt = cwd+'%s/%s.txt'%(jdl_folder, sample)
+        with open(dcard_tgt, "w") as sample_card:
+            sample_card.write(dcard_data)
 
-    # Define exec file: run impacts
-    exec_file = exec_impacts
+        # Output EOS tgt
+        eos_tgtdir = '/store/user/lpchaa4g/mandrews/Run2/%s/%s/%s'%(this_campaign, sub_campaign, sample)
+        print('   .. eos tgt:', eos_tgtdir)
 
-    # Define jdl inputs
-    jdl_inputs = '%s, %s, %s, %s'%(cwd+exec_file, cwd+tar_file, model_file, dcard_tgt)
+        # Define exec file: run impacts
+        exec_file = exec_impacts
 
-    # Define jdl args
-    jdl_args = '%s %s %s %s %s'%(sample, model_file.split('/')[-1], dcard_tgt.split('/')[-1], eos_tgtdir, tar_file)
-    assert sample+'.txt' == dcard_tgt.split('/')[-1] # required by exec_file
+        # Define jdl inputs
+        jdl_inputs = '%s, %s, %s, %s'%(cwd+exec_file, cwd+tar_file, model_file, dcard_tgt)
 
-    # Read in jdl template
-    with open('jdls/condor_setlimits.jdl', "r") as template_file:
-        file_data = template_file.read()
+        # Define jdl args
+        jdl_args = '%s %s %s %s %s'%(sample, model_file.split('/')[-1], dcard_tgt.split('/')[-1], eos_tgtdir, tar_file)
+        assert sample+'.txt' == dcard_tgt.split('/')[-1] # required by exec_file
 
-    # Replace condor template strings with sample-specific values
-    file_data = file_data.replace(EXEC,   cwd+exec_file)
-    file_data = file_data.replace(INPUTS, jdl_inputs)
-    file_data = file_data.replace(ARGS,   jdl_args)
-    #file_data = file_data.replace(MEM,    '2800')
-    file_data = file_data.replace(MEM,    '8000')
-    file_data = file_data.replace(NCPU,   '10') #10
+        # Read in jdl template
+        with open('jdls/condor_setlimits.jdl', "r") as template_file:
+            file_data = template_file.read()
 
-    # Write out sample-specific jdl
-    with open('%s/../condor_impacts_%s.jdl'%(jdl_folder, sample), "w") as sample_file:
-        sample_file.write(file_data)
+        # Replace condor template strings with sample-specific values
+        file_data = file_data.replace(EXEC,   cwd+exec_file)
+        file_data = file_data.replace(INPUTS, jdl_inputs)
+        file_data = file_data.replace(ARGS,   jdl_args)
+        #file_data = file_data.replace(MEM,    '2800')
+        #file_data = file_data.replace(MEM,    '8000')
+        file_data = file_data.replace(MEM,    '16000')
+        file_data = file_data.replace(NCPU,   '10') #10
+
+        # Write out sample-specific jdl
+        with open('%s/../condor_impacts_%s.jdl'%(jdl_folder, sample), "w") as sample_file:
+            sample_file.write(file_data)
 
     #'''
     ########################################
@@ -240,3 +273,5 @@ for m in masses:
             sample_file.write(file_data)
 
     #'''
+
+print('>> jdl folder:',jdl_folder+'/../')

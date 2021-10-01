@@ -46,7 +46,7 @@ def select_event(tree, cuts, hists, counts, outvars=None, year=None):
     # Trigger cut
     cut = 'trg'
     if cut in cuts:
-        assert year is not None
+        #assert year is not None
         if year == '2016':
             '''
             NO LONGER USED: low-mass hgg trgs
@@ -236,7 +236,7 @@ def analyze_event(tree, region, blind, do_ptomGG=True):
     # DEPRECATED: 2d-ma blinding performed post-selections
     ## Check if event is part of blinded region
     #if is_blinded(blind, tree): return False
-    assert blind is None
+    assert blind is None or blind == 'None', '2D-ma blinding is deprecated. Only `None` allowed but got:'%blind
 
     return True
 
@@ -257,10 +257,29 @@ def eta_passed(tree, phoIdxs, cut=1.479):
 def bdt_passed(tree, phoIdxs, cut=-0.96):
     if tree.phoIDMVA[phoIdxs[0]] <= cut: return False
     if tree.phoIDMVA[phoIdxs[1]] <= cut: return False
-    #
+    '''
+    # h4g
+    passedH4g = True
+    if tree.phoIDMVA[phoIdxs[0]] <= cut:
+        passedH4g = False
+    if tree.phoIDMVA[phoIdxs[1]] <= cut:
+        passedH4g = False
+    # hgg
+    passedHgg = True
+    #if tree.phoIDMVA[phoIdxs[0]] <= -0.9: return False
+    #if tree.phoIDMVA[phoIdxs[1]] <= -0.9: return False
+    if tree.phoIDMVA[phoIdxs[0]] <= -0.9:
+        passedHgg = False
+    if tree.phoIDMVA[phoIdxs[1]] <= -0.9:
+        passedHgg = False
+    #if not passedHgg: return False
+    #if not passedH4g: return False
+    if not (passedHgg and passedH4g): return False #common
+    #if not (passedH4g and (not passedHgg)): return False # addtl
     #if tree.phoIDMVA[phoIdxs[0]] <= 0.: return False
     ##if tree.ma0 > 0.: return False
     #if tree.phoIDMVA[phoIdxs[1]] <= cut: return False
+    '''
     return True
 
 #def chgiso_passed(tree, phoIdxs, cut=0.03):
@@ -280,9 +299,25 @@ def chgiso_passed(tree, phoIdxs, cut=0.07):
     #if (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]]) < cut: nIso += 1
     #if (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]]) < cut: nIso += 1
     #if nIso != 1: return False
+    '''
+    # h4g
+    passedH4g = True
+    if (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]]) > cut:
+        passedH4g = False
+    if (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]]) > cut:
+        passedH4g = False
     # hgg
-    if not ( ((tree.phoR9Full5x5[phoIdxs[0]] > 0.8) and (tree.phoPFChIso[phoIdxs[0]] < 20.)) or (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]] < 0.3) ): return False
-    if not ( ((tree.phoR9Full5x5[phoIdxs[1]] > 0.8) and (tree.phoPFChIso[phoIdxs[1]] < 20.)) or (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]] < 0.3) ): return False
+    passedHgg = True
+    #if not ( ((tree.phoR9Full5x5[phoIdxs[0]] > 0.8) and (tree.phoPFChIso[phoIdxs[0]] < 20.)) or (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]] < 0.3) ): return False
+    #if not ( ((tree.phoR9Full5x5[phoIdxs[1]] > 0.8) and (tree.phoPFChIso[phoIdxs[1]] < 20.)) or (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]] < 0.3) ): return False
+    if not ( ((tree.phoR9Full5x5[phoIdxs[0]] > 0.8) and (tree.phoPFChIso[phoIdxs[0]] < 20.)) or (tree.phoPFChIso[phoIdxs[0]]/tree.phoEt[phoIdxs[0]] < 0.3) ):
+        passedHgg = False
+    if not ( ((tree.phoR9Full5x5[phoIdxs[1]] > 0.8) and (tree.phoPFChIso[phoIdxs[1]] < 20.)) or (tree.phoPFChIso[phoIdxs[1]]/tree.phoEt[phoIdxs[1]] < 0.3) ):
+        passedHgg = False
+    #if not passedHgg: return False
+    #if not passedH4g: return False # addtl
+    if not (passedHgg and passedH4g): return False # common
+    '''
     return True
 
 def ptomGG_passed(tree, phoIdxs, mgg):
@@ -467,6 +502,7 @@ def get_trgSFtot(tree, year, shift=None):
         abs_sceta = abs(tree.phoSCEta[idx])
         pt = tree.phoEt[idx]
 
-        sftot *= getTrgSF2016(r9, abs_sceta, pt, i, year, shift)
+        #sftot *= getTrgSF2016(r9, abs_sceta, pt, i, year, shift)
+        sftot *= getTrgSF(r9, abs_sceta, pt, i, year, shift)
 
     return sftot
