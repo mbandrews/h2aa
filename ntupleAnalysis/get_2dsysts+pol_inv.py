@@ -63,7 +63,7 @@ def isnot_sg(ix, iy):
 
 nparams = 3
 #nparams = 4
-nparams = 6
+#nparams = 6
 #nparams = 10
 
 def pol2_2d_x_bkg(x, par):
@@ -71,9 +71,9 @@ def pol2_2d_x_bkg(x, par):
     imx = h[kfitsrc].GetXaxis().FindBin(x[0])
     imy = h[kfitsrc].GetYaxis().FindBin(x[1])
 
-    #pol_val =  par[0] + par[1]*x[0] + par[2]*x[1]
+    pol_val =  par[0] + par[1]*x[0] + par[2]*x[1]
     #pol_val =  par[0] + par[1]*x[0] + par[2]*x[1] + par[3]*x[0]*x[1]
-    pol_val =  par[0] + par[1]*x[0] + par[2]*x[1] + par[3]*x[0]*x[1] + par[4]*x[0]*x[0] + par[5]*x[1]*x[1]
+    #pol_val =  par[0] + par[1]*x[0] + par[2]*x[1] + par[3]*x[0]*x[1] + par[4]*x[0]*x[0] + par[5]*x[1]*x[1]
     #pol_val =  par[0] + par[1]*x[0] + par[2]*x[1] + par[3]*x[0]*x[1] + par[4]*x[0]*x[0] + par[5]*x[1]*x[1]\
     #            + par[6]*x[0]*x[0]*x[0] + par[7]*x[1]*x[1]*x[1] + par[8]*x[0]*x[0]*x[1] + par[9]*x[0]*x[1]*x[1]
     hist_val = h[kfitsrc].GetBinContent(imx, imy)
@@ -82,9 +82,9 @@ def pol2_2d_x_bkg(x, par):
 
 def get_pol_hist(params, shift):
 
-    #pol2_2d = '[0] + [1]*x + [2]*y'
+    pol2_2d = '[0] + [1]*x + [2]*y'
     #pol2_2d = '[0] + [1]*x + [2]*y +[3]*x*y'
-    pol2_2d = '[0] + [1]*x + [2]*y +[3]*x*y + [4]*x*x + [5]*y*y'
+    #pol2_2d = '[0] + [1]*x + [2]*y +[3]*x*y + [4]*x*x + [5]*y*y'
     #pol2_2d = '[0] + [1]*x + [2]*y +[3]*x*y + [4]*x*x + [5]*y*y + [6]*x*x*x + [7]*y*y*y + [8]*x*x*y + [9]*x*y*y'
 
     nparams = len(pol2_2d.split(']'))-1
@@ -102,9 +102,11 @@ def scale_bypol(k, gpol):
     for ix in range(1, h[k].GetNbinsX()+1):
         for iy in range(1, h[k].GetNbinsY()+1):
             binc = h[k].GetBinContent(ix, iy)
+            binerr = h[k].GetBinError(ix, iy)
             ma_x, ma_y = h[k].GetXaxis().GetBinCenter(ix), h[k].GetYaxis().GetBinCenter(iy)
             pol_val = gpol.Eval(ma_x, ma_y)
             h[k].SetBinContent(ix, iy, pol_val*binc)
+            h[k].SetBinError(ix, iy, pol_val*binerr)
 
 def var_params(params, varvec, side):
 
@@ -137,9 +139,13 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     if 'rebin' in ksr:
         kc = kc+'_rebin'
 
+    txtFont = 42
+    mrkstyle = 20 #24 #20 #20
+    mrksize = 0.6 #75 #6
     err_style = 'E2'
     fill_style = 3002
-    wd, ht = int(640*1), int(680*1)
+    #wd, ht = int(640*1), int(680*1)
+    wd, ht = int(640*1), int(720*1)
     #ROOT.TGaxis.fgMaxDigits = 3
     #ROOT.gStyle.SetErrorX(0)
 
@@ -181,30 +187,46 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
 
     c[kc] = ROOT.TCanvas("c%s"%kc,"c%s"%kc,wd,ht)
 
-    pUp = ROOT.TPad("upperPad", "upperPad",.005, .300, .995, .995) # (,,Double_t xlow, Double_t ylow, Double_t xup, Double_t yup,...)
-    pDn = ROOT.TPad("lowerPad", "lowerPad",.005, .005, .995, .300)
+
+
+    pUp = ROOT.TPad("upperPad", "upperPad",.005, .305, .995, .995) # (,,Double_t xlow, Double_t ylow, Double_t xup, Double_t yup,...)
+    pDn = ROOT.TPad("lowerPad", "lowerPad",.005, .005, .995, .305)
     pUp.Draw()
     pDn.Draw()
-    pUp.SetMargin(13.e-02,3.e-02,2.e-02,9.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
-    pDn.SetMargin(13.e-02,3.e-02,36.e-02,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
+    pUp.SetMargin(16.e-02, 3.e-02, 2.e-02,  8.5e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
+    pDn.SetMargin(16.e-02, 3.e-02, 38.e-02, 2.2e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
 
     pUp.cd()
 
     k = sr_k
     #h[k] = set_hist(h[k], "m_{a,pred} [GeV]", "N_{a} / %d MeV"%dMa, "")
     #h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
-    h[k] = set_hist(h[k], "m_{#Gamma} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
+    #h[k] = set_hist(h[k], "m_{#Gamma} [GeV]", "Events / %d MeV"%dMa, "")
+    h[k] = set_hist(h[k], "m_{#Gamma} [GeV]", "Events / %.2f GeV"%(dMa/1.e3), "")
     hc[k+'dummy'] = h[k].Clone()
 
     k = k+'dummy'
     #hc[k].Reset()
     hc[k].GetXaxis().SetTitle('')
     hc[k].GetXaxis().SetLabelSize(0.)
-    hc[k].GetYaxis().SetTitleOffset(0.9)
-    hc[k].GetYaxis().SetTitleSize(0.07)
+
+    hc[k].GetYaxis().SetTitleOffset(1.18) #0.9
+    hc[k].GetYaxis().SetLabelOffset(0.01)
+    hc[k].GetYaxis().SetTitleSize(0.073)
     hc[k].GetYaxis().SetLabelSize(0.06)
+
     hc[k].GetYaxis().SetMaxDigits(3)
+    hc[k].GetYaxis().SetTitleFont(txtFont)
+    hc[k].GetYaxis().SetLabelFont(txtFont)
+
     hc[k].Draw("E")
+
+    # Plot bkg + stat band
+    k = sb2sr_k
+    # Plot bkg as line
+    h[k].SetLineColor(9)
+    h[k].SetFillStyle(0)
+    h[k].Draw("hist same")
 
     # Plot stat band and stat+syst band separately
     # Need to plot stat+syst band first
@@ -213,20 +235,25 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     if plot_syst:
         h[ksyst].SetLineColor(3)
         h[ksyst].SetFillColor(3)
-        h[ksyst].SetFillStyle(3001)
+        h[ksyst].SetFillStyle(3002)
         h[ksyst].Draw("E2 same")
-    # Plot bkg + stat band
-    k = sb2sr_k
-    # Plot bkg as line
-    h[k].SetLineColor(9)
-    h[k].SetFillStyle(0)
-    h[k].Draw("hist same")
-    # Plot stat as fill band
-    hc[k] = h[k].Clone()
-    hc[k].SetName(k+'errs')
-    hc[k].SetFillColor(9)
-    hc[k].SetFillStyle(3002)
-    hc[k].Draw("E2 same")
+    else:
+        # Plot stat as fill band
+        k = sb2sr_k
+        #hc[k] = h[k].Clone()
+        #hc[k].SetName(k+'errs')
+        #hc[k].SetFillColor(9)
+        #hc[k].SetFillStyle(3002)
+        #hc[k].Draw("E2 same")
+        hc[k] = ROOT.TGraphErrors()
+        hc[k].SetName(k+'errs')
+        for i in range(1, h[k].GetNbinsX()+1):
+            hc[k].SetPoint(i-1, h[k].GetBinCenter(i), h[k].GetBinContent(i))
+            hc[k].SetPointError(i-1, h[k].GetBinWidth(i)/2., h[k].GetBinError(i))
+        hc[k].SetLineColor(9) #3
+        hc[k].SetFillColor(9) #3
+        hc[k].SetFillStyle(3002)
+        hc[k].Draw("E2 same")
 
     # Plot obs data
     # For blinded data, sr_k = sb2sr_k
@@ -237,9 +264,9 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     hc[kobs].SetLineColor(1)
     hc[kobs].SetFillColor(0)
     hc[kobs].SetFillStyle(0)
-    hc[kobs].SetMarkerStyle(20)
-    hc[kobs].SetMarkerSize(0.85)
-    hc[kobs].Draw("E same")
+    hc[kobs].SetMarkerStyle(mrkstyle)
+    hc[kobs].SetMarkerSize(mrksize)
+    hc[kobs].Draw("Ep same")
 
     #k = sr_k
     k = kobs
@@ -257,16 +284,16 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     l, l2, hatch = {}, {}, {}
     legend = {}
 
-    print('up line key:',k)
-    l[k] = ROOT.TLine(0.135, 0., 0.135, ymax) # x0,y0, x1,y1
-    l[k].SetLineColor(14)
-    l[k].SetLineStyle(7)
-    l[k].Draw("same")
+    #print('up line key:',k)
+    #l[k] = ROOT.TLine(0.135, 0., 0.135, ymax) # x0,y0, x1,y1
+    #l[k].SetLineColor(14)
+    #l[k].SetLineStyle(7)
+    #l[k].Draw("same")
 
-    l2[k] = ROOT.TLine(0.55, 0., 0.55, ymax) # x0,y0, x1,y1
-    l2[k].SetLineColor(14)
-    l2[k].SetLineStyle(7)
-    l2[k].Draw("same")
+    #l2[k] = ROOT.TLine(0.55, 0., 0.55, ymax) # x0,y0, x1,y1
+    #l2[k].SetLineColor(14)
+    #l2[k].SetLineStyle(7)
+    #l2[k].Draw("same")
 
     hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
     hatch[k].SetLineColor(14)
@@ -289,23 +316,27 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     #posY_ = 0.85
     print(posY_)
 
-    blindText = 'm(a)-SR' if 'offdiag' in blind else 'm(a)-SB'
+    blindText = 'm_{H}-SR #cap '+ ('m_{#bf{#it{A}}}-SR' if 'offdiag' in blind else 'm_{#bf{#it{A}}}-SB')
+    #if 'nom-nom' not in campaign:
+    blindText += ', inv. sel.'
     #print(blind, blindText)
     ltx = ROOT.TLatex()
     ltx.SetNDC()
-    ltx.SetTextFont(42)#bold:62
+    ltx.SetTextFont(txtFont)#bold:62
     ltx.SetTextAlign(13)
     ltx.SetTextSize(blindTextSize*t_)
-    ltx.DrawLatex(posX_, posY_, blindText)
+    #ltx.DrawLatex(posX_, posY_, blindText)
+    #ltx.DrawLatex(0.52, 0.8, blindText)
+    ltx.DrawLatex(0.44, 0.8, blindText)
 
-    legend[k] = ROOT.TLegend(0.62, posY_-0.2 if plot_syst else posY_-0.13, 0.92, posY_) #(x1, y1, x2, y2)
-    #legend[k].AddEntry(hc[sr_k].GetName(), "Obs", "p")
-    #legend[k].AddEntry(hc[sb2sr_k].GetName(), "Bkg, stat", "fel")
-    legend[k].AddEntry(sr_k+'obserrs', "Obs", "lp")
-    legend[k].AddEntry(sb2sr_k+'errs', "Bkg, stat", "fel")
+    #legend[k] = ROOT.TLegend(0.62, posY_-0.2 if plot_syst else posY_-0.13, 0.92, posY_) #(x1, y1, x2, y2)
+    legend[k] = ROOT.TLegend(0.42, 0.7-0.28, 0.95, 0.7) #(x1, y1, x2, y2)
+    legend[k].AddEntry(sr_k+'obserrs', "Obs.", "ep")
+    legend[k].AddEntry(sb2sr_k+'errs', "Bkg.", "l")
     if plot_syst:
-        legend[k].AddEntry(h[ksyst].GetName(), 'Bkg, stat+syst', "fel")
+        legend[k].AddEntry(h[ksyst].GetName(), 'Bkg. unc. (stat + syst)', "f")
     legend[k].SetBorderSize(0)
+    legend[k].SetTextFont(txtFont)
     legend[k].Draw("same")
 
     CMS_lumi.CMS_lumi(pUp, iPeriod, iPos)
@@ -313,37 +344,42 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
     ##### Ratio plots on lower pad #####
     pDn.cd()
     pDn.SetTicky()
-    pDn.SetGridy()
+    #pDn.SetGridy()
 
     #fUnity = ROOT.TF1("fUnity","[0]",-0.4,1.2)
     fUnity = ROOT.TF1("fUnity","[0]",-0.,1.2)
     fUnity.SetParameter( 0,1. )
 
     #fUnity.GetXaxis().SetTitle("m_{#Gamma,pred} [GeV]")
-    fUnity.GetXaxis().SetTitle("m_{#Gamma} [GeV]")
+    pho_idx = ',%d'%(int(ksr[-1])+1)
+    fUnity.GetXaxis().SetTitle("m_{#Gamma%s} [GeV]"%pho_idx)
     fUnity.GetXaxis().SetTickLength(0.1)
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
+    fUnity.GetXaxis().SetLabelFont(txtFont)
+    fUnity.GetXaxis().SetTitleFont(txtFont)
 
+    dY = 0.099
     #dY = 0.199
-    dY = 0.399
+    #dY = 0.399
     #fUnity.GetYaxis().SetTitle("SB/SR")
-    fUnity.GetYaxis().SetTitle("Obs/Bkg")
+    fUnity.GetYaxis().SetTitle("Obs. / Bkg.")
     #fUnity.GetYaxis().SetRangeUser(1.-dY,1.+dY)
     fUnity.SetMaximum(1.+dY)
     fUnity.SetMinimum(1.-dY)
     fUnity.GetYaxis().SetNdivisions(305)
     fUnity.GetYaxis().SetTickLength(0.04)
-    fUnity.GetYaxis().SetLabelFont(62)
-    fUnity.GetYaxis().SetTitleFont(62)
-    fUnity.GetYaxis().SetTitleOffset(.4)
-    fUnity.GetYaxis().SetTitleSize(0.16)
+    fUnity.GetYaxis().SetLabelFont(txtFont)
+    fUnity.GetYaxis().SetTitleFont(txtFont)
+    fUnity.GetYaxis().SetLabelOffset(0.01)
+    fUnity.GetYaxis().SetTitleOffset(.5)
     fUnity.GetYaxis().SetLabelSize(0.14)
+    fUnity.GetYaxis().SetTitleSize(0.165)
 
     fUnity.SetLineColor(9)
-    #fUnity.SetLineWidth(1)
-    fUnity.SetLineWidth(0)
+    fUnity.SetLineWidth(1)
+    #fUnity.SetLineWidth(0)
     fUnity.SetLineStyle(7)
     fUnity.SetTitle("")
     fUnity.Draw()
@@ -370,30 +406,30 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
                 (yvals[i]+eyhis[i])/yvals[i] - 1 if yvals[i] > 0. else 0.
                 )
         h[kr].SetFillColor(3)
-        h[kr].SetFillStyle(3001)
+        h[kr].SetFillStyle(3002)
         h[kr].Draw("E2 same")
-
-    # Plot bkg stat ratio err bands
-    k = sb2sr_k
-    kr = k+'ratioerr'
-    h[kr] = ROOT.TGraphAsymmErrors()
-    h[kr].SetName(kr)
-    for i in range(h[k].GetNbinsX()-1):
-        ib = i+2
-        h[kr].SetPoint(i, h[k].GetBinCenter(ib), 1.)
-        h[kr].SetPointError(
-            i,
-            h[k].GetBinWidth(ib)/2.,
-            h[k].GetBinWidth(ib)/2.,
-            #0.,#1. - (h[k].GetBinError(ib)/h[k].GetBinContent(ib)),
-            #0.# (h[k].GetBinError(ib)/h[k].GetBinContent(ib)) - 1.,
-            (h[k].GetBinError(ib)/h[k].GetBinContent(ib)) if h[k].GetBinContent(ib) > 0. else 0.,
-            (h[k].GetBinError(ib)/h[k].GetBinContent(ib)) if h[k].GetBinContent(ib) > 0. else 0.
-            )
-    h[kr].SetFillColor(9)
-    #h[kr].SetFillStyle(3001)
-    h[kr].SetFillStyle(3002)
-    h[kr].Draw("E2 same")
+    else:
+        # Plot bkg stat ratio err bands
+        k = sb2sr_k
+        kr = k+'ratioerr'
+        h[kr] = ROOT.TGraphAsymmErrors()
+        h[kr].SetName(kr)
+        for i in range(h[k].GetNbinsX()-1):
+            ib = i+2
+            h[kr].SetPoint(i, h[k].GetBinCenter(ib), 1.)
+            h[kr].SetPointError(
+                i,
+                h[k].GetBinWidth(ib)/2.,
+                h[k].GetBinWidth(ib)/2.,
+                #0.,#1. - (h[k].GetBinError(ib)/h[k].GetBinContent(ib)),
+                #0.# (h[k].GetBinError(ib)/h[k].GetBinContent(ib)) - 1.,
+                (h[k].GetBinError(ib)/h[k].GetBinContent(ib)) if h[k].GetBinContent(ib) > 0. else 0.,
+                (h[k].GetBinError(ib)/h[k].GetBinContent(ib)) if h[k].GetBinContent(ib) > 0. else 0.
+                )
+        h[kr].SetFillColor(9)
+        #h[kr].SetFillStyle(3001)
+        h[kr].SetFillStyle(3002)
+        h[kr].Draw("E2 same")
 
     # Plot obs/bkg as points with err bars
     k = srosb2sr_k
@@ -412,21 +448,21 @@ def draw_hist_1dma_statsyst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True
         h[k].SetBinError(ib, obs_err/obs)
     h[k].SetLineColor(1)
     h[k].SetStats(0)
-    h[k].SetMarkerStyle(20)
-    h[k].SetMarkerSize(0.85)
+    h[k].SetMarkerStyle(mrkstyle)
+    h[k].SetMarkerSize(mrksize)
     h[k].SetMarkerColor(1)
     h[k].Draw("ep same")
 
     k = srosb2sr_k
-    l[k] = ROOT.TLine(0.135, 1.-dY, 0.135, 1.+dY) # x0,y0, x1,y1
-    l[k].SetLineColor(14)
-    l[k].SetLineStyle(7)
-    l[k].Draw("same")
+    #l[k] = ROOT.TLine(0.135, 1.-dY, 0.135, 1.+dY) # x0,y0, x1,y1
+    #l[k].SetLineColor(14)
+    #l[k].SetLineStyle(7)
+    #l[k].Draw("same")
 
-    l2[k] = ROOT.TLine(0.55, 1.-dY, 0.55, 1.+dY) # x0,y0, x1,y1
-    l2[k].SetLineColor(14)
-    l2[k].SetLineStyle(7)
-    l2[k].Draw("same")
+    #l2[k] = ROOT.TLine(0.55, 1.-dY, 0.55, 1.+dY) # x0,y0, x1,y1
+    #l2[k].SetLineColor(14)
+    #l2[k].SetLineStyle(7)
+    #l2[k].Draw("same")
 
     hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[1.-dY,1.+dY]));
     hatch[k].SetLineColor(14)
@@ -462,11 +498,14 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     if 'rebin' in ksr:
         kc = kc+'_rebin'
 
+    txtFont = 42
+    mrkstyle = 20 #24 #20 #20
+    mrksize = 0.6 #75 #6
     err_style = 'E2'
     fill_style = 3002
     wd, ht = int(640*1), int(680*1)
     #ROOT.TGaxis.fgMaxDigits = 3
-    #ROOT.gStyle.SetErrorX(0)
+    ROOT.gStyle.SetErrorX(0)
 
     sr_k = ksr
     #print('num:',sr_k)
@@ -517,7 +556,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
 
     k = sr_k
     #h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
-    h[k] = set_hist(h[k], "m_{#Gamma} [GeV]", "N_{#Gamma} / %d MeV"%dMa, "")
+    h[k] = set_hist(h[k], "m_{#Gamma} [GeV]", "Events / %d MeV"%dMa, "")
     hc[k+'dummy'] = h[k].Clone()
 
     k = k+'dummy'
@@ -528,6 +567,8 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     hc[k].GetYaxis().SetTitleSize(0.07)
     hc[k].GetYaxis().SetLabelSize(0.06)
     hc[k].GetYaxis().SetMaxDigits(3)
+    hc[k].GetYaxis().SetTitleFont(txtFont)
+    hc[k].GetYaxis().SetLabelFont(txtFont)
     hc[k].Draw("E")
 
     # Plot bkg model + stat band + syst band in order
@@ -537,9 +578,13 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     h[k].SetFillStyle(0)
     h[k].Draw("hist same")
     # Plot stat as fill band
-    hc[k] = h[k].Clone()
+    hc[k] = ROOT.TGraphErrors()
     hc[k].SetName(k+'errs')
-    hc[k].SetFillColor(9)
+    for i in range(1, h[k].GetNbinsX()+1):
+        hc[k].SetPoint(i-1, h[k].GetBinCenter(i), h[k].GetBinContent(i))
+        hc[k].SetPointError(i-1, h[k].GetBinWidth(i)/2., h[k].GetBinError(i))
+    hc[k].SetLineColor(9) #3
+    hc[k].SetFillColor(9) #3
     hc[k].SetFillStyle(3002)
     hc[k].Draw("E2 same")
     # Plot syst as fill band
@@ -564,17 +609,17 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
         hc[kobs].SetFillStyle(3003)
         #hc[kobs].SetMarkerSize(0.)
         #hc[kobs].Draw("hist E2 same")
-        hc[kobs].SetMarkerStyle(20)
-        hc[kobs].SetMarkerSize(0.85)
+        hc[kobs].SetMarkerStyle(mrkstyle)
+        hc[kobs].SetMarkerSize(mrksize)
         hc[kobs].Draw("hist E same")
     else:
         # Otherwise plot obs data pts
         hc[kobs].SetLineColor(1)
         hc[kobs].SetFillColor(0)
         hc[kobs].SetFillStyle(0)
-        hc[kobs].SetMarkerStyle(20)
-        hc[kobs].SetMarkerSize(0.85)
-        hc[kobs].Draw("E same")
+        hc[kobs].SetMarkerStyle(mrkstyle)
+        hc[kobs].SetMarkerSize(mrksize)
+        hc[kobs].Draw("Ep same")
 
     #k = sr_k
     k = kobs
@@ -592,16 +637,16 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     l, l2, hatch = {}, {}, {}
     legend = {}
 
-    print('up line key:',k)
-    l[k] = ROOT.TLine(0.135, 0., 0.135, ymax) # x0,y0, x1,y1
-    l[k].SetLineColor(14)
-    l[k].SetLineStyle(7)
-    l[k].Draw("same")
+    #print('up line key:',k)
+    #l[k] = ROOT.TLine(0.135, 0., 0.135, ymax) # x0,y0, x1,y1
+    #l[k].SetLineColor(14)
+    #l[k].SetLineStyle(7)
+    #l[k].Draw("same")
 
-    l2[k] = ROOT.TLine(0.55, 0., 0.55, ymax) # x0,y0, x1,y1
-    l2[k].SetLineColor(14)
-    l2[k].SetLineStyle(7)
-    l2[k].Draw("same")
+    #l2[k] = ROOT.TLine(0.55, 0., 0.55, ymax) # x0,y0, x1,y1
+    #l2[k].SetLineColor(14)
+    #l2[k].SetLineStyle(7)
+    #l2[k].Draw("same")
 
     hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
     hatch[k].SetLineColor(14)
@@ -628,7 +673,7 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     #print(blind, blindText)
     ltx = ROOT.TLatex()
     ltx.SetNDC()
-    ltx.SetTextFont(42)#bold:62
+    ltx.SetTextFont(txtFont)#bold:62
     ltx.SetTextAlign(13)
     ltx.SetTextSize(blindTextSize*t_)
     ltx.DrawLatex(posX_, posY_, blindText)
@@ -636,11 +681,13 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     legend[k] = ROOT.TLegend(0.62, posY_-0.2 if plot_syst else posY_-0.13, 0.92, posY_) #(x1, y1, x2, y2)
     #legend[k].AddEntry(hc[sr_k].GetName(), 'h #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp" if is_h4g else 'p')
     #legend[k].AddEntry(hc[sb2sr_k].GetName(), "Bkg, stat", "fel")
-    legend[k].AddEntry(kobs+'errs', 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
-    legend[k].AddEntry(sb2sr_k+'errs', "Bkg, stat", "fel")
+    #legend[k].AddEntry(kobs+'errs', 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
+    legend[k].AddEntry(kobs+'errs', 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "ep")
+    legend[k].AddEntry(sb2sr_k+'errs', "Bkg, stat", "f")
     if plot_syst:
-        legend[k].AddEntry(h[ksyst].GetName(), 'Sg, syst' if is_h4g else 'Bkg, syst', "fel")
+        legend[k].AddEntry(h[ksyst].GetName(), 'Sg, syst' if is_h4g else 'Bkg, syst', "f")
     legend[k].SetBorderSize(0)
+    legend[k].SetTextFont(txtFont)#bold:62
     legend[k].Draw("same")
 
     CMS_lumi.CMS_lumi(pUp, iPeriod, iPos)
@@ -660,9 +707,11 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
+    fUnity.GetXaxis().SetLabelFont(txtFont)
+    fUnity.GetXaxis().SetTitleFont(txtFont)
 
-    #dY = 0.199
-    dY = 0.399
+    dY = 0.199
+    #dY = 0.399
     #fUnity.GetYaxis().SetTitle("SB/SR")
     fUnity.GetYaxis().SetTitle("Obs/Bkg")
     #fUnity.GetYaxis().SetRangeUser(1.-dY,1.+dY)
@@ -670,11 +719,12 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
     fUnity.SetMinimum(1.-dY)
     fUnity.GetYaxis().SetNdivisions(305)
     fUnity.GetYaxis().SetTickLength(0.04)
-    fUnity.GetYaxis().SetLabelFont(62)
-    fUnity.GetYaxis().SetTitleFont(62)
-    fUnity.GetYaxis().SetTitleOffset(.4)
-    fUnity.GetYaxis().SetTitleSize(0.16)
+    fUnity.GetYaxis().SetLabelFont(txtFont)
+    fUnity.GetYaxis().SetTitleFont(txtFont)
+    fUnity.GetYaxis().SetTitleOffset(.35)
+    #fUnity.GetYaxis().SetTitleSize(0.16)
     fUnity.GetYaxis().SetLabelSize(0.14)
+    fUnity.GetYaxis().SetTitleSize(0.165)
 
     fUnity.SetLineColor(9)
     #fUnity.SetLineWidth(1)
@@ -767,21 +817,21 @@ def draw_hist_1dma_syst(ks, syst, ymax_=-1, blind_diag=False, plot_syst=True):
             h[k].SetBinError(ib, obs_err/obs)
         h[k].SetLineColor(1)
         h[k].SetStats(0)
-        h[k].SetMarkerStyle(20)
-        h[k].SetMarkerSize(0.85)
+        h[k].SetMarkerStyle(mrkstyle)
+        h[k].SetMarkerSize(mrksize)
         h[k].SetMarkerColor(1)
         h[k].Draw("ep same")
 
     k = srosb2sr_k
-    l[k] = ROOT.TLine(0.135, 1.-dY, 0.135, 1.+dY) # x0,y0, x1,y1
-    l[k].SetLineColor(14)
-    l[k].SetLineStyle(7)
-    l[k].Draw("same")
+    #l[k] = ROOT.TLine(0.135, 1.-dY, 0.135, 1.+dY) # x0,y0, x1,y1
+    #l[k].SetLineColor(14)
+    #l[k].SetLineStyle(7)
+    #l[k].Draw("same")
 
-    l2[k] = ROOT.TLine(0.55, 1.-dY, 0.55, 1.+dY) # x0,y0, x1,y1
-    l2[k].SetLineColor(14)
-    l2[k].SetLineStyle(7)
-    l2[k].Draw("same")
+    #l2[k] = ROOT.TLine(0.55, 1.-dY, 0.55, 1.+dY) # x0,y0, x1,y1
+    #l2[k].SetLineColor(14)
+    #l2[k].SetLineStyle(7)
+    #l2[k].Draw("same")
 
     hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[1.-dY,1.+dY]));
     hatch[k].SetLineColor(14)
@@ -915,7 +965,7 @@ def plot_2dma(k, title, xtitle, ytitle, ztitle, zrange=None, do_trunc=False, do_
     c[k].Print('Plots/Sys2D_%s.pdf'%(k))
     #c[k].Print('Plots/Sys2D_%s.png'%(k))
 
-def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], styles=[1001, 1001], titles=["im_{1} #times im_{2} + im_{2}", "N_{evts}"], plot_syst=True):
+def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], styles=[1001, 1001], titles=["im_{1} #times im_{2} + im_{2}", "Events"], plot_syst=True):
 
     assert syst == 'all'
 
@@ -929,6 +979,13 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
     #is_h4g = True if 'h4g' in kobs_nom else False
     assert 'h4g' not in kobs_nom
 
+    mrkstyle = 20 #24 #20 #20
+    mrksize = 0.6 #6
+    err_style = 'E2'
+    fill_style = 3002
+    #txtFont = 62
+    txtFont = 42
+
     sample = kobs_nom.split('_')[1]
     blind = kobs_nom.split('_')[2]
     sr = kobs_nom[-3:]
@@ -940,15 +997,15 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
     c[kc] = ROOT.TCanvas('c'+kc, 'c'+kc, wd_wide, ht)
 
     ROOT.gStyle.SetOptStat(0)
-    #ROOT.gStyle.SetErrorX(0)
+    ROOT.gStyle.SetErrorX(0)
 
     pUp = ROOT.TPad("upperPad", "upperPad",.005, .300, .995, .995) # (,, xlow, ylow, xup, yup)
     pDn = ROOT.TPad("lowerPad", "lowerPad",.005, .005, .995, .300)
     pUp.Draw()
     pDn.Draw()
     #pUp.SetMargin(14.e-02,3.e-02,5.e-03,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
-    pUp.SetMargin(8.e-02,1.e-02,2.e-02,9.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
-    pDn.SetMargin(8.e-02,1.e-02,36.e-02,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
+    pUp.SetMargin(6.e-02,1.e-02,2.e-02,9.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
+    pDn.SetMargin(6.e-02,1.e-02,36.e-02,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
 
     pUp.cd()
 
@@ -960,16 +1017,17 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
         h[k].SetTitle("")
         h[k].GetXaxis().SetTitle(xtitle)
         h[k].GetYaxis().SetTitle(ytitle+' / %d MeV'%dMa)
-        h[k].GetYaxis().SetTitleOffset(0.5)
+        h[k].GetYaxis().SetTitleOffset(0.4)
         h[k].GetXaxis().SetTitleOffset(1.)
         h[k].GetXaxis().SetTitleSize(0.06)
         h[k].GetYaxis().SetTitleSize(0.075)
-        h[k].GetXaxis().SetLabelFont(62)
+        h[k].GetXaxis().SetLabelFont(txtFont)
         h[k].GetXaxis().SetLabelSize(0)
         h[k].GetYaxis().SetLabelSize(0.055)
-        h[k].GetXaxis().SetTitleFont(62)
-        h[k].GetYaxis().SetLabelFont(62)
-        h[k].GetYaxis().SetTitleFont(62)
+        h[k].GetXaxis().SetTitleFont(txtFont)
+        h[k].GetYaxis().SetLabelFont(txtFont)
+        h[k].GetYaxis().SetTitleFont(txtFont)
+        h[k].GetYaxis().SetMaxDigits(3)
         if yrange is not None:
             #h[k].GetYaxis().SetRangeUser(yrange[0], yrange[1])
             h[k].GetYaxis().SetRangeUser(yrange[0]+1.e-1, yrange[1])
@@ -988,22 +1046,40 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
         h[kfit].SetFillColor(3)
         h[kfit].SetFillStyle(3001)
         h[kfit].Draw("E2 same")
+        #hc[kfit] = ROOT.TGraphErrors()
+        #hc[kfit].SetName(kfit+'unc')
+        #for i in range(1, h[kfit].GetNbinsX()+1):
+        #    hc[kfit].SetPoint(i-1, 0.5+(i-1), h[kfit].GetBinContent(i))
+        #    hc[kfit].SetPointError(i-1, 0.5, h[kfit].GetBinError(i))
+        #hc[kfit].SetLineColor(3) #3
+        #hc[kfit].SetFillColor(3) #3
+        #hc[kfit].SetFillStyle(3002)
+        #hc[kfit].Draw("E2 same")
     # Plot bkg hist line
     h[kbkg_nom].SetLineColor(9)
     h[kbkg_nom].SetLineStyle(1)
     h[kbkg_nom].Draw("hist same")
     # Plot bkg err bands
-    hc[kbkg_nom] = h[kbkg_nom].Clone()
-    hc[kbkg_nom].SetName(kbkg_nom+'errs')
-    hc[kbkg_nom].SetLineColor(9)
-    hc[kbkg_nom].SetFillColor(9)
+    #hc[kbkg_nom] = h[kbkg_nom].Clone()
+    #hc[kbkg_nom].SetName(kbkg_nom+'errs')
+    #hc[kbkg_nom].SetLineColor(9)
+    #hc[kbkg_nom].SetFillColor(9)
+    #hc[kbkg_nom].SetFillStyle(3002)
+    #hc[kbkg_nom].Draw("E2 same")
+    hc[kbkg_nom] = ROOT.TGraphErrors()
+    hc[kbkg_nom].SetName(kbkg_nom+'unc')
+    for i in range(1, h[kbkg_nom].GetNbinsX()+1):
+        hc[kbkg_nom].SetPoint(i-1, 0.5+(i-1), h[kbkg_nom].GetBinContent(i))
+        hc[kbkg_nom].SetPointError(i-1, 0.5, h[kbkg_nom].GetBinError(i))
+    hc[kbkg_nom].SetLineColor(9) #3
+    hc[kbkg_nom].SetFillColor(9) #3
     hc[kbkg_nom].SetFillStyle(3002)
     hc[kbkg_nom].Draw("E2 same")
     # Plot obs as points
     h[kobs_nom].SetFillStyle(0)
-    h[kobs_nom].SetMarkerStyle(20)
-    h[kobs_nom].SetMarkerSize(0.85)
-    h[kobs_nom].Draw("E same")
+    h[kobs_nom].SetMarkerStyle(mrkstyle)
+    h[kobs_nom].SetMarkerSize(mrksize)
+    h[kobs_nom].Draw("Ep same")
 
     pUp.RedrawAxis()
 
@@ -1025,27 +1101,27 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
     ltx = ROOT.TLatex()
     ltx.SetNDC()
     #ltx.SetTextColor(ROOT.kBlack)
-    ltx.SetTextFont(42)#bold:62
+    ltx.SetTextFont(txtFont)#bold:62
     ltx.SetTextAlign(13)
     ltx.SetTextSize(blindTextSize*t_)
-    ltx.DrawLatex(posX_, posY_, blindText)
-    ch2odof = '#chi^{2}/dof = %3.2f'%(chi2/ndofoff)
+    ltx.DrawLatex(posX_+0.08, posY_, blindText)
+    ch2odof = '#chi^{2}/dof = %.f / %d = %3.2f'%(chi2, ndofoff, chi2/ndofoff)
     if 'offdiag' not in blind:
-        ltx.DrawLatex(0.66, posY_-0.25, ch2odof)
+        ltx.DrawLatex(0.66+0.08, posY_-0.25, ch2odof)
 
     k = kobs_nom
     #legend[k] = ROOT.TLegend(0.65,0.65,0.95,0.85) #(x1, y1, x2, y2)
     #legend[k] = ROOT.TLegend(0.65,0.65 if plot_syst else 0.71,0.95,0.85) #(x1, y1, x2, y2)
-    legend[k] = ROOT.TLegend(0.65, posY_-0.20 if plot_syst else posY_-0.13, 0.95, posY_) #(x1, y1, x2, y2)
-    legend[k].AddEntry(h[kobs_nom].GetName(), "Obs", "lp")
-    legend[k].AddEntry(hc[kbkg_nom].GetName(), "Bkg, stat", "fl")
+    legend[k] = ROOT.TLegend(0.75, posY_-0.20 if plot_syst else posY_-0.13, 0.95, posY_) #(x1, y1, x2, y2)
+    legend[k].AddEntry(h[kobs_nom].GetName(), "Obs", "ep")
+    legend[k].AddEntry(hc[kbkg_nom].GetName(), "Bkg, stat", "f")
     if plot_syst:
-        legend[k].AddEntry(h[kfit].GetName(), 'Bkg, stat+syst', "fl")
+        legend[k].AddEntry(h[kfit].GetName(), 'Bkg, stat+syst', "f")
     legend[k].SetBorderSize(0)
+    legend[k].SetTextFont(txtFont)
     legend[k].Draw("same")
 
     CMS_lumi.CMS_lumi(pUp, iPeriod, iPos)
-
 
     ##### Ratio plots on lower pad #####
     pDn.cd()
@@ -1060,19 +1136,21 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
+    fUnity.GetXaxis().SetLabelFont(txtFont)
+    fUnity.GetXaxis().SetTitleFont(txtFont)
 
-    #dY = 0.399
-    dY = 0.75
+    dY = 0.399
+    #dY = 0.75
     fUnity.GetYaxis().SetTitle("Obs/Bkg")
     #fUnity.GetYaxis().SetRangeUser(1.-dY,1.+dY)
     fUnity.SetMaximum(1.+dY)
     fUnity.SetMinimum(1.-dY)
     fUnity.GetYaxis().SetNdivisions(305)
     fUnity.GetYaxis().SetTickLength(0.04)
-    fUnity.GetYaxis().SetLabelFont(62)
-    fUnity.GetYaxis().SetTitleFont(62)
-    fUnity.GetYaxis().SetTitleOffset(.25)
-    fUnity.GetYaxis().SetTitleSize(0.15)
+    fUnity.GetYaxis().SetLabelFont(txtFont)
+    fUnity.GetYaxis().SetTitleFont(txtFont)
+    fUnity.GetYaxis().SetTitleOffset(.172)
+    fUnity.GetYaxis().SetTitleSize(0.165)
     fUnity.GetYaxis().SetLabelSize(0.12)
 
     fUnity.SetLineColor(9)
@@ -1145,8 +1223,8 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
       h[kr].SetBinError(i, binerr_num/binc_num if binc_num > 0. else 0.)
       #if i<10: print(kr, binc_num/binc_den)
     #h[kr].SetFillStyle(0)
-    h[kr].SetMarkerStyle(20)
-    h[kr].SetMarkerSize(0.85)
+    h[kr].SetMarkerStyle(mrkstyle)
+    h[kr].SetMarkerSize(mrksize)
     h[kr].Draw("Ep same")
 
     #fUnityUp = ROOT.TF1('fUnityUp',"[0]",0., float(nbins))
@@ -1169,7 +1247,7 @@ def plot_datavmc_flat_statsyst(blind, kplots, syst, nbins, yrange=None, colors=[
     #c[kc].Update()
     c[kc].Print('Plots/Sys2D_%s.pdf'%(kc))
 
-def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], styles=[1001, 1001], titles=["im_{1} #times im_{2} + im_{2}", "N_{evts}"], plot_syst=True):
+def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], styles=[1001, 1001], titles=["im_{1} #times im_{2} + im_{2}", "Events"], plot_syst=True):
 
     hc = {}
     legend = {}
@@ -1188,18 +1266,25 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
     #print('>> Flat plot name: [sample, syst, blind, sr o sb]',kc, sample, syst, blind)
     #print('>> Flat plot kobs_nom:',kobs_nom)
 
+    mrkstyle = 20 #24 #20 #20
+    mrksize = 0.6 #6
+    err_style = 'E2'
+    fill_style = 3002
+    #txtFont = 62
+    txtFont = 42
+
     c[kc] = ROOT.TCanvas('c'+kc, 'c'+kc, wd_wide, ht)
 
     ROOT.gStyle.SetOptStat(0)
-    #ROOT.gStyle.SetErrorX(0)
+    ROOT.gStyle.SetErrorX(0)
 
     pUp = ROOT.TPad("upperPad", "upperPad",.005, .300, .995, .995) # (,, xlow, ylow, xup, yup)
     pDn = ROOT.TPad("lowerPad", "lowerPad",.005, .005, .995, .300)
     pUp.Draw()
     pDn.Draw()
     #pUp.SetMargin(14.e-02,3.e-02,5.e-03,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
-    pUp.SetMargin(8.e-02,1.e-02,2.e-02,9.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
-    pDn.SetMargin(8.e-02,1.e-02,36.e-02,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
+    pUp.SetMargin(6.e-02,1.e-02,2.e-02,9.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
+    pDn.SetMargin(6.e-02,1.e-02,36.e-02,2.e-02) # (Float_t left, Float_t right, Float_t bottom, Float_t top)
 
     pUp.cd()
 
@@ -1211,16 +1296,17 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
         h[k].SetTitle("")
         h[k].GetXaxis().SetTitle(xtitle)
         h[k].GetYaxis().SetTitle(ytitle+' / %d MeV'%dMa)
-        h[k].GetYaxis().SetTitleOffset(0.5)
+        h[k].GetYaxis().SetTitleOffset(0.4)
         h[k].GetXaxis().SetTitleOffset(1.)
         h[k].GetXaxis().SetTitleSize(0.06)
         h[k].GetYaxis().SetTitleSize(0.075)
-        h[k].GetXaxis().SetLabelFont(62)
+        h[k].GetXaxis().SetLabelFont(txtFont)
         h[k].GetXaxis().SetLabelSize(0)
         h[k].GetYaxis().SetLabelSize(0.055)
-        h[k].GetXaxis().SetTitleFont(62)
-        h[k].GetYaxis().SetLabelFont(62)
-        h[k].GetYaxis().SetTitleFont(62)
+        h[k].GetXaxis().SetTitleFont(txtFont)
+        h[k].GetYaxis().SetLabelFont(txtFont)
+        h[k].GetYaxis().SetTitleFont(txtFont)
+        h[k].GetYaxis().SetMaxDigits(3)
         if yrange is not None:
             #h[k].GetYaxis().SetRangeUser(yrange[0], yrange[1])
             h[k].GetYaxis().SetRangeUser(yrange[0]+1.e-1, yrange[1])
@@ -1238,10 +1324,13 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
     h[kbkg_nom].SetLineStyle(1)
     h[kbkg_nom].Draw("hist same")
     # Plot bkg err bands
-    hc[kbkg_nom] = h[kbkg_nom].Clone()
-    hc[kbkg_nom].SetName(kbkg_nom+'errs')
-    hc[kbkg_nom].SetLineColor(9)
-    hc[kbkg_nom].SetFillColor(9)
+    hc[kbkg_nom] = ROOT.TGraphErrors()
+    hc[kbkg_nom].SetName(kbkg_nom+'unc')
+    for i in range(1, h[kbkg_nom].GetNbinsX()+1):
+        hc[kbkg_nom].SetPoint(i-1, 0.5+(i-1), h[kbkg_nom].GetBinContent(i))
+        hc[kbkg_nom].SetPointError(i-1, 0.5, h[kbkg_nom].GetBinError(i))
+    hc[kbkg_nom].SetLineColor(9) #3
+    hc[kbkg_nom].SetFillColor(9) #3
     hc[kbkg_nom].SetFillStyle(3002)
     hc[kbkg_nom].Draw("E2 same")
     # Plot syst up/dn
@@ -1256,14 +1345,14 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
         h[kobs_nom].SetFillColor(1)
         h[kobs_nom].SetFillStyle(3003)
         h[kobs_nom].SetMarkerColor(1)
-        h[kobs_nom].SetMarkerStyle(20)
-        h[kobs_nom].SetMarkerSize(0.85)
+        h[kobs_nom].SetMarkerStyle(mrkstyle)
+        h[kobs_nom].SetMarkerSize(mrksize)
         h[kobs_nom].Draw("hist E2 same")
     else:
         h[kobs_nom].SetFillStyle(0)
-        h[kobs_nom].SetMarkerStyle(20)
-        h[kobs_nom].SetMarkerSize(0.85)
-        h[kobs_nom].Draw("E same")
+        h[kobs_nom].SetMarkerStyle(mrkstyle)
+        h[kobs_nom].SetMarkerSize(mrksize)
+        h[kobs_nom].Draw("Ep same")
 
     pUp.RedrawAxis()
 
@@ -1285,27 +1374,28 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
     ltx = ROOT.TLatex()
     ltx.SetNDC()
     #ltx.SetTextColor(ROOT.kBlack)
-    ltx.SetTextFont(42)#bold:62
+    ltx.SetTextFont(txtFont)#bold:62
     ltx.SetTextAlign(13)
     ltx.SetTextSize(blindTextSize*t_)
-    ltx.DrawLatex(posX_, posY_, blindText)
-    ch2odof = '#chi^{2}/dof = %3.2f'%(chi2/ndofoff)
+    ltx.DrawLatex(posX_+0.08, posY_, blindText)
+    ch2odof = '#chi^{2}/dof = %.f / %d = %3.2f'%(chi2, ndofoff, chi2/ndofoff)
     if 'offdiag' not in blind:
-        ltx.DrawLatex(0.66, posY_-0.25, ch2odof)
+        ltx.DrawLatex(0.66+0.08, posY_-0.25, ch2odof)
 
     k = kobs_nom
     #legend[k] = ROOT.TLegend(0.65,0.65,0.95,0.85) #(x1, y1, x2, y2)
     #legend[k] = ROOT.TLegend(0.65,0.65 if plot_syst else 0.71,0.95,0.85) #(x1, y1, x2, y2)
-    legend[k] = ROOT.TLegend(0.65, posY_-0.20 if plot_syst else posY_-0.13, 0.95, posY_) #(x1, y1, x2, y2)
-    legend[k].AddEntry(h[kobs_nom].GetName(), 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
-    legend[k].AddEntry(hc[kbkg_nom].GetName(), "Bkg, stat", "fl")
+    legend[k] = ROOT.TLegend(0.75, posY_-0.20 if plot_syst else posY_-0.13, 0.95, posY_) #(x1, y1, x2, y2)
+    #legend[k].AddEntry(h[kobs_nom].GetName(), 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "lp")
+    legend[k].AddEntry(h[kobs_nom].GetName(), 'H #rightarrow aa #rightarrow 4#gamma' if is_h4g else "Obs", "ep")
+    legend[k].AddEntry(hc[kbkg_nom].GetName(), "Bkg, stat", "f")
     if plot_syst:
-        legend[k].AddEntry(h[kfit].GetName(), 'Sg, syst' if is_h4g else 'Bkg, syst', "fl")
+        legend[k].AddEntry(h[kfit].GetName(), 'Sg, syst' if is_h4g else 'Bkg, syst', "f")
     legend[k].SetBorderSize(0)
+    legend[k].SetTextFont(txtFont)
     legend[k].Draw("same")
 
     CMS_lumi.CMS_lumi(pUp, iPeriod, iPos)
-
 
     ##### Ratio plots on lower pad #####
     pDn.cd()
@@ -1320,19 +1410,21 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
     fUnity.GetXaxis().SetTitleOffset(1.05)
     fUnity.GetXaxis().SetTitleSize(0.16)
     fUnity.GetXaxis().SetLabelSize(0.14)
+    fUnity.GetXaxis().SetLabelFont(txtFont)
+    fUnity.GetXaxis().SetTitleFont(txtFont)
 
-    #dY = 0.399
-    dY = 0.75
+    dY = 0.399
+    #dY = 0.75
     fUnity.GetYaxis().SetTitle("Obs/Bkg")
     #fUnity.GetYaxis().SetRangeUser(1.-dY,1.+dY)
     fUnity.SetMaximum(1.+dY)
     fUnity.SetMinimum(1.-dY)
     fUnity.GetYaxis().SetNdivisions(305)
     fUnity.GetYaxis().SetTickLength(0.04)
-    fUnity.GetYaxis().SetLabelFont(62)
-    fUnity.GetYaxis().SetTitleFont(62)
-    fUnity.GetYaxis().SetTitleOffset(.25)
-    fUnity.GetYaxis().SetTitleSize(0.15)
+    fUnity.GetYaxis().SetLabelFont(txtFont)
+    fUnity.GetYaxis().SetTitleFont(txtFont)
+    fUnity.GetYaxis().SetTitleOffset(.172)
+    fUnity.GetYaxis().SetTitleSize(0.165)
     fUnity.GetYaxis().SetLabelSize(0.12)
 
     fUnity.SetLineColor(9)
@@ -1430,8 +1522,8 @@ def plot_datavmc_flat(blind, kplots, syst, nbins, yrange=None, colors=[3, 10], s
           #if i<10: print(kr, binc_num/binc_den)
 
         #h[kr].SetFillStyle(0)
-        h[kr].SetMarkerStyle(20)
-        h[kr].SetMarkerSize(0.85)
+        h[kr].SetMarkerStyle(mrkstyle)
+        h[kr].SetMarkerSize(mrksize)
         h[kr].Draw("Ep same")
 
     #fUnityUp = ROOT.TF1('fUnityUp',"[0]",0., float(nbins))
@@ -1513,6 +1605,10 @@ def get_datavmc_flat(ksrcs, ktgts, nbins):
                     h[kflat].SetBinContent(ibin, binlo)
                     h[kflat].SetBinError(ibin, binerrlo)
                 elif 'Nom' in k:
+                    if ix == 3 and iy == 15:
+                        print(kflat, ibin, ix, iy, binnom, binerrnom)
+                    if ix == 5 and iy == 5:
+                        print(kflat, ibin, ix, iy, binnom, binerrnom)
                     h[kflat].SetBinContent(ibin, binnom)
                     h[kflat].SetBinError(ibin, binerrnom)
                 elif 'Up' in k:
@@ -1550,6 +1646,7 @@ def get_datavmc_flat(ksrcs, ktgts, nbins):
         #print(ibin-1, nbins)
         print('>> Bin count, actual: %d vs expected: %d'%(ibin-1, nbins))
         assert ibin-1 == nbins
+        #print(kflat, h[kflat].Integral(), type(h[kflat]))
 
 def rebin2d(h, ma_bins):
 
@@ -1557,8 +1654,15 @@ def rebin2d(h, ma_bins):
     #print(h.GetName())
     name = h.GetName()+'_rebin'
     #print(name)
+    #hrebin = h.Clone()
+    #hrebin.SetName(name)
     hrebin = ROOT.TH2F(name, name, nbins, ma_bins, nbins, ma_bins)
     #hrebin.Sumw2()
+
+    binerrs = {}
+    for ix_rebin in range(0, hrebin.GetNbinsX()+2):
+        for iy_rebin in range(0, hrebin.GetNbinsY()+2):
+            binerrs['%d,%d'%(ix_rebin,iy_rebin)] = []
 
     for ix in range(0, h.GetNbinsX()+2):
         ma_x = h.GetXaxis().GetBinCenter(ix)
@@ -1570,9 +1674,20 @@ def rebin2d(h, ma_bins):
             iy_rebin = hrebin.GetYaxis().FindBin(ma_y)
             binc = h.GetBinContent(ix, iy)
 
+            # Collect bin errors and set them later
+            binerrs['%d,%d'%(ix_rebin,iy_rebin)].append(h.GetBinError(ix, iy))
+
             ixy_rebin = hrebin.GetBin(ix_rebin, iy_rebin)
             hrebin.AddBinContent(ixy_rebin, binc)
             #if ix == 2: print(iy, ma_y, iy_rebin, binc)
+
+    for ix_rebin in range(0, hrebin.GetNbinsX()+2):
+        for iy_rebin in range(0, hrebin.GetNbinsY()+2):
+            binerr_ = np.array(binerrs['%d,%d'%(ix_rebin,iy_rebin)])
+            binerrtot_ = np.sqrt(np.sum(binerr_*binerr_)) if len(binerrs['%d,%d'%(ix_rebin,iy_rebin)]) > 0. else 0.
+            if hrebin.GetBinContent(ix_rebin, iy_rebin) == 0.:
+                binerrtot_ = 0.
+            hrebin.SetBinError(ix_rebin, iy_rebin, binerrtot_)
 
     return hrebin.Clone()
     #return hrebin
@@ -1590,13 +1705,14 @@ valid_blind = 'diag_lo_hi'
 limit_blind = 'offdiag_lo_hi'
 blinds = [valid_blind, limit_blind]
 #blinds = [valid_blind]
-#systs = ['flo']
 systs = ['flo', 'hgg']
+#systs = []
 #cr = 'a0noma1inv'
 syst_shifts = {}
 syst_shifts['flo'] = ['Dn', 'Up']
-syst_shifts['hgg'] = ['Nom', 'Syst']
-#apply_blinding = True
+#syst_shifts['hgg'] = ['Nom', 'Syst']
+syst_shifts['hgg'] = ['Dn', 'Up']
+apply_blinding = True
 apply_blinding = False
 plot_syst = False
 plot_syst = True
@@ -1620,10 +1736,11 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso <
 #sub_campaign = 'bdtgtm0p97_relChgIsolt0p06_etalt1p44' # bdt > -0.97, relChgIso < 0.06
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44' # bdt > -0.96, relChgIso < 0.08
-#campaign = 'bkgPtWgts-Era04Dec2020v2/%s/nom-nom/Templates_bkg'%sub_campaign # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
-#campaign = 'bkgPtWgts-Era22Jun2021v1/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, mgg95
+campaign = 'bkgPtWgts-Era22Jun2021v2/%s/nom-inv/Templates_bkg'%sub_campaign # v1 but with bin50MeV
 #campaign = 'bkgPtWgts-Era22Jun2021v3/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, mgg95, hgg template with SFs
-campaign = 'bkgPtWgts-Era22Jun2021v4/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, mgg95, hgg template with SFs, fhgg from br(hgg)
+#campaign = 'bkgPtWgts-Era22Jun2021v4/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, mgg95, hgg template with SFs, fhgg from br(hgg)
+#campaign = 'bkgPtWgts-Era22Jun2021v5/%s/nom-inv/Templates_bkg'%sub_campaign # combined full Run2, mgg95, hgg template with SFs, fhgg from br(hgg)
+#campaign = 'bkgPtWgts-Era22Jun2021v6/%s/nom-inv/Templates_bkg'%sub_campaign # v4, but with pt wgts smoothing (no shifting anymore)
 
 assert 'nom-inv' in campaign
 
@@ -1640,7 +1757,9 @@ for b in blinds:
             hname = '%s_%s_%s-%s'%(sample, r, k, b)
             h[kidx_k] = hf['nom'].Get(hname)
             h[kidx_k].SetName(kidx_k)
-            #print('Adding:',kidx_k, hname, h[kidx_k].GetName(), h[kidx_k].Integral())
+            print('Adding:',kidx_k, hname, h[kidx_k].GetName(), h[kidx_k].Integral())
+            print('.. 3 15:', h[kidx_k].GetBinContent(3, 15), h[kidx_k].GetBinError(3, 15))
+            print('.. 5  5:', h[kidx_k].GetBinContent(5, 5), h[kidx_k].GetBinError(5, 5))
 
 # Syst shifts, sb2sr only
 for syst in systs:
@@ -1662,9 +1781,11 @@ for syst in systs:
                     h[kidx_k] = hf[syst+shift].Get(hname)
                     h[kidx_k].SetName(kidx_k)
                     #print('Adding:',kidx_k, h[kidx_k].Integral())
+                    #print('.. 3 15:', h[kidx_k].GetBinContent(3, 15), h[kidx_k].GetBinError(3, 15))
+                    #print('.. 5  5:', h[kidx_k].GetBinContent(5, 5), h[kidx_k].GetBinError(5, 5))
 
 dMa = 25
-#dMa = 50
+dMa = 50
 #dMa = 100
 ma_bins = list(range(0,1200+dMa,dMa))
 ma_bins = [-400]+ma_bins
@@ -1673,9 +1794,12 @@ ma_bins = [float(m)/1.e3 for m in ma_bins]
 ma_bins = array('d', ma_bins)
 
 if dMa == 50:
-    nbins = {valid_blind:420, limit_blind:196} #dM50
+    #nbins = {valid_blind:420, limit_blind:196} #dM50, blind_w=200MeV
+    #nbins = {valid_blind:342, limit_blind:270} #dM50, blind_w=300MeV
+    nbins = {valid_blind:342, limit_blind:234} #native dM50, blind_w=300MeV
 elif dMa == 100:
-    nbins = {valid_blind:110, limit_blind:54} #dM100
+    #nbins = {valid_blind:110, limit_blind:54} #dM100, blind_w = 200MeV
+    nbins = {valid_blind:90, limit_blind:72} #dM100, blind_w = 300MeV
 else:
     #nbins = {valid_blind:1640, limit_blind:664} #dM25, blind_w = 200MeV
     nbins = {valid_blind:1332, limit_blind:972} #dM25, blind_w = 300MeV
@@ -1693,8 +1817,8 @@ if dMa == 100:
     ymax_flat = 18.e3
 elif dMa == 50:
     # Run2
-    ymax_1d = 30.e3
-    ymax_flat = 5.4e3
+    ymax_1d = 45.e3
+    ymax_flat = 3.e3
 else:
     # Run2
     ymax_1d = 20.e3 # 16.e3
@@ -1702,6 +1826,12 @@ else:
 zrange = [0., ymax_flat]
 do_trunc = True
 do_log = False if do_trunc else True
+
+for blind in blinds:
+
+    ktest = '%s_sb2sr_%s_%s'%(sample, blind, keys[0])
+    print('2dma, pre-rebin: 3 15:', h[ktest].GetBinContent(3, 15), h[ktest].GetBinError(3, 15))
+    print('2dma, pre-rebin: 5  5:', h[ktest].GetBinContent(5, 5), h[ktest].GetBinError(5, 5))
 
 for kidx in h:
 
@@ -1721,6 +1851,12 @@ for kidx in h:
 
     #plot_2dma(k, "", xtitle, ytitle, ztitle, zrange, do_trunc, do_log=do_log)
     #print(k, h[k].GetName(), h[k].Integral())
+
+for blind in blinds:
+
+    ktest = '%s_sb2sr_%s_%s_rebin'%(sample, blind, keys[0])
+    print('2dma, post-rebin: 3 15:', h[ktest].GetBinContent(3, 15), h[ktest].GetBinError(3, 15))
+    print('2dma, post-rebin: 5  5:', h[ktest].GetBinContent(5, 5), h[ktest].GetBinError(5, 5))
 
 #for kidx in h.keys():
 #
@@ -1788,21 +1924,34 @@ kfittgt_stat = kfittgt+'_stat'
 h[kfittgt_stat] = h[kfittgt].Clone()
 h[kfittgt_stat].SetName(kfittgt_stat)
 h[kfittgt_stat].SetTitle(kfittgt_stat)
+#nbinsall = 0
+#nbinsnonzero = 0
 for ix in range(1, h[kfittgt_stat].GetNbinsX()+1):
     for iy in range(1, h[kfittgt_stat].GetNbinsY()+1):
         binerr_tgt = h[kfittgt].GetBinError(ix, iy)
         binerr_src = h[kfitsrc].GetBinError(ix, iy)
         binerr = np.sqrt(binerr_tgt*binerr_tgt + binerr_src*binerr_src)
         h[kfittgt_stat].SetBinError(ix, iy, binerr)
+        #if h[kfittgt_stat].GetBinContent(ix, iy) == 0:
+        #    pass
+        #    #print(ix, iy, binerr)
+        #else:
+        #    nbinsnonzero += 1
+        #nbinsall += 1
+#print(nbinsall, nbinsnonzero)
 fitResult = h[kfittgt_stat].Fit(h[k], "LLIEMNS")
+#fitResult = h[kfittgt_stat].Fit(h[k], "IEMNS") # chi2: dof=1326
 chi2 = h[k].GetChisquare()
 ndof = h[k].GetNDF()
 pval = h[k].GetProb()
 nDiag = nbins[limit_blind]
-ndofoff = ndof-nDiag
-print('chi2 / ndf: %f / %f = %f'%(chi2, ndof, chi2/ndof))
-print('chi2 / (ndf-nDiag): %f / %f = %f'%(chi2, ndofoff, chi2/ndofoff))
+#ndofoff = ndof-nDiag
+n_offdiag = nbins[valid_blind] #342 #1332
+ndofoff = n_offdiag-nparams
+print('chi2 / ndf(raw): %f / %f = %f'%(chi2, ndof, chi2/ndof))
+print('chi2 / ndf(nonzero): %f / %f = %f'%(chi2, n_offdiag-nparams, chi2/(n_offdiag-nparams))) #dof-pol2d-3:1329, dof-pol2d-6:1326
 print('p-val:',pval)
+print('p-val(chi2,ndf):',ROOT.TMath.Prob(chi2, int(n_offdiag-nparams)))
 #cor = fitResult.GetCorrelationMatrix()
 cov = fitResult.GetCovarianceMatrix()
 #cor.Print()
@@ -1828,41 +1977,21 @@ print('pol_hist:%s, min:%f, max:%f'%(k, h[k].GetMinimum(), h[k].GetMaximum()))
 #plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.05, 1.+0.05])
 #plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.1, 1.+0.1], do_trunc=do_trunc)
 plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.04, 1.+0.04], do_trunc=do_trunc)
+#plot_2dma(k, "", xtitle, ytitle, 'pol2d', [1.-0.08, 1.+0.08], do_trunc=do_trunc)
 
 # Eigenvariations from solving covariance matrix
 # Must be hardcoded here
 if dMa == 25:
     pass
     varvec = np.array([
-    # nominal
-    #blind_w = 300MeV
-    #np.sqrt(1.109966e-04) * np.array([ 0.630671986495,-0.514766176261,-0.580748335536 ]),
-    #np.sqrt(2.546847e-06) * np.array([ -0.76442924112,-0.283054473226,-0.57924787484 ]),
-    #np.sqrt(2.866653e-05) * np.array([ -0.133793799447,-0.809256417314,0.572016844389 ])
-    #fhggv3
-    # no neg, with norm
-    #np.sqrt(1.110046e-04) * np.array([ 0.630448219926,-0.515022079285,-0.58076440993 ]),
-    #np.sqrt(2.556325e-06) * np.array([ -0.764567880212,-0.282798909229,-0.579189721496 ]),
-    #np.sqrt(2.866904e-05) * np.array([ -0.134055953018,-0.809182942719,0.572059408342 ])
-    # bkg v3, no neg, with norm
-    #np.sqrt(1.083035e-04) * np.array([ 0.58764846401,-0.571807582417,-0.572455562849 ]),
-    #np.sqrt(3.036732e-06) * np.array([ -0.807346534633,-0.36761639508,-0.461573135142 ]),
-    #np.sqrt(2.449972e-05) * np.array([ -0.0534869681563,-0.733412758792,0.677676080055 ])
-    # bkg v4
-    #np.sqrt(1.110199e-04) * np.array([ 0.63064920106,-0.514750357945,-0.580787098857 ]),
-    #np.sqrt(2.551268e-06) * np.array([ -0.764417393334,-0.282829685359,-0.579373297493 ]),
-    #np.sqrt(2.866880e-05) * np.array([ -0.133968779838,-0.80934506737,0.571850441946 ])
-    # pol2d-O2
-    np.sqrt(4.078154e-03) * np.array([ -0.272811815827,0.522789516435,0.59252714924,-0.35132249279,-0.268187144168,-0.325306891761 ]),
-    np.sqrt(7.964080e-04) * np.array([ 0.0709801537015,0.548778581717,-0.52295834281,-0.111314515618,-0.497899210149,0.400029889959 ]),
-    np.sqrt(3.484043e-04) * np.array([ 0.094127093541,0.0428222592052,0.0733747912539,0.798380148573,-0.475211701509,-0.347398131113 ]),
-    np.sqrt(4.351769e-05) * np.array([ 0.685683641411,-0.218981560064,-0.120866040873,-0.425163408212,-0.285559127087,-0.452734449398 ]),
-    np.sqrt(1.638628e-06) * np.array([ 0.646181132897,0.243980359763,0.506372168878,0.163221167317,0.163026981202,0.461835260742 ]),
-    np.sqrt(1.229732e-05) * np.array([ -0.149373464101,-0.554050270928,0.328530596694,-0.132377062893,-0.581463061152,0.455148914399 ])
     ])
 elif dMa == 50:
     pass
     varvec = np.array([
+    # bkgv2
+    np.sqrt(1.057291e-04) * np.array([ 0.630107389393,-0.515201462917,-0.580975154753 ]),
+    np.sqrt(2.503639e-06) * np.array([ -0.765401830882,-0.285998304071,-0.576511064379 ]),
+    np.sqrt(2.832730e-05) * np.array([ -0.130861434789,-0.807943328877,0.574545787739 ])
     ])
 elif dMa == 100:
     pass
@@ -2076,7 +2205,12 @@ yrange_flat = [0., ymax_flat] # a0nom, a1nom, dM=100MeV
 #yrange_flat = [0., 650.] # a0nom, a1inv
 #yrange_flat = [0., 200.] # a0inv, a1inv
 #yrange_flat = [0., 1100.] # a0nom, a1nom
+
 for blind in blinds:
+
+    ktest = '%s_sb2sr_%s_%s_rebin'%(sample, blind, key)
+    print('2dma, pre-unroll: 3 15:', h[ktest].GetBinContent(3, 15), h[ktest].GetBinError(3, 15))
+    print('2dma, pre-unroll: 5  5:', h[ktest].GetBinContent(5, 5), h[ktest].GetBinError(5, 5))
 
     nbin = nbins[blind]
 
@@ -2123,8 +2257,8 @@ for ib in range(1, h[kpullobs].GetNbinsX()+1):
     #sg = h[kpullbkg].GetBinError(ib)
     sg_bkg = h[kpullbkg].GetBinError(ib)
     sg_obs = h[kpullobs].GetBinError(ib)
-    #sg = np.sqrt(sg_bkg*sg_bkg + sg_obs*sg_obs)
-    sg = sg_bkg
+    sg = np.sqrt(sg_bkg*sg_bkg + sg_obs*sg_obs)
+    #sg = sg_bkg
     pull = diff/sg
     h[kpull].Fill(pull)
     #if count < 10:
@@ -2149,8 +2283,8 @@ print('chi2 / ndf: %f / %f = %f'%(chi2, ndof, chi2/ndof))
 
 #'''
 hout = OrderedDict()
-#file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "RECREATE")
 file_out = ROOT.TFile('Fits/CMS_h4g_sgbg_shapes.root', "RECREATE")
+#file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "RECREATE")
 #file_out = ROOT.TFile('Datacards/%s_hists.root'%'shape', "UPDATE")
 for i,syst in enumerate(systs):
     ksysts = [k for k in h.keys() if syst in k]
@@ -2178,7 +2312,7 @@ for i,syst in enumerate(systs):
         hout[kout] = h[ksyst_shift].Clone()
         hout[kout].SetName(kout)
         hout[kout].SetLineColor(1)
-        print(kout)
+        print(kout, hout[kout].GetBinContent(43), hout[kout].GetBinError(43))
         if shift != 'Nom': continue
         #for stat in ['Up', 'Down']:
         #    kout = 'bkg_bstat%s'%stat
@@ -2194,303 +2328,308 @@ for i,syst in enumerate(systs):
 
 file_out.Write()
 file_out.Close()
-#
-##########################
-## Signal samples
-##########################
-#regions = ['sr']
-#blinds = [limit_blind]
-#sample_sg = 'h4g'
-#
-##systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi']
-##systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi', 'TrgSF']
-#systs = ['PhoIdSF', 'Scale', 'Smear', 'TrgSF']
-##systs = ['Lumi']
-##systs = ['Scale']
-#syst_shifts['PhoIdSF'] = ['dn', 'up']
-#syst_shifts['Scale'] = ['dn', 'up']
-#syst_shifts['Smear'] = ['dn', 'up']
-#syst_shifts['Lumi'] = ['dn', 'up']
-#syst_shifts['TrgSF'] = ['dn', 'up']
-##systs = ['TEST'] # dummy to force output of nominal sg plots
-##syst_shifts['TEST'] = ['dn', 'up']
-#keys = ['ma0vma1']
-#
-##run = 'Run2'
-##run = '2017'
-##indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
+
+#########################
+# Signal samples
+#########################
+regions = ['sr']
+blinds = [limit_blind]
+sample_sg = 'h4g'
+
+#systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi']
+#systs = ['PhoIdSF', 'Scale', 'Smear', 'Lumi', 'TrgSF']
+systs = ['PhoIdSF', 'Scale', 'Smear', 'TrgSF']
+#systs = ['Lumi']
+#systs = ['Scale']
+syst_shifts['PhoIdSF'] = ['dn', 'up']
+syst_shifts['Scale'] = ['dn', 'up']
+syst_shifts['Smear'] = ['dn', 'up']
+syst_shifts['Lumi'] = ['dn', 'up']
+syst_shifts['TrgSF'] = ['dn', 'up']
+#systs = ['TEST'] # dummy to force output of nominal sg plots
+#syst_shifts['TEST'] = ['dn', 'up']
+keys = ['ma0vma1']
+
+#run = 'Run2'
+#run = '2017'
+#indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
+#campaign = 'sg-Era04Dec2020v6/%s/nom-nom/Templates'%sub_campaign # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
+#campaign = 'sg-Era22Jun2021v2/%s/nom-nom/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
+#campaign = 'sg-Era22Jun2021v3/%s/nom-nom/Templates'%sub_campaign # phoid+trg SFs. mgg95. no HLT applied.
+#campaign = 'sg-Era22Jun2021v4/%s/nom-nom/Templates'%sub_campaign # v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
 #campaign = 'sg-Era22Jun2021v5/%s/nom-nom/Templates'%sub_campaign # v3 + ss with SFs + (xs_sg = 1pb for all)
-#
-##runs = ['Run2']
-##runs = ['2018', '2017']
-#runs = ['2016', '2017', '2018']
-#
-##ma_pts = ['0p1', '0p2', '0p4', '0p6', '0p8', '1p0', '1p2']
-#ma_pts = (np.arange(12)+1.)/10.
-#ma_pts = [str(m_).replace('.','p') for m_ in ma_pts]
-##ma_pts = ['0p1']
-##ma_pts = ['0p1', '0p4', '1p0']
-##for ma in ['100MeV', '400MeV', '1GeV']:
-#for ma in ma_pts:
-#
-#    for run in runs:
-#
-#        #sample = 'h4g_%s'%ma
-#        sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
-#        #norm = get_sg_norm(sample, xsec=50.*1.e-2)
-#        #norm = get_sg_norm(sample, xsec=1.)
-#        #print('%s mc2data norm: %.4f'%(sample, norm))
-#        indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
-#
-#        for b in blinds:
-#            for r in regions:
-#                # Nominals
-#                kidx = '%s_%s_%s'%(sample, r, b)
-#                #hf[kidx] = ROOT.TFile("%s/%s/%s_%s_blind_%s_templates.root"%(indir, 'nom', sample, r, b),"READ")
-#                inpath = "%s/%s/syst%s/%s_%s_blind_%s_templates.root"%(indir, campaign, 'Nom_nom', sample, r, b)
-#                print('>> Reading:', inpath)
-#                hf[kidx] = ROOT.TFile.Open(inpath, "READ")
-#                for k in keys:
-#                    kidx_k = '%s_%s'%(kidx, k)
-#                    kidx_h = '%s_%s_%s-%s'%(sample, r, k, b)
-#                    print('   .. input key:',kidx_h)
-#                    #h[kidx_k] = hf[kidx].Get(k)
-#                    h[kidx_k] = hf[kidx].Get(kidx_h)
-#                    h[kidx_k].SetName(kidx_k)
-#                    #h[kidx_k].Scale(norm)
-#                    print('   .. adding: %s, integral: %.f'%(kidx_k, h[kidx_k].Integral()))
-#
-#                # Syst shifts
-#                for syst in systs:
-#                    for shift in syst_shifts[syst]:
-#                        kidx = '%s_%s_%s_%s%s'%(sample, r, b, syst, shift)
-#                        #hf[kidx] = ROOT.TFile("%s/%s/%s_%s_blind_%s_templates.root"%(indir, '%s_%s'%(syst,shift), sample, r, b),"READ")
-#                        inpath = "%s/%s/syst%s/%s_%s_blind_%s_templates.root"%(indir, campaign, '%s_%s'%(syst, shift), sample, r, b)
-#                        print('>> Reading:', inpath)
-#                        hf[kidx] = ROOT.TFile.Open(inpath, "READ")
-#                        for k in keys:
-#                            kidx_k = '%s_%s'%(kidx, k)
-#                            kidx_h = '%s_%s_%s-%s'%(sample, r, k, b)
-#                            print('   .. input key:',kidx_h)
-#                            #h[kidx_k] = hf[kidx].Get(k)
-#                            h[kidx_k] = hf[kidx].Get(kidx_h)
-#                            h[kidx_k].SetName(kidx_k)
-#                            #h[kidx_k].Scale(norm)
-#                            #print('Adding:',kidx_k)
-#                            print('   .. adding: %s, integral: %.f'%(kidx_k, h[kidx_k].Integral()))
-#
-#        # Rebin
-#        for kidx in h.keys():
-#            if sample not in kidx: continue
-#            key = kidx.split('_')[-1]
-#            if key != key_2d: continue
-#
-#            k = kidx+'_rebin'
-#            if ma_bins is not None:
-#                h[k] = rebin2d(h[kidx], ma_bins)
-#
-#            for ix in range(1, h[k].GetNbinsX()+1):
-#                for iy in range(1, h[k].GetNbinsY()+1):
-#                    binc = h[k].GetBinContent(ix, iy)
-#                    h[k].SetBinContent(ix, iy, binc)
-#
-#            #plot_2dma(k, "", xtitle, ytitle, ztitle, zrange, do_trunc, do_log=do_log)
-##print(h.keys())
-#
-###########################
-## Get total syst
-#
-#syst_shifts['all'] = ['dn', 'up']
-#
-#for ma in ma_pts:
-#
-#    for run in runs:
-#
-#        sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
-#
-#        # Initialize hists
-#        for b in blinds:
-#            for r in regions:
-#                k = '%s_%s_%s_ma0vma1_rebin'%(sample, r, b)
-#                for shift in syst_shifts['all']:
-#                    kSystAll = '%s_%s_%s_all%s_ma0vma1_rebin'%(sample, r, b, shift)
-#                    h[kSystAll] = h[k].Clone()
-#                    h[kSystAll].SetName(kSystAll)
-#                    h[kSystAll].SetTitle(kSystAll)
-#
-#        # Fill with total err in quadrature
-#        for b in blinds:
-#            for r in regions:
-#                kNom = '%s_%s_%s_ma0vma1_rebin'%(sample, r, b)
-#                for ix in range(1, h[kNom].GetNbinsX()+1):
-#                    for iy in range(1, h[kNom].GetNbinsY()+1):
-#                        binc = h[kNom].GetBinContent(ix, iy)
-#                        errlos = binc-np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin'%(\
-#                                                   sample, r, b, syst, syst_shifts[syst][0])].GetBinContent(ix,iy) for syst in systs])
-#                        errhis = np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin'%(\
-#                                              sample, r, b, syst, syst_shifts[syst][1])].GetBinContent(ix,iy) for syst in systs])-binc
-#                        errs = np.array([[lo,hi]  if (lo >= 0.) and (hi >= 0.) else [abs(hi),abs(lo)] for lo,hi in zip(errlos, errhis)])
-#                        #print(errs.shape)
-#                        errdns = errs[:,0]
-#                        errups = errs[:,1]
-#                        qerrdn = np.sqrt(np.sum(errdns*errdns))
-#                        qerrup = np.sqrt(np.sum(errups*errups))
-#                        #print(ix, iy, errlos)
-#                        #print(ix, iy, binc)
-#                        #print(ix, iy, errhis)
-#                        #print(ix, iy, errs)
-#                        #print(ix, iy, errdns)
-#                        #print(ix, iy, qerrdn)
-#                        #print(ix, iy, errups)
-#                        #print(ix, iy, qerrup)
-#                        for shift in syst_shifts['all']:
-#                            kSystAll = '%s_%s_%s_all%s_ma0vma1_rebin'%(sample, r, b, shift)
-#                            bincout = binc+qerrup if shift == syst_shifts['all'][1] else binc-qerrdn
-#                            #print(ix, iy, shift, bincout)
-#                            h[kSystAll].SetBinContent(ix, iy, bincout)
-#                            #print(ix, iy, shift, h[kSystAll].GetBinContent(ix, iy))
-#                        #if iy > 2: break
-#                    #if ix > 2: break
-#
-## Add `all` to list of systs
-#systs.append('all')
-##'''
-#
-##file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "UPDATE")
-#file_out = ROOT.TFile('Fits/CMS_h4g_sgbg_shapes.root', "UPDATE")
-#for ma in ma_pts:
-#
-#    for run in runs:
-#
-#        sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
-#
-#        ##########################
-#        # Redo 1d with pol correction
-#        for kidx in h.keys():
-#            #if 'pol2d' in kidx: continue
-#            if 'rebin' not in kidx: continue
-#            if sample not in kidx: continue
-#            print('rebinned:',kidx)
-#            ktgt = kidx+'_ma0'
-#            h[ktgt] = h[kidx].ProjectionX(ktgt)
-#            ktgt = kidx+'_ma1'
-#            h[ktgt] = h[kidx].ProjectionY(ktgt)
-#
-#        # Re-calculate 1d quadrature errors for `all` syst
-#        for key in keys_1d:
-#            for b in blinds:
-#                for r in regions:
-#                    kNom = '%s_%s_%s_ma0vma1_rebin_%s'%(sample, r, b, key)
-#                    for ib in range(1, h[kNom].GetNbinsX()+1):
-#                        binc = h[kNom].GetBinContent(ib)
-#                        errlos = binc-np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin_%s'%(\
-#                                               sample, r, b, syst, syst_shifts[syst][0], key)].GetBinContent(ib) for syst in systs if syst != 'all'])
-#                        errhis = np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin_%s'%(\
-#                                          sample, r, b, syst, syst_shifts[syst][1], key)].GetBinContent(ib) for syst in systs if syst != 'all'])-binc
-#                        errs = np.array([[lo,hi]  if (lo >= 0.) and (hi >= 0.) else [abs(hi),abs(lo)] for lo,hi in zip(errlos, errhis)])
-#                        #print(errs.shape)
-#                        errdns = errs[:,0]
-#                        errups = errs[:,1]
-#                        qerrdn = np.sqrt(np.sum(errdns*errdns))
-#                        qerrup = np.sqrt(np.sum(errups*errups))
-#                        #if ib < 2:
-#                        #    print(ix, iy, errlos)
-#                        #    print(ix, iy, errdns)
-#                        #    print(ix, iy, qerrdn)
-#                        #    print(ix, iy, binc)
-#                        #    print(ix, iy, errlos)
-#                        #    print(ix, iy, errups)
-#                        #    print(ix, iy, qerrup)
-#                        #for shift in syst_shifts['all']:
-#                        #    kSystAll = '%s_%s_%s_all%s_ma0vma1_rebin_%s'%(sample, r, b, shift, key)
-#                        #    bincout = binc+qerrup if shift == syst_shifts['all'][1] else binc-qerrdn
-#                        #    h[kSystAll].SetBinContent(ib, bincout)
-#
-#        for key in keys_1d:
-#            for blind in blinds:
-#                for syst in systs:
-#
-#                    ksrcs = [
-#                        '%s_sr_%s'%(sample, blind),
-#                        '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][0]),
-#                        '%s_sb2sr_%s'%(sample_data, blind),
-#                        '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][1])
-#                        ]
-#                    ksrcs = ['%s_%s_rebin_%s'%(ksrc, key_2d, key) for ksrc in ksrcs]
-#                    for ksrc in ksrcs:
-#                        print(ksrc)
-#                        assert ksrc in h.keys(), ksrc
-#                    #print(ksrcs)
-#                    draw_hist_1dma_syst(ksrcs, syst, ymax_=ymax_1d, plot_syst=plot_syst)
-#                    #'''
-#
-#        # Flatten 2d -> 1d
-#        for blind in blinds:
-#
-#            nbin = nbins[blind]
-#
-#            for syst in systs:
-#
-#                ksrcs = [
-#                    '%s_sr_%s'%(sample, blind),
-#                    '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][0]),
-#                    #'%s_sb2sr_%s'%(sample, blind),
-#                    '%s_sb2sr_%s'%(sample_data, blind),
-#                    '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][1])
-#                    ]
-#                ksrcs = ['%s_%s_rebin'%(ksrc, key_2d) for ksrc in ksrcs]
-#                ktgts = ['Obs', 'Down', 'Nom', 'Up', 'Fit']
-#                ktgts = ['%s_%s_%s%s'%(sample, blind, syst, ktgt) for ktgt in ktgts]
-#                get_datavmc_flat(ksrcs, ktgts, nbin)
-#                kplots = ['flat_'+k for k in ktgts]
-#                #if i != 0: continue
-#                plot_datavmc_flat(blind, kplots, syst, nbin, yrange=yrange_flat, plot_syst=plot_syst)
-#
-#        #file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "UPDATE")
-#        for i,syst in enumerate(systs):
-#            ksysts = [k for k in h.keys() if syst in k]
-#            ksysts = [k for k in ksysts if sample in k]
-#            ksysts = [k for k in ksysts if 'flat' in k]
-#            ksysts = [k for k in ksysts if limit_blind in k]
-#            print(ksysts)
-#            for shift in ['Down', 'Up']:
-#                #print('shift:',shift)
-#                ksyst_shift = [k for k in ksysts if shift in k][0]
-#                print(ksyst_shift)#, h[ksyst_shift].Integral())
-#                #kout = 'h4g_%s%s'%(syst, shift)
-#                #kout = 'h4g_%s_%s%s'%(ma, syst, shift)
-#                kout = 'h4g_%s_%s%s'%(ma, dcard_syst(syst, run), shift)
-#                hout[kout] = h[ksyst_shift].Clone()
-#                hout[kout].SetName(kout)
-#                hout[kout].SetLineColor(1)
-#                hout[kout].Write()
-#                #print(hout[kout].Integral())
-#                print(kout)
-#            if i != 0: continue
-#            for shift in ['Obs']:
-#                #print('shift:',shift)
-#                ksyst_shift = [k for k in ksysts if shift in k][0]
-#                #print(ksyst_shift, h[ksyst_shift].Integral())
-#                #kout = 'h4g'
-#                #kout = 'h4g_%s'%ma
-#                kout = 'h4g_%s_%s'%(ma, run)
-#                hout[kout] = h[ksyst_shift].Clone()
-#                hout[kout].SetName(kout)
-#                hout[kout].SetLineColor(1)
-#                hout[kout].Write()
-#                print(kout)
-#                #for stat in ['Up', 'Down']:
-#                #    kout = 'h4g_sstat%s'%stat
-#                #    hout[kout] = hout['h4g'].Clone()
-#                #    hout[kout].SetName(kout)
-#                #    print(kout)
-#                #    for ib in range(1, hout[kout].GetNbinsX()+1):
-#                #        binc = hout[kout].GetBinContent(ib)
-#                #        binerr = hout[kout].GetBinError(ib)
-#                #        binout = binc + binerr if stat == 'Up' else binc - binerr
-#                #        if binout < 0.:print(ib, binc, binerr)
-#                #        hout[kout].SetBinContent(ib, binout)
-#                #        #if ib < 10: print(ib, binc, binerr, np.sqrt(binc))
-#
-#    #file_out.Write() # will write all hists created after initialization of `file_out`
-#file_out.Close()
+campaign = 'sg-Era22Jun2021v6/%s/nom-nom/Templates'%sub_campaign # v5 but with 50MeV
+
+#runs = ['Run2']
+#runs = ['2018', '2017']
+runs = ['2016', '2017', '2018']
+
+#ma_pts = ['0p1', '0p2', '0p4', '0p6', '0p8', '1p0', '1p2']
+ma_pts = (np.arange(12)+1.)/10.
+ma_pts = [str(m_).replace('.','p') for m_ in ma_pts]
+#ma_pts = ['0p1']
+#ma_pts = ['0p1', '0p4', '1p0']
+#for ma in ['100MeV', '400MeV', '1GeV']:
+for ma in ma_pts:
+
+    for run in runs:
+
+        #sample = 'h4g_%s'%ma
+        sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
+        #norm = get_sg_norm(sample, xsec=50.*1.e-2)
+        #norm = get_sg_norm(sample, xsec=1.)
+        #print('%s mc2data norm: %.4f'%(sample, norm))
+        indir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews/%s'%run
+
+        for b in blinds:
+            for r in regions:
+                # Nominals
+                kidx = '%s_%s_%s'%(sample, r, b)
+                #hf[kidx] = ROOT.TFile("%s/%s/%s_%s_blind_%s_templates.root"%(indir, 'nom', sample, r, b),"READ")
+                inpath = "%s/%s/syst%s/%s_%s_blind_%s_templates.root"%(indir, campaign, 'Nom_nom', sample, r, b)
+                print('>> Reading:', inpath)
+                hf[kidx] = ROOT.TFile.Open(inpath, "READ")
+                for k in keys:
+                    kidx_k = '%s_%s'%(kidx, k)
+                    kidx_h = '%s_%s_%s-%s'%(sample, r, k, b)
+                    print('   .. input key:',kidx_h)
+                    #h[kidx_k] = hf[kidx].Get(k)
+                    h[kidx_k] = hf[kidx].Get(kidx_h)
+                    h[kidx_k].SetName(kidx_k)
+                    #h[kidx_k].Scale(norm)
+                    print('   .. adding: %s, integral: %.f'%(kidx_k, h[kidx_k].Integral()))
+
+                # Syst shifts
+                for syst in systs:
+                    for shift in syst_shifts[syst]:
+                        kidx = '%s_%s_%s_%s%s'%(sample, r, b, syst, shift)
+                        #hf[kidx] = ROOT.TFile("%s/%s/%s_%s_blind_%s_templates.root"%(indir, '%s_%s'%(syst,shift), sample, r, b),"READ")
+                        inpath = "%s/%s/syst%s/%s_%s_blind_%s_templates.root"%(indir, campaign, '%s_%s'%(syst, shift), sample, r, b)
+                        print('>> Reading:', inpath)
+                        hf[kidx] = ROOT.TFile.Open(inpath, "READ")
+                        for k in keys:
+                            kidx_k = '%s_%s'%(kidx, k)
+                            kidx_h = '%s_%s_%s-%s'%(sample, r, k, b)
+                            print('   .. input key:',kidx_h)
+                            #h[kidx_k] = hf[kidx].Get(k)
+                            h[kidx_k] = hf[kidx].Get(kidx_h)
+                            h[kidx_k].SetName(kidx_k)
+                            #h[kidx_k].Scale(norm)
+                            #print('Adding:',kidx_k)
+                            print('   .. adding: %s, integral: %.f'%(kidx_k, h[kidx_k].Integral()))
+
+        # Rebin
+        for kidx in h.keys():
+            if sample not in kidx: continue
+            key = kidx.split('_')[-1]
+            if key != key_2d: continue
+
+            k = kidx+'_rebin'
+            if ma_bins is not None:
+                h[k] = rebin2d(h[kidx], ma_bins)
+
+            for ix in range(1, h[k].GetNbinsX()+1):
+                for iy in range(1, h[k].GetNbinsY()+1):
+                    binc = h[k].GetBinContent(ix, iy)
+                    h[k].SetBinContent(ix, iy, binc)
+
+            #plot_2dma(k, "", xtitle, ytitle, ztitle, zrange, do_trunc, do_log=do_log)
+#print(h.keys())
+
+##########################
+# Get total syst
+
+syst_shifts['all'] = ['dn', 'up']
+
+for ma in ma_pts:
+
+    for run in runs:
+
+        sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
+
+        # Initialize hists
+        for b in blinds:
+            for r in regions:
+                k = '%s_%s_%s_ma0vma1_rebin'%(sample, r, b)
+                for shift in syst_shifts['all']:
+                    kSystAll = '%s_%s_%s_all%s_ma0vma1_rebin'%(sample, r, b, shift)
+                    h[kSystAll] = h[k].Clone()
+                    h[kSystAll].SetName(kSystAll)
+                    h[kSystAll].SetTitle(kSystAll)
+
+        # Fill with total err in quadrature
+        for b in blinds:
+            for r in regions:
+                kNom = '%s_%s_%s_ma0vma1_rebin'%(sample, r, b)
+                for ix in range(1, h[kNom].GetNbinsX()+1):
+                    for iy in range(1, h[kNom].GetNbinsY()+1):
+                        binc = h[kNom].GetBinContent(ix, iy)
+                        errlos = binc-np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin'%(\
+                                                   sample, r, b, syst, syst_shifts[syst][0])].GetBinContent(ix,iy) for syst in systs])
+                        errhis = np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin'%(\
+                                              sample, r, b, syst, syst_shifts[syst][1])].GetBinContent(ix,iy) for syst in systs])-binc
+                        errs = np.array([[lo,hi]  if (lo >= 0.) and (hi >= 0.) else [abs(hi),abs(lo)] for lo,hi in zip(errlos, errhis)])
+                        #print(errs.shape)
+                        errdns = errs[:,0]
+                        errups = errs[:,1]
+                        qerrdn = np.sqrt(np.sum(errdns*errdns))
+                        qerrup = np.sqrt(np.sum(errups*errups))
+                        #print(ix, iy, errlos)
+                        #print(ix, iy, binc)
+                        #print(ix, iy, errhis)
+                        #print(ix, iy, errs)
+                        #print(ix, iy, errdns)
+                        #print(ix, iy, qerrdn)
+                        #print(ix, iy, errups)
+                        #print(ix, iy, qerrup)
+                        for shift in syst_shifts['all']:
+                            kSystAll = '%s_%s_%s_all%s_ma0vma1_rebin'%(sample, r, b, shift)
+                            bincout = binc+qerrup if shift == syst_shifts['all'][1] else binc-qerrdn
+                            #print(ix, iy, shift, bincout)
+                            h[kSystAll].SetBinContent(ix, iy, bincout)
+                            #print(ix, iy, shift, h[kSystAll].GetBinContent(ix, iy))
+                        #if iy > 2: break
+                    #if ix > 2: break
+
+# Add `all` to list of systs
+systs.append('all')
+#'''
+
+#file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "UPDATE")
+file_out = ROOT.TFile('Fits/CMS_h4g_sgbg_shapes.root', "UPDATE")
+for ma in ma_pts:
+
+    for run in runs:
+
+        sample = 'h4g-mA%sGeV'%ma if run == 'Run2' else 'h4g%s-mA%sGeV'%(run, ma)
+
+        ##########################
+        # Redo 1d with pol correction
+        for kidx in h.keys():
+            #if 'pol2d' in kidx: continue
+            if 'rebin' not in kidx: continue
+            if sample not in kidx: continue
+            print('rebinned:',kidx)
+            ktgt = kidx+'_ma0'
+            h[ktgt] = h[kidx].ProjectionX(ktgt)
+            ktgt = kidx+'_ma1'
+            h[ktgt] = h[kidx].ProjectionY(ktgt)
+
+        # Re-calculate 1d quadrature errors for `all` syst
+        for key in keys_1d:
+            for b in blinds:
+                for r in regions:
+                    kNom = '%s_%s_%s_ma0vma1_rebin_%s'%(sample, r, b, key)
+                    for ib in range(1, h[kNom].GetNbinsX()+1):
+                        binc = h[kNom].GetBinContent(ib)
+                        errlos = binc-np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin_%s'%(\
+                                               sample, r, b, syst, syst_shifts[syst][0], key)].GetBinContent(ib) for syst in systs if syst != 'all'])
+                        errhis = np.array([h['%s_%s_%s_%s%s_ma0vma1_rebin_%s'%(\
+                                          sample, r, b, syst, syst_shifts[syst][1], key)].GetBinContent(ib) for syst in systs if syst != 'all'])-binc
+                        errs = np.array([[lo,hi]  if (lo >= 0.) and (hi >= 0.) else [abs(hi),abs(lo)] for lo,hi in zip(errlos, errhis)])
+                        #print(errs.shape)
+                        errdns = errs[:,0]
+                        errups = errs[:,1]
+                        qerrdn = np.sqrt(np.sum(errdns*errdns))
+                        qerrup = np.sqrt(np.sum(errups*errups))
+                        #if ib < 2:
+                        #    print(ix, iy, errlos)
+                        #    print(ix, iy, errdns)
+                        #    print(ix, iy, qerrdn)
+                        #    print(ix, iy, binc)
+                        #    print(ix, iy, errlos)
+                        #    print(ix, iy, errups)
+                        #    print(ix, iy, qerrup)
+                        #for shift in syst_shifts['all']:
+                        #    kSystAll = '%s_%s_%s_all%s_ma0vma1_rebin_%s'%(sample, r, b, shift, key)
+                        #    bincout = binc+qerrup if shift == syst_shifts['all'][1] else binc-qerrdn
+                        #    h[kSystAll].SetBinContent(ib, bincout)
+
+        for key in keys_1d:
+            for blind in blinds:
+                for syst in systs:
+
+                    ksrcs = [
+                        '%s_sr_%s'%(sample, blind),
+                        '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][0]),
+                        '%s_sb2sr_%s'%(sample_data, blind),
+                        '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][1])
+                        ]
+                    ksrcs = ['%s_%s_rebin_%s'%(ksrc, key_2d, key) for ksrc in ksrcs]
+                    for ksrc in ksrcs:
+                        print(ksrc)
+                        assert ksrc in h.keys(), ksrc
+                    #print(ksrcs)
+                    draw_hist_1dma_syst(ksrcs, syst, ymax_=ymax_1d, plot_syst=plot_syst)
+                    #'''
+
+        # Flatten 2d -> 1d
+        for blind in blinds:
+
+            nbin = nbins[blind]
+
+            for syst in systs:
+
+                ksrcs = [
+                    '%s_sr_%s'%(sample, blind),
+                    '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][0]),
+                    #'%s_sb2sr_%s'%(sample, blind),
+                    '%s_sb2sr_%s'%(sample_data, blind),
+                    '%s_sr_%s_%s%s'%(sample, blind, syst, syst_shifts[syst][1])
+                    ]
+                ksrcs = ['%s_%s_rebin'%(ksrc, key_2d) for ksrc in ksrcs]
+                ktgts = ['Obs', 'Down', 'Nom', 'Up', 'Fit']
+                ktgts = ['%s_%s_%s%s'%(sample, blind, syst, ktgt) for ktgt in ktgts]
+                get_datavmc_flat(ksrcs, ktgts, nbin)
+                kplots = ['flat_'+k for k in ktgts]
+                #if i != 0: continue
+                plot_datavmc_flat(blind, kplots, syst, nbin, yrange=yrange_flat, plot_syst=plot_syst)
+
+        #file_out = ROOT.TFile('Fits/Bkgfits_flat_region%s.root'%'limit', "UPDATE")
+        for i,syst in enumerate(systs):
+            ksysts = [k for k in h.keys() if syst in k]
+            ksysts = [k for k in ksysts if sample in k]
+            ksysts = [k for k in ksysts if 'flat' in k]
+            ksysts = [k for k in ksysts if limit_blind in k]
+            print(ksysts)
+            for shift in ['Down', 'Up']:
+                #print('shift:',shift)
+                ksyst_shift = [k for k in ksysts if shift in k][0]
+                print(ksyst_shift)#, h[ksyst_shift].Integral())
+                #kout = 'h4g_%s%s'%(syst, shift)
+                #kout = 'h4g_%s_%s%s'%(ma, syst, shift)
+                kout = 'h4g_%s_%s%s'%(ma, dcard_syst(syst, run), shift)
+                hout[kout] = h[ksyst_shift].Clone()
+                hout[kout].SetName(kout)
+                hout[kout].SetLineColor(1)
+                hout[kout].Write()
+                #print(hout[kout].Integral())
+                print(kout)
+            if i != 0: continue
+            for shift in ['Obs']:
+                #print('shift:',shift)
+                ksyst_shift = [k for k in ksysts if shift in k][0]
+                #print(ksyst_shift, h[ksyst_shift].Integral())
+                #kout = 'h4g'
+                #kout = 'h4g_%s'%ma
+                kout = 'h4g_%s_%s'%(ma, run)
+                hout[kout] = h[ksyst_shift].Clone()
+                hout[kout].SetName(kout)
+                hout[kout].SetLineColor(1)
+                hout[kout].Write()
+                print(kout)
+                #for stat in ['Up', 'Down']:
+                #    kout = 'h4g_sstat%s'%stat
+                #    hout[kout] = hout['h4g'].Clone()
+                #    hout[kout].SetName(kout)
+                #    print(kout)
+                #    for ib in range(1, hout[kout].GetNbinsX()+1):
+                #        binc = hout[kout].GetBinContent(ib)
+                #        binerr = hout[kout].GetBinError(ib)
+                #        binout = binc + binerr if stat == 'Up' else binc - binerr
+                #        if binout < 0.:print(ib, binc, binerr)
+                #        hout[kout].SetBinContent(ib, binout)
+                #        #if ib < 10: print(ib, binc, binerr, np.sqrt(binc))
+
+    #file_out.Write() # will write all hists created after initialization of `file_out`
+file_out.Close()

@@ -24,8 +24,6 @@ distns = [k2dma]
 ma_blind_input = None
 ma_blind_output = 'offdiag_lo_hi'
 #ma_blind_output = 'diag_lo_hi' # for making unblinded plots in plot_2dma.py: both offdiag+diag blinding needed
-#ma_blind_output = 'lo_hi'
-#ma_blind_output = 'offdiag'
 
 # g/mandrews/2018/bkgNoPtWgts-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44/
 #campaign = 'systTEST'
@@ -38,7 +36,8 @@ ma_blind_output = 'offdiag_lo_hi'
 #campaign = 'sg-Era22Jun2021v2' # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
 #campaign = 'sg-Era22Jun2021v3' # v2 + interpolated masses
 #campaign = 'sg-Era22Jun2021v4' # duplicate of v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
-campaign = 'sg-Era22Jun2021v5' # duplicate of v3 + ss with SFs + (xs_sg = 1pb for all)
+#campaign = 'sg-Era22Jun2021v5' # duplicate of v3 + ss with SFs + (xs_sg = 1pb for all)
+campaign = 'sg-Era22Jun2021v6' # v5 but with 50MeV
 print('>> Signal selection campaign:',campaign)
 
 sel = 'nom'

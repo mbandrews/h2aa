@@ -12,7 +12,8 @@ MEM = '__MEM__'
 indir = '../maNtuples'
 #input_campaign = 'Era09Feb2021-Zeev1' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era06Sep2020_AOD-IMGZeev4, model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
 #input_campaign = 'Era16Feb2021-Zeev1' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era16Feb2021_AOD-IMGZeev1, model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
-input_campaign = 'Era16Feb2021-Zeev2' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era16Feb2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
+#input_campaign = 'Era16Feb2021-Zeev2' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era16Feb2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
+input_campaign = 'Era16Feb2021-Zeev3' # same as Era16Feb2021-Zeev2 but rotate 90deg CW: gg[data]:ggNtuples-Era24Sep2020v1_ggSkimZee-v3/gg[dy]:ggNtuples-Era09Mar20    21v1_ggSkimZee-v1 + img[data]:Era16Feb2021_AOD-IMGZeev1/img[dy]:Era09Mar2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
 print('>> Input campaign: maNtuples-%s'%input_campaign)
 
 # Output bkg campaign
@@ -20,18 +21,21 @@ print('>> Input campaign: maNtuples-%s'%input_campaign)
 #this_campaign = 'ZeeSel-Era09Feb2021v1' # dy+data zee skim(nele+presel)
 #this_campaign = 'ZeeSel-Era16Feb2021-Zeev1' # zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee). For massreg paper only (no chgiso+bdt). model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
 #this_campaign = 'ZeeSel-Era16Feb2021-Zeev2' # zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
-this_campaign = 'ZeeSel-Era16Feb2021-Zeev3' # ZeeSel-Era16Feb2021-Zeev2 + r9 for trg SFs: zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
+#this_campaign = 'ZeeSel-Era16Feb2021-Zeev3' # ZeeSel-Era16Feb2021-Zeev2 + r9 for trg SFs: zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
 #this_campaign = 'ZeeSel-Era16Feb2021-Zeev4' # ZeeSel-Era16Feb2021-Zeev3 except hgg preselection. For hgg vs h4g trg SF comparison.
+this_campaign = 'ZeeSel-Era16Feb2021-Zeev5' # same as ZeeSel-Era16Feb2021-Zeev3 but rotate 90deg CW: ZeeSel-Era16Feb2021-Zeev3 + r9 for trg SFs: zee(nele+presel[hoEPhoIDLoose]+tnp+mee[81-101GeV]+ptomee+bdt+chgiso). For h4g analysis: Zee data v mc. model:Models/model_epoch80_mae0.1906.pkl
 print('>> Output campaign:',this_campaign)
 
 exec_file = 'run_sel-zee.sh'
 assert os.path.isfile(exec_file), '!! input exec file not found!'
 
 tar_file = 'h2aa-zee.tgz'
-if input_campaign == 'Era16Feb2021-Zeev2':
-    tar_file = 'h2aa-zee_bdtgtm0p96_relChgIsolt0p07.tgz'
+#if input_campaign == 'Era16Feb2021-Zeev2':
+#    tar_file = 'h2aa-zee_bdtgtm0p96_relChgIsolt0p07.tgz'
 if this_campaign == 'ZeeSel-Era16Feb2021-Zeev4':
     tar_file = 'h2aa-zee_hgg.tgz'
+else:
+    tar_file = 'h2aa-zee_bdtgtm0p96_relChgIsolt0p07.tgz'
 print('>> tar file:',tar_file)
 assert os.path.isfile(tar_file), '!! input tar file not found!'
 
@@ -56,8 +60,8 @@ for l in inlist:
     #if 'h4g' not in l: continue
     #if 'hgg' not in l: continue
     #if 'dy' not in l: continue
-    #if '2016' not in l: continue
-    if '2016' in l: continue
+    if '2018' not in l: continue
+    #if '2016' in l: continue
 
     sample = l.split('/')[-1].split('_')[0]
     print('>> For sample:',sample)

@@ -5,7 +5,8 @@ from data_utils import *
 #campaign = 'Era04Dec2020v1' # h4g,hgg dipho trgs fixed. 2018A added later, 2018+2016H failed lumis
 #campaign = 'Era09Feb2021-Zeev1' # dy+data zee skim(nele+presel), # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era06Sep2020_AOD-IMGZeev4, model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
 #campaign = 'Era16Feb2021-Zeev1' # dy+data zee skim(nele+presel), # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era16Feb2021_AOD-IMGZeev1, model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
-campaign = 'Era16Feb2021-Zeev2' # dy+data zee skim(nele+presel), # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era16Feb2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
+#campaign = 'Era16Feb2021-Zeev2' # dy+data zee skim(nele+presel), # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era16Feb2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
+campaign = 'Era16Feb2021-Zeev3' # same as Era16Feb2021-Zeev2 but rotate 90deg CW: gg[data]:ggNtuples-Era24Sep2020v1_ggSkimZee-v3/gg[dy]:ggNtuples-Era09Mar20    21v    1_ggSkimZee-v1 + img[data]:Era16Feb2021_AOD-IMGZeev1/img[dy]:Era09Mar2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
 
 # /store/group/lpchaa4g/mandrews/2017/maNtuples-Era04Dec2020v1/h4g2017-mA1p2GeV_mantuple.root
 # To make full year: cat data2017-Run2017*_file_list.txt > data2017_file_list.txt
@@ -85,9 +86,9 @@ samples['bg2018'] = [
 
 for r in ['2016', '2017', '2018']:
 
-    #if r != '2018': continue
+    if r != '2018': continue
     #if r != '2017': continue
-    if r != '2016': continue
+    #if r != '2016': continue
     #if r == '2017': continue
     #if r == '2016': continue
 
@@ -103,7 +104,7 @@ for r in ['2016', '2017', '2018']:
         for s in samples[d+r]:
 
             #if s != 'hgg': continue
-            if 'dy' not in s: continue
+            #if 'dy' not in s: continue
             #if 'dy' in s: continue
 
             print('Sample:',s)

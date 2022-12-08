@@ -18,7 +18,10 @@ eos_basedir = 'root://cmseos.fnal.gov//store/user/lpchaa4g/mandrews'
 #in_campaign = 'bkgNoPtWgts-Era04Dec2020v1' # missing 2018A, 2016H+2018 failed lumis
 #in_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis still
 #in_campaign = 'bkgNoPtWgts-Era04Dec2020v3' # redo v2 with nVtx, PU plots
-in_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
+#in_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
+in_campaign = 'bkgNoPtWgts-Era22Jun2021v2' # v1 but with bin 50MeV [not used]
+#in_campaign = 'bkgNoPtWgts-Era22Jun2021v3' # duplicate of v1 but with SFs on hgg template
+#in_campaign = 'bkgNoPtWgts-Era22Jun2021v4' # duplicate of v3, but with fhgg derived from SM br(hgg)
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44' # nominal
 #sub_campaign = 'bdtgtm0p99_relChgIsolt0p05_etalt1p44' # bdt > -0.99
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p05_etalt1p44' # bdt > -0.96
@@ -29,8 +32,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44' # bdt > -0.96, relChgIso <
 #sub_campaign = 'bdtgtm0p97_relChgIsolt0p06_etalt1p44' # bdt > -0.96, relChgIso < 0.07
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44' # bdt > -0.96, relChgIso < 0.08
-#sel = 'nom'
-sel = 'inv'
+sel = 'nom'
+#sel = 'inv'
 
 norm_scale = 150.e3
 distn = 'pt0vpt1'
@@ -101,8 +104,9 @@ for r in runs:
         # SB->SR weights given by ratio SR/SB
         h[tgt+'%s_ratio'%k] = h['%s_%s_%s'%(s, tgt, k)].Clone()
         h[tgt+'%s_ratio'%k].Divide(h[kcombo])
-        print(h[tgt+'%s_ratio'%k].GetMaximum())
-        print(h[tgt+'%s_ratio'%k].GetMinimum())
+        print('  .. max,  pre-smooth:',h[tgt+'%s_ratio'%k].GetMaximum())
+        #h[tgt+'%s_ratio'%k].Smooth()
+        #print('  .. max, post-smooth:',h[tgt+'%s_ratio'%k].GetMaximum())
         # NOTE: Apply ceiling during pt look-up in actual bkg event loop instead of here
         #for ix in range(1, h[tgt+'%s_ratio'%k].GetNbinsX()+1):
         #    for iy in range(1, h[tgt+'%s_ratio'%k].GetNbinsY()+1):
@@ -112,11 +116,54 @@ for r in runs:
         #print(h[tgt+'%s_ratio'%k].GetMaximum())
         #print(h[tgt+'%s_ratio'%k].GetMinimum())
 
+        ## Save all histograms for reference
+        #for shift in ['Down', '', 'Up']:
+        #    if flo_in is not None and shift != '': continue
+
+        #    kratio = tgt+'%s_ratioClone%s'%(k, shift)
+        #    h[kratio] = h[tgt+'%s_ratio'%k].Clone()
+        #    h[kratio].SetName(kratio)
+        #    for ix in range(h[kratio].GetNbinsX()+2):
+        #        for iy in range(h[kratio].GetNbinsY()+2):
+        #            #if ix != 30: continue
+        #            #if iy != 10: continue
+        #            binc = h[kratio].GetBinContent(ix, iy)
+        #            binerr = h[kratio].GetBinError(ix, iy)
+        #            fracerr = 0 if binc == 0 else binerr/binc
+        #            #print(ix, iy, binc, binerr, fracerr)
+        #            if shift != '':
+        #                h[kratio].SetBinContent(ix, iy, binc+binerr if shift == 'Up' else binc-binerr)
+        #                # ^NOTE: binerrs will be unchanged and so will no longer be correct!
+        #            #binc = h[kratio].GetBinContent(ix, iy)
+        #            #binerr = h[kratio].GetBinError(ix, iy)
+        #            #fracerr = 0 if binc == 0 else binerr/binc
+        #            #print(ix, iy, binc, binerr, fracerr)
+        #    print(h[kratio].GetMaximum())
+
+        #    flo_str = '%.4f'%flo
+        #    #outpath = "%s/%s_sb2%s_blind_%s_flo%s_ptwgts.root"%(outdir, s, tgt, ma_blind, flo_str)
+        #    outpath = "%s/%s_sb2%s_blind_%s_flo%s%s_ptwgts.root"%(outdir, s, tgt, ma_blind, flo_str, shift)
+        #    print('      .. output file:',outpath)
+        #    hf[tgt+'ratios'] = ROOT.TFile.Open(outpath, "RECREATE")
+        #    h['%s_%s_%s'%(s, tgt, k)].SetName('%s_%s_%s'%(s, tgt, k))
+        #    h['%s_%s_%s'%(s, tgt, k)].Write()
+        #    h['%s_sblo_%s'%(s, k)].SetName('%s_sblo_%s'%(s, k))
+        #    h['%s_sblo_%s'%(s, k)].Write()
+        #    h['%s_sbhi_%s'%(s, k)].SetName('%s_sbhi_%s'%(s, k))
+        #    h['%s_sbhi_%s'%(s, k)].Write()
+        #    h[kcombo].SetName(kcombo)
+        #    h[kcombo].Write()
+        #    #h[tgt+'%s_ratio'%k].SetName('%s_ratio'%k)
+        #    #h[tgt+'%s_ratio'%k].Write()
+        #    h[kratio].SetName('%s_ratio'%k)
+        #    h[kratio].Write()
+        #    hf[tgt+'ratios'].Close()
+
         # Save all histograms for reference
         #flo_str = '%.3f'%flo if flo_in is not None else str(flo_in)
         flo_str = '%.4f'%flo
         outpath = "%s/%s_sb2%s_blind_%s_flo%s_ptwgts.root"%(outdir, s, tgt, ma_blind, flo_str)
-        print('      .. output file:',outpath)
+        print('  .. output file:',outpath)
         hf[tgt+'ratios'] = ROOT.TFile.Open(outpath, "RECREATE")
         h['%s_%s_%s'%(s, tgt, k)].SetName('%s_%s_%s'%(s, tgt, k))
         h['%s_%s_%s'%(s, tgt, k)].Write()

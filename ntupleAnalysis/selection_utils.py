@@ -479,7 +479,8 @@ def get_puwgt(tree, h):
 
     return wgt
 
-def get_ptwgt(tree, h, ceil=10.):
+#def get_ptwgt(tree, h, ceil=10.):
+def get_ptwgt(tree, h, ceil=20.):
 
     assert tree.phoEt[0] > tree.phoEt[1]
 

@@ -60,7 +60,8 @@ def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
     h[k].GetYaxis().SetTitleSize(0.06)
     h[k].GetYaxis().SetTitleFont(62)
 
-    h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / 25 MeV", "")
+    #h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "N_{#Gamma} / 25 MeV", "")
+    h[k] = set_hist(h[k], "m_{#Gamma} [GeV]", "Events / %d MeV"%dMa, "")
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     #h[k].SetLineColor(9)
@@ -175,11 +176,15 @@ eos_redir = 'root://cmseos.fnal.gov'
 eos_basedir = '/store/user/lpchaa4g/mandrews/'#$ root -l 2017/maNtuples-Era03Dec2020v1/h4g2017-mA0p4GeV_mantuple.root
 #campaign = 'Templates/templates-Era04Dec2020v1'
 #campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
-campaign = 'sg-Era22Jun2021v2/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+#campaign = 'sg-Era22Jun2021v2/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+campaign = 'sg-Era22Jun2021v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom' #bin50MeV
+
+dMa = 50
 
 # For mc->data normalization
 #ggntuple_campaign = 'Era04Dec2020v1_ggSkim-v1' # fixed h4g mc triggers
-ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign.split('/')[0][-1]
+#ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign.split('/')[0][-1]
+ggntuple_campaign = 'Era20May2021v1_ggSkim-v2'
 xs_sg = 1. #pb
 # Official lumis: https://twiki.cern.ch/twiki/bin/view/CMS/TWikiLUM
 #tgt_lumis = {'2016': 36.33e3, #35.92e3,
@@ -208,7 +213,8 @@ keys = ['ma0','ma1']
 
 nit = len(keys)
 #ymaxs = {'0p1':2.e3, '0p4':2.5e3, '1p0':500.}
-ymaxs = {'0p1':2.4e3, '0p4':2.8e3, '1p0':800.}
+#ymaxs = {'0p1':2.4e3, '0p4':2.8e3, '1p0':800.}
+ymaxs = {'0p1':2.*2.4e3, '0p4':5.4e3, '1p0':1.5e3}
 
 # /eos/uscms/store/user/lpchaa4g/mandrews/2017/sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom/
 for r in runs:

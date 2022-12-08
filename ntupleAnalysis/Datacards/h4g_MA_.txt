@@ -37,9 +37,9 @@ CMS_h4g_bgFracHgg               shape    -              -              -        
 CMS_h4g_bgRewgtPolEigen0        shape    -              -              -              1.
 CMS_h4g_bgRewgtPolEigen1        shape    -              -              -              1.
 CMS_h4g_bgRewgtPolEigen2        shape    -              -              -              1.
-CMS_h4g_bgRewgtPolEigen3        shape    -              -              -              1.
-CMS_h4g_bgRewgtPolEigen4        shape    -              -              -              1.
-CMS_h4g_bgRewgtPolEigen5        shape    -              -              -              1.
+#CMS_h4g_bgRewgtPolEigen3        shape    -              -              -              1.
+#CMS_h4g_bgRewgtPolEigen4        shape    -              -              -              1.
+#CMS_h4g_bgRewgtPolEigen5        shape    -              -              -              1.
 * autoMCStats 0.
 
 # scale down sg template so that signal strength r ~ 1

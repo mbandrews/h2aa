@@ -407,13 +407,15 @@ CMS_lumi.extraText = "Simulation"
 sel = 'nom'
 #campaign = 'sg-Era04Dec2020v7/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # 2016-18 phoid, 2016-18 ss. ss implemented only for shifted syst (as in v4)
 #campaign = 'sg-Era22Jun2021v2/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # mgg90, phoid+trg SFs. no HLT applied.
-campaign = 'sg-Era22Jun2021v3/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # v2 + interpolated masses
+#campaign = 'sg-Era22Jun2021v3/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # v2 + interpolated masses
+campaign = 'sg-Era22Jun2021v6/%s/nom-%s/Templates/systNom_nom'%(sub_campaign, sel) # v2 + interpolated masses
 
 #nit = len(runs)*len(expts)
 #normalize = False
 normalize = True
 if normalize:
     ymax_norm = 0.18 if '2016' in run else 0.12
+    #ymax_norm = 2.*0.18 if '2016' in run else 2.*0.12
 
 mhregion = r_sr
 mablind = None
@@ -453,7 +455,8 @@ sample = 'data'
 #/eos/uscms/store/user/lpchaa4g/mandrews/2017/bkgNoPtWgts-Era04Dec2020v3/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/
 #campaign = 'bkgPtWgts-Era04Dec2020v3/%s/nom-%s/Run2/Templates_flo0.6437'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
 #campaign = 'bkgNoPtWgts-Era04Dec2020v3/%s/nom-%s/Templates'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
-campaign = 'bkgNoPtWgts-Era22Jun2021v1/%s/nom-%s/Templates'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+#campaign = 'bkgNoPtWgts-Era22Jun2021v1/%s/nom-%s/Templates'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
+campaign = 'bkgNoPtWgts-Era22Jun2021v2/%s/nom-%s/Templates'%(sub_campaign, sel) # combined full Run2, 2016H+2018 failed lumis, run = 'Run2'
 CMS_lumi.extraText = "Preliminary"
 
 mhregion = 'sr'

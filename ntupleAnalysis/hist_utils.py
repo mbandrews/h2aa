@@ -8,8 +8,8 @@ def create_hists(h):
 
     k = 'ma0'
 
-    ma_bins = list(range(0,1200+25,25))
-    #ma_bins = list(range(0,1200+50,50))
+    #ma_bins = list(range(0,1200+25,25))
+    ma_bins = list(range(0,1200+50,50))
     ma_bins = [-400]+ma_bins
     #ma_bins = [-400, -200]+ma_bins
     ma_bins = [float(m)/1.e3 for m in ma_bins]

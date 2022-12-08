@@ -36,7 +36,7 @@ outdir = args.outdir
 log_file = args.log_file
 magen_tgt = args.magen_tgt
 
-magen_instr = sample.split('-')[1].replace('mA','').replace('GeV','')
+magen_instr = sample.split('-')[1].split('-')[0].replace('mA','').replace('GeV','')
 magen_in = float(magen_instr.replace('p','.'))
 magen_tgtstr = None if magen_tgt is None else str(magen_tgt).replace('.','p')
 

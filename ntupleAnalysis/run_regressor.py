@@ -76,7 +76,7 @@ assert os.path.isfile(model), '!! model file not found: %s'%img_list
 #img_campaign = 'Era06Sep2020_AOD-IMGv6' # 2018A
 #img_campaign = 'Era04Dec2020_AOD-IMGv1' # h4g,hgg dipho trgs fixed
 #img_campaign = 'Era22Jun2021_AOD-IMGv1' # !! EB images only !! data, h4g, hgg: redo with mgg95 trgs.
-img_campaign = 'Era22Jun2021_AOD-IMGv2' # !! EB images only !! h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
+#img_campaign = 'Era22Jun2021_AOD-IMGv2' # !! EB images only !! h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
 print('>> Input imgNtuple campaign:', img_campaign)
 img_list = '../imgNtuples/%s/%s_file_list.txt'%(img_campaign, sample)
 assert os.path.isfile(img_list), '!! img input list not found: %s'%img_list
@@ -85,7 +85,7 @@ assert os.path.isfile(img_list), '!! img input list not found: %s'%img_list
 #gg_campaign = 'ggNtuples-Era24Sep2020v1_ggSkim-v2' # h4g,hgg bad dipho trgs, data,dy: ok
 #gg_campaign = 'ggNtuples-Era04Dec2020v1_ggSkim-v1' # h4g,hgg dipho trgs fixed
 #gg_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v1' # data, h4g, hgg. mgg95 trgs
-gg_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v2' # h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
+#gg_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v2' # h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
 print('>> Input ggSkim campaign:', gg_campaign)
 gg_list = '../ggSkims/%s/%s_file_list.txt'%(gg_campaign, sample)
 assert os.path.isfile(gg_list), '!! gg input list not found: %s'%gg_list

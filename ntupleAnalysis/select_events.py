@@ -53,7 +53,8 @@ print('>> Will output templates to:',outdir)
 #wgtsdir = args.wgtsdir
 if 'h4g' in sample:
     # h4g2017-mA1p0GeV
-    magen = float(sample.split('-')[-1].replace('GeV','').replace('mA','').replace('p','.'))
+    #magen = float(sample.split('-')[-1].replace('GeV','').replace('mA','').replace('p','.'))
+    magen = float(sample.split('-')[1].split('-')[0].replace('GeV','').replace('mA','').replace('p','.'))
 else:
     magen = None
 print('>> mA,gen [GeV]:',str(magen))

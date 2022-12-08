@@ -13,7 +13,9 @@ indir = '../ggNtuples'
 #input_campaign = 'Era24Sep2020_v1' # data only ok
 #input_campaign = 'Era04Dec2020_v1' # fixed mc diphoton trg
 #input_campaign = 'Era04May2021_v1' # Updated 2018 low-mass trgs
-input_campaign = 'Era20May2021_v1' # Add mgg95 trgs for data, h4g, hgg
+#input_campaign = 'Era20May2021_v1' # Add mgg95 trgs for data, h4g, hgg
+#input_campaign = 'Era18Nov2021_v1' # h4g, LL bad tau units
+input_campaign = 'Era18Nov2021_v2' # h4g, LL fixed tau units
 
 # Era24Sep2020_v1_ggSkim-v1: hoePhoIDloose_mgg100_ptomGG_bdgtm0p99, bad total Nevts, bad dipho h4g,hgg trgs
 # Era24Sep2020_v1_ggSkim-v2: hoePhoIDloose_mgg100-180_ptomGG_bdgtm0p99, fixed total Nevts, bad dipho h4g,hgg trgs
@@ -31,10 +33,12 @@ input_campaign = 'Era20May2021_v1' # Add mgg95 trgs for data, h4g, hgg
 # mgg95
 # ggNtuples-Era20May2021v1_ggSkim-v1: data, h4g, hgg. mgg95 trgs
 # ggNtuples-Era20May2021v1_ggSkim-v2: h4g, hgg: do NOT apply HLT dipho trg--applied later using trg SFs instead
+# ggNtuples-Era18Nov2021v1_ggSkim-v1: h4g LL bad tau units, do NOT apply HLT dipho trg--applied later using trg SFs instead
+# ggNtuples-Era18Nov2021v2_ggSkim-v1: h4g LL fixed tau units, do NOT apply HLT dipho trg--applied later using trg SFs instead
 this_campaign = '%s-%s'%(indir.split('/')[-1], input_campaign.replace('_',''))
 #this_campaign = '%s_%s'%(this_campaign, 'ggSkim-vTEST')
-#this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v1')
-this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v2')
+this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v1')
+#this_campaign = '%s_%s'%(this_campaign, 'ggSkim-v2')
 print('ggSkim campaign:',this_campaign)
 
 exec_file = 'run_skim.sh'
@@ -59,8 +63,8 @@ for l in inlist:
     #if 'Run2016' in l: continue
     #if 'Run2016' not in l: continue
     #if 'Run2016G' not in l: continue
-    #if 'h4g' not in l: continue
-    if 'hgg' not in l: continue
+    if 'h4g' not in l: continue
+    #if 'hgg' not in l: continue
     #if 'dy' in l: continue
 
     sample = l.split('/')[-1].split('_')[0]

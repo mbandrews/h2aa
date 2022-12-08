@@ -93,7 +93,7 @@ def CMS_lumi(pad,  iPeriod,  iPosX ):
     latex = rt.TLatex()
     latex.SetNDC()
     latex.SetTextAngle(0)
-    latex.SetTextColor(rt.kBlack)    
+    latex.SetTextColor(rt.kBlack) # custom 
     
     extraTextSize = extraOverCmsTextSize*cmsTextSize
     
