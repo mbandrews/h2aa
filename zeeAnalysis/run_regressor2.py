@@ -51,7 +51,8 @@ assert os.path.isfile(gg_list), '!! gg input list not found: %s'%gg_list
 # output mantuple campaign
 #ma_campaign = 'maNtuples-Era09Feb2021-Zeev1' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img:Era06Sep2020_AOD-IMGZeev4/v5, model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json
 #ma_campaign = 'maNtuples-Era16Feb2021-Zeev1' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img[data]:Era16Feb2021_AOD-IMGZeev1/img[dy]:Era09Mar2021_AOD-IMGZeev1, model:Models/resnet/precise300/model_epoch90_val_mae0.1889.json. for massreg paper only.
-ma_campaign = 'maNtuples-Era16Feb2021-Zeev2' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img[data]:Era16Feb2021_AOD-IMGZeev1/img[dy]:Era09Mar2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
+#ma_campaign = 'maNtuples-Era16Feb2021-Zeev2' # gg:ggNtuples-Era24Sep2020v1_ggSkimZee-v3 + img[data]:Era16Feb2021_AOD-IMGZeev1/img[dy]:Era09Mar2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
+ma_campaign = 'maNtuples-Era16Feb2021-Zeev3' # same as Era16Feb2021-Zeev2 but rotate 90deg CW: gg[data]:ggNtuples-Era24Sep2020v1_ggSkimZee-v3/gg[dy]:ggNtuples-Era09Mar2021v1_ggSkimZee-v1 + img[data]:Era16Feb2021_AOD-IMGZeev1/img[dy]:Era09Mar2021_AOD-IMGZeev1, model:Models/model_epoch80_mae0.1906.pkl
 print('>> Output maNtuple campaign:', ma_campaign)
 
 # mantuple output dir

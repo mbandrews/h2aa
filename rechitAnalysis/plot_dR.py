@@ -10,7 +10,7 @@ CMS_lumi.writeExtraText = 1
 CMS_lumi.extraText = "Simulation"
 iPeriod = 0
 iPos = 0
-if( iPos==0 ): CMS_lumi.relPosX = 0.17
+if( iPos==0 ): CMS_lumi.relPosX = 0.205
 
 histname = "dPhidEta_GG"
 hist = "fevt/%s"%histname
@@ -27,6 +27,7 @@ masses = [100, 400, 1000]
 for mass in masses:
 
     sample = '%dMeV'%mass if mass < 1000 else '%dGeV'%(mass/1000.)
+    #sample = '%dGeV'%(mass/1000.)
     print ' >> Sample:',sample
 
     decay = 'h24gamma_1j_1M_%s_PU2017_ext3'%sample
@@ -70,9 +71,9 @@ for mass in masses:
     c.cd()
 
     ROOT.gPad.SetLeftMargin(0.15)
-    ROOT.gPad.SetRightMargin(0.2)
+    ROOT.gPad.SetRightMargin(0.21)
     ROOT.gPad.SetBottomMargin(0.18)
-    ROOT.gPad.SetTopMargin(0.08)
+    ROOT.gPad.SetTopMargin(0.09)
 
     ymax = 0.18
     h_in.SetTitle('')
@@ -85,30 +86,34 @@ for mass in masses:
 
     txtFont = 62 #bold
     txtFont = 42 #regular
-    h_in.GetYaxis().SetLabelSize(0.05)
+    h_in.GetYaxis().SetLabelSize(0.06)
     h_in.GetYaxis().SetLabelFont(txtFont)
     #h_in.GetYaxis().SetTitle("#Deltai#eta(#gamma,#gamma)_{gen}")
-    h_in.GetYaxis().SetTitle("#Delta#eta(#gamma_{1},#gamma_{2})^{gen}")
-    h_in.GetYaxis().SetTitleOffset(0.9)
+    h_in.GetYaxis().SetTitle("#Delta#eta(#gamma_{1},#gamma_{2})^{gen} [crystal units]")
+    h_in.GetYaxis().SetTitleOffset(1.)
+    h_in.GetYaxis().SetLabelOffset(0.01)
     h_in.GetYaxis().SetTitleSize(0.06)
     h_in.GetYaxis().SetTitleFont(txtFont)
     h_in.GetYaxis().SetRangeUser(0.,xtalWindow*xtalWidth)
 
-    h_in.GetXaxis().SetLabelSize(0.05)
+    h_in.GetXaxis().SetLabelSize(0.06)
     h_in.GetXaxis().SetLabelFont(txtFont)
     #h_in.GetXaxis().SetTitle("#Deltai#varphi(#gamma,#gamma)_{gen}")
-    h_in.GetXaxis().SetTitle("#Delta#phi(#gamma_{1},#gamma_{2})^{gen}")
-    h_in.GetXaxis().SetTitleOffset(1.2)
+    h_in.GetXaxis().SetTitle("#Delta#phi(#gamma_{1},#gamma_{2})^{gen} [crystal units]")
+    h_in.GetXaxis().SetTitleOffset(1.3)
+    h_in.GetXaxis().SetLabelOffset(0.01)
     h_in.GetXaxis().SetTitleSize(0.06)
     h_in.GetXaxis().SetTitleFont(txtFont)
     h_in.GetXaxis().SetRangeUser(0.,xtalWindow*xtalWidth)
 
     #h_in.GetZaxis().SetTitle("f_{events}")
-    h_in.GetZaxis().SetTitle("f_{a#rightarrow#gamma#gamma}")
-    h_in.GetZaxis().SetTitleOffset(1.05)
+    #h_in.GetZaxis().SetTitle("f_{a#rightarrow#gamma#gamma}")
+    h_in.GetZaxis().SetTitle("Normalized units / bin")
+    h_in.GetZaxis().SetTitleOffset(1.25)
+    h_in.GetZaxis().SetLabelOffset(0.01)
     h_in.GetZaxis().SetTitleSize(0.06)
     h_in.GetZaxis().SetTitleFont(txtFont)
-    h_in.GetZaxis().SetLabelSize(0.05)
+    h_in.GetZaxis().SetLabelSize(0.06)
     h_in.GetZaxis().SetLabelFont(txtFont)
     h_in.GetZaxis().SetNdivisions(5);
 
@@ -158,7 +163,12 @@ for mass in masses:
     ROOT.gPad.Update()
 
     # CMS label
-    CMS_lumi.lumi_sqrtS = "m(a) = %s"%sample.replace('GeV',' GeV').replace('MeV',' MeV') # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+    #CMS_lumi.lumi_sqrtS = "m_{a} = %s"%sample.replace('GeV',' GeV').replace('MeV',' MeV') # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+    if mass == 1000:
+        #CMS_lumi.lumi_sqrtS = "m_{#bf{#it{A}}} = %.f GeV"%(mass/1.e3) #sample.replace('GeV',' GeV').replace('MeV',' MeV') # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+        CMS_lumi.lumi_sqrtS = "m_{#bf{#it{A}}} = %.1f GeV"%(mass/1.e3) #sample.replace('GeV',' GeV').replace('MeV',' MeV') # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
+    else:
+        CMS_lumi.lumi_sqrtS = "m_{#bf{#it{A}}} = %.1f GeV"%(mass/1.e3) #sample.replace('GeV',' GeV').replace('MeV',' MeV') # used with iPeriod = 0, e.g. for simulation-only plots (default is an empty string)
     CMS_lumi.CMS_lumi(c, iPeriod, iPos)
     c.Draw()
     c.Update()

@@ -59,7 +59,7 @@ def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
     h[k].GetYaxis().SetTitleFont(kfont)
 
     #h[k] = set_hist(h[k], "m_{#Gamma,pred} [GeV]", "f_{#Gamma} / 25 MeV", "")
-    h[k] = set_hist(h[k], "m_{#Gamma,%d} [GeV]"%(int(keys[0][-1])+1), "Normalized units / 25 MeV", "", kfont=kfont)
+    h[k] = set_hist(h[k], "m_{#Gamma,%d} [GeV]"%(int(keys[0][-1])+1), "Normalized units / %d MeV"%dMa, "", kfont=kfont)
     #h[k].GetXaxis().SetTitleOffset(0.9)
     #h[k].GetXaxis().SetTitleSize(0.06)
     #h[k].SetLineColor(9)
@@ -67,28 +67,34 @@ def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
     h[k].SetLineColor(it+1)
     h[k].SetFillColor(it+1)
     h[k].SetFillStyle(fill_style)
+    #h[k].SetFillStyle(0)
     #h[k].Draw("hist")
     if it == 0:
         h[k].Draw("%s"%err_style)
+        #h[k].Draw("hist")
     else:
+        pass
+        #h[k].Draw("hist same")
         h[k].Draw("%s same"%err_style)
     hc[k] = h[k].Clone()
     hc[k].SetName(k+'line')
     #hc[k].SetLineColor(9)
+    #hc[k].SetFillStyle(3002)
     hc[k].SetFillStyle(0)
-    hc[k].SetMarkerStyle(20)
-    hc[k].SetMarkerSize(0.85)
+    #hc[k].SetMarkerStyle(20)
+    #hc[k].SetMarkerSize(0.85)
 
     #h[k].GetXaxis().SetTitle('')
     #h[k].GetXaxis().SetLabelSize(0.)
     #h[k].GetYaxis().SetTitleOffset(0.9)
-    h[k].GetYaxis().SetTitleSize(0.06)
-    h[k].GetYaxis().SetLabelSize(0.04)
-    h[k].GetYaxis().SetMaxDigits(3)
-    h[k].GetXaxis().SetTitleSize(0.06)
-    h[k].GetXaxis().SetLabelSize(0.04)
-    h[k].GetXaxis().SetTitleOffset(1.)
+    #h[k].GetYaxis().SetTitleSize(0.06)
+    #h[k].GetYaxis().SetLabelSize(0.04)
+    #h[k].GetYaxis().SetMaxDigits(3)
+    #h[k].GetXaxis().SetTitleSize(0.06)
+    #h[k].GetXaxis().SetLabelSize(0.04)
+    #h[k].GetXaxis().SetTitleOffset(1.)
     hc[k].Draw("hist same")
+    #hc[k].Draw("%s same"%err_style)
     #hc[k].Draw("E")
 
     if ymax_ is None:
@@ -130,13 +136,13 @@ def draw_hist_1dma_overlay(k_, h, hc, c, l, hatch, legend, it, ymax_=None):
         l[k].SetLineStyle(7)
         l[k].Draw("same")
 
-        hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
-        hatch[k].SetLineColor(14)
-        hatch[k].SetLineWidth(5001)
-        #hatch[k].SetLineWidth(5)
-        hatch[k].SetFillStyle(3004)
-        hatch[k].SetFillColor(14)
-        hatch[k].Draw("same")
+        #hatch[k] = ROOT.TGraph(2, array('d',[0.,0.]), array('d',[0.,ymax]));
+        #hatch[k].SetLineColor(14)
+        #hatch[k].SetLineWidth(5001)
+        ##hatch[k].SetLineWidth(5)
+        #hatch[k].SetFillStyle(3004)
+        #hatch[k].SetFillColor(14)
+        #hatch[k].Draw("same")
 
     if it == 0:
         c.Draw()
@@ -165,13 +171,15 @@ l, hatch = {}, {}
 legend = {}
 
 hf, h, hc = {}, {}, {}
+hd = {}
 c = {}
 
 eos_redir = 'root://cmseos.fnal.gov'
 eos_basedir = '/store/user/lpchaa4g/mandrews/'#$ root -l 2017/maNtuples-Era03Dec2020v1/h4g2017-mA0p4GeV_mantuple.root
 #campaign = 'Templates/templates-Era04Dec2020v1'
 #campaign = 'sg-Era04Dec2020v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
-campaign = 'sg-Era22Jun2021v4/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+#campaign = 'sg-Era22Jun2021v4/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom'
+campaign = 'sg-Era22Jun2021v6/bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom/Templates/systNom_nom' #bin50MeV
 #expts = ['', '-eta1p4', '-eta1p3', '-eta1p2'] # eta study
 expts = ['interp', '']
 interp_dir = '/uscms/home/mba2012/nobackup/h2aa/CMSSW_10_5_0/src/h2aa/ntupleAnalysis/Templates/systNom_nom'
@@ -188,15 +196,18 @@ mas.append('0p4')
 #mas.append('1p2') # eta study
 #keys = ['ma0','ma1']
 keys = ['ma0']
-keys = ['ma1']
+#keys = ['ma1']
 #keys = ['maxy']
+
+dMa = 50
 
 nit = len(runs)*len(expts)
 #normalize = False
 normalize = True
 if normalize:
     #ymaxs = {'0p1':0.07, '0p4':0.09, '1p0':0.08,  '1p2':0.08}
-    ymax_norm = 0.1
+    #ymax_norm = 0.1
+    ymax_norm = 0.2
     ymaxs = {m:ymax_norm for m in mas}
 else:
     ymaxs = {'0p1':6.e3, '0p4':8.e3, '1p0':1.2e3, '1p2':1.2e3}
@@ -215,9 +226,25 @@ for r in runs:
             hf[r+m+e] = ROOT.TFile.Open(filepath)
             for k in keys:
                 rmek = '%s_%s_%s_%s'%(r, m, e, k)
-                h[rmek] = hf[r+m+e].Get(k)
+                hd[rmek] = hf[r+m+e].Get(k)
+                if 'interp' in e:
+                    # rebin without negative mass bin
+                    h[rmek] = ROOT.TH1F(rmek, rmek, int(1200./dMa), 0., 1.2)
+                    h[rmek].Sumw2()
+                    for i in range(1, h[rmek].GetNbinsX()+1):
+                        for j in range(2, hd[rmek].GetNbinsX()+1):
+                            edgsrc = hd[rmek].GetBinLowEdge(j)
+                            if edgsrc < h[rmek].GetBinLowEdge(i+1) and edgsrc >= h[rmek].GetBinLowEdge(i):
+                                h[rmek].AddBinContent(i, hd[rmek].GetBinContent(j))
+                        h[rmek].SetBinError(i, np.sqrt(h[rmek].GetBinContent(i)))
+                        #print(h[rmek].GetBinError(i))
+                    print('>> %s: bin1:%f, bin2:%f, bin3:%f'%(rmek, hd[rmek].GetBinContent(1), hd[rmek].GetBinContent(2), hd[rmek].GetBinContent(3)))
+                    print('>> %s: bin1:%f, bin2:%f, bin3:%f'%(rmek, h[rmek].GetBinContent(1), h[rmek].GetBinContent(2), h[rmek].GetBinContent(3)))
+                else:
+                    h[rmek] = hd[rmek].Clone()
+                    h[rmek].SetName(rmek)
                 if normalize:
-                    #h[rmek].Scale(1./h[rmek].GetEntries())
+                    #h[rmek].Scale(1./hd[rmek].GetEntries())
                     h[rmek].Scale(1./h[rmek].Integral())
                     h[rmek].SetName(rmek)
                     h[rmek].SetTitle(rmek)

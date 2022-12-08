@@ -44,7 +44,7 @@ args = parser.parse_args()
 
 sample = args.sample
 print('>> Sample:', sample)
-assert len(sample.split('-')) == 2, '!! sample name invalid: %s'%sample
+#assert len(sample.split('-')) == 2, '!! sample name invalid: %s'%sample
 year = re.findall('(201[6-8])', sample.split('-')[0])[0]
 
 # input maNtuple list

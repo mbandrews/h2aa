@@ -28,7 +28,8 @@ NCPU = '__NCPU__'
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v1_sg-Era22Jun2021v3_v3' # bin50MeV
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v3_sg-Era22Jun2021v4_v1' # hgg bkg template with SFs, updated sg ss uncerts, fix lumi2018 uncert, obs limits, xs=0.05pb
 #this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v4_sg-Era22Jun2021v5_v1' # ^ but fhgg from br(hgg) and xs = 0.05104pb
-this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v4_sg-Era22Jun2021v5_v1' # ^ but fhgg from br(hgg) and xs = 1 pb
+#this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v4_sg-Era22Jun2021v5_v1' # ^ but fhgg from br(hgg) and xs = 1 pb
+this_campaign = 'limits_bkg-bkgNoPtWgts-Era22Jun2021v2_sg-Era22Jun2021v6_v1' # pol2d-O1, fixed stat uncert, bin 50MeV, xs = 1 pb
 print('>> Limit setting campaign:',this_campaign)
 
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv
@@ -43,12 +44,13 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-nom' # bdt > -0.96, rel
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p09_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.09
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-nom' # bdt > -0.96, relChgIso < 0.08
 #sub_campaign = '%s/bin100MeV'%sub_campaign
-#sub_campaign = '%s/bin50MeV'%sub_campaign
-sub_campaign = '%s/bin25MeV'%sub_campaign
+sub_campaign = '%s/bin50MeV'%sub_campaign
+#sub_campaign = '%s/bin25MeV'%sub_campaign
 print('>> Output sub-campaign:',sub_campaign)
 
 # Skip impacts if running 25MeV bins--too long!
-run_impacts = False if '25MeV' in sub_campaign else True
+#run_impacts = False if '25MeV' in sub_campaign else True
+run_impacts = False # impacts now run using lxplus condor
 
 # Define jdl exec, tar, etc
 tar_file = 'combineTool.tgz'
@@ -114,9 +116,9 @@ systs = [
     'CMS_h4g_bgRewgtPolEigen0',
     'CMS_h4g_bgRewgtPolEigen1',
     'CMS_h4g_bgRewgtPolEigen2',
-    'CMS_h4g_bgRewgtPolEigen3',
-    'CMS_h4g_bgRewgtPolEigen4',
-    'CMS_h4g_bgRewgtPolEigen5',
+    #'CMS_h4g_bgRewgtPolEigen3',
+    #'CMS_h4g_bgRewgtPolEigen4',
+    #'CMS_h4g_bgRewgtPolEigen5',
     '* autoMCStats'
 ]
 

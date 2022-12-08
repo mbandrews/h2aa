@@ -125,6 +125,26 @@ def crop_EBshower_padded(imgEB, ieta, iphi, window=32):
 
     return img_crop
 
+def rotate(imgEB, window=32):
+
+    imgEB = np.float32(imgEB)
+    assert len(imgEB.shape) == 3, '!! len(imgEB.shape): %d != 3'%len(imgEB.shape)
+    assert imgEB.shape[1] == window
+    assert imgEB.shape[2] == window
+
+    #print('pre rotation:')
+    #print(np.argwhere(imgEB == imgEB.max()))
+
+    rot   = np.rot90(imgEB, axes=(1,2))
+    shift = np.pad(rot, ((0,0),(0,1),(0,0)), 'constant')
+    crop  = shift[:,1:,:]
+
+    #print('post rotation:')
+    #print(np.argwhere(crop == imgEB.max()))
+    assert crop.shape[1] == window
+    assert crop.shape[2] == window
+    return crop
+
 # Create an event list containing run:lumi:event:idx IDs for some input `tree`
 # Defaults to ggNtuple so events can be skipped if not present here.
 # NOTE: event id conventions for the ntuples are as follows:
@@ -415,6 +435,8 @@ for iEvt in range(iEvtStart,iEvtEnd):
         iphi.append([img_tree.SC_iphi[idx]])
         #sc_cms_ = crop_EBshower(X_cms, ieta[-1], iphi[-1])
         sc_cms_ = crop_EBshower_padded(X_cms, ieta[-1], iphi[-1])
+        # rotate 90deg clockwise
+        sc_cms_ = rotate(sc_cms_)
         sc_cms.append(sc_cms_)
 
     # Run inference
@@ -435,6 +457,7 @@ for iEvt in range(iEvtStart,iEvtEnd):
         h['ieta'].Fill(img_tree.SC_ieta[i])
         h['iphi'].Fill(img_tree.SC_iphi[i])
 
+    #break
     tree_out.Fill()
     nWrite += 1
 

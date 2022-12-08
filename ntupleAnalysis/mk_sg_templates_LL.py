@@ -37,7 +37,9 @@ ma_blind_output = 'offdiag_lo_hi'
 #campaign = 'sg-Era22Jun2021v3' # v2 + interpolated masses
 #campaign = 'sg-Era22Jun2021v4' # duplicate of v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
 #campaign = 'sg-Era22Jun2021v5' # duplicate of v3 + ss with SFs + (xs_sg = 1pb for all)
-campaign = 'sg-Era22Jun2021v6' # v5 but with 50MeV
+#campaign = 'sg-Era22Jun2021v6' # v5 but with 50MeV
+#campaign = 'sg-Era18Nov2021v1' # h4g 2017 LL, w/o HLT
+campaign = 'sg-Era18Nov2021v2' # h4g 2017 LL fixed tau units, w/o HLT
 print('>> Signal selection campaign:',campaign)
 
 sel = 'nom'
@@ -63,7 +65,9 @@ print('>> sub-campaign:',sub_campaign)
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v1' # h4g, hgg: mgg95 trgs, w/ HLT req
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v2' # h4g, hgg: mgg95 trgs, no HLT req
 #ggntuple_campaign = 'Era20May2021v1_ggSkim-v'+campaign[-1]
-ggntuple_campaign = 'Era20May2021v1_ggSkim-v2'
+#ggntuple_campaign = 'Era20May2021v1_ggSkim-v2'
+#ggntuple_campaign = 'Era18Nov2021v1_ggSkim-v1' # h4g 2017, LL
+ggntuple_campaign = 'Era18Nov2021v2_ggSkim-v1' # h4g 2017, LL fixed tau units
 xs_sg = 1. #pb
 #xs_sg = 0.05 #pb
 #xs_sg = 0.05104 #pb
@@ -92,7 +96,7 @@ syst_lumi = 'systLumi'
 cwd = os.getcwd()+'/'
 
 runs = ['2016', '2017', '2018']
-#runs = ['2018']
+runs = ['2017']
 
 for r in runs:
 
@@ -121,6 +125,8 @@ for r in runs:
 
         for i,s in enumerate(samples):
 
+            #if 'mA0p1GeV' not in s: continue
+            #if 'mA0p2GeV' not in s: continue
             #if 'mA0p4GeV' not in s: continue
             #if ('mA1p2GeV' not in s) and ('mA1p1GeV' not in s) and ('mA1p0GeV' not in s): continue # DEBUG: for verifying interpolation
             #if ('mA0p2GeV' not in s) and ('mA0p3GeV' not in s) and ('mA0p4GeV' not in s): continue # DEBUG: for verifying interpolation
@@ -151,7 +157,9 @@ for r in runs:
 
             # Get mc->data lumi normalization
             #mcnorm = get_mc2data_norm(s, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
-            mcnorm = get_mc2data_norm_interp(s, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
+            #mcnorm = get_mc2data_norm_interp(s, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
+            s_edit = s.replace('ctau', 'tau').strip('mm') # forgot to fix names in ggntuples
+            mcnorm = get_mc2data_norm_interp(s_edit, ggntuple_campaign, tgt_lumis[r], xsec=xs_sg)
             hblind[kblind].Scale(mcnorm)
             print('      .. nevts[%s], mc2data: %f'%(kblind, hblind[kblind].Integral()))
 

@@ -12,8 +12,7 @@ sample_sg = 'h4g'
 mh_region = 'sr'
 #ma_blinds = ['diag_lo_hi', 'offdiag_lo_hi']
 ma_blind = 'offdiag_lo_hi'
-#ma_blind = 'lo_hi'
-#ma_blind = 'diag_lo_hi'
+#ma_blind = 'diag_lo_hi' # for making unblinded plots in plot_2dma.py: both offdiag+diag blinding needed
 #ma_blind = None
 distns = ['%s-%s'%(k2dma, ma_blind)]
 #distn = '%s'%(k2dma)
@@ -42,7 +41,8 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #campaign = 'sg-Era22Jun2021v2/%s'%sub_campaign # h4g, hgg: w/o HLT applied, with trgSF. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
 #campaign = 'sg-Era22Jun2021v3/%s'%sub_campaign # v2 + interpolated masses
 #campaign = 'sg-Era22Jun2021v4/%s'%sub_campaign # duplicate of v3 + ss with SFs + (xs_sg = 0.05pb for by era but xs_sg = 1pb for run2 for making plots)
-campaign = 'sg-Era22Jun2021v5/%s'%sub_campaign # duplicate of v3 + ss with SFs + (xs_sg = 0.05104pb for by era but xs_sg = 1pb for run2 for making plots)
+#campaign = 'sg-Era22Jun2021v5/%s'%sub_campaign # duplicate of v3 + ss with SFs + (xs_sg = 0.05104pb for by era but xs_sg = 1pb for run2 for making plots)
+campaign = 'sg-Era22Jun2021v6/%s'%sub_campaign # v5 but with 50MeV
 print('.. input campaign: %s'%campaign)
 
 # Define ggnutple campaign for mc normalization

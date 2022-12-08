@@ -13,7 +13,9 @@ indir = '../maNtuples'
 #input_campaign = 'Era04Dec2020v1' # fixed mc diphoton trg
 #input_campaign = 'Era22Jun2021v1' # data, h4g, hgg. mgg95 trgs. gg:ggNtuples-Era20May2021v1_ggSkim-v1 + img:Era22Jun2021_AOD-IMGv1 [EB-only AOD skims]
 #input_campaign = 'Era22Jun2021v2' # h4g w/o HLT. gg:ggNtuples-Era20May2021v1_ggSkim-v2 + img:Era22Jun2021_AOD-IMGv2
-input_campaign = 'Era22Jun2021v3' # Era22Jun2021v2 + interpolated mass samples
+#input_campaign = 'Era22Jun2021v3' # Era22Jun2021v2 + interpolated mass samples
+#input_campaign = 'Era18Nov2021v1' # gg:ggNtuples-Era18Nov2021v1_ggSkim-v1 + img:Era18Nov2021_AOD-IMGv1. h4g 2017 LL, w/o HLT
+input_campaign = 'Era18Nov2021v2' # gg:ggNtuples-Era18Nov2021v2_ggSkim-v1 + img:Era18Nov2021_AOD-IMGv3. h4g 2017 LL fixed tau units, w/o HLT
 print('>> Input maNtuple campaign:',input_campaign)
 
 # Define sg campaign
@@ -27,7 +29,11 @@ print('>> Input maNtuple campaign:',input_campaign)
 #this_campaign = 'sg-Era22Jun2021v1' # h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims], HLT applied, no trgSF
 #this_campaign = 'sg-Era22Jun2021v2' # h4g w/o HLT applied, with trgSF
 #this_campaign = 'sg-Era22Jun2021v3' # sg-Era22Jun2021v2 + interpolated mass samples
-this_campaign = 'sg-Era22Jun2021v4' # sg-Era22Jun2021v3 + ss with SFs
+#this_campaign = 'sg-Era22Jun2021v4' # sg-Era22Jun2021v3 + ss with SFs
+# v5 used to play with norm, see:mk_sg_templates.py
+#this_campaign = 'sg-Era22Jun2021v6' # v4 but with bin50MeV
+#this_campaign = 'sg-Era18Nov2021v1' # Era18Nov2021v1, h4g 2017 LL, w/o HLT
+this_campaign = 'sg-Era18Nov2021v2' # Era18Nov2021v2, h4g 2017 LL fixed tau units, w/o HLT
 print('>> Signal selection campaign:',this_campaign)
 
 # If applying trg SFs, make sure HLT trigger was NOT applied
@@ -36,11 +42,11 @@ print('>> Signal selection campaign:',this_campaign)
 #do_trgSF = True # if HLT *not* applied in skim
 #do_trgSF = False
 do_trgSF = True
-if this_campaign == 'sg-Era22Jun2021v2' or this_campaign == 'sg-Era22Jun2021v3' or this_campaign == 'sg-Era22Jun2021v4':
-    do_trgSF = True
+#if this_campaign == 'sg-Era22Jun2021v2' or this_campaign == 'sg-Era22Jun2021v3' or this_campaign == 'sg-Era22Jun2021v4':
+#    do_trgSF = True
 
 sel = 'nom'
-sel = 'inv'
+#sel = 'inv'
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-inv' # a0nom-a1inv
 #sub_campaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom' # a0nom-a1nom
 #sub_campaign = 'bdtgtm0p99_relChgIsolt0p05_etalt1p44/nom-nom' # bdt > -0.99
@@ -137,3 +143,5 @@ for l in inlist:
     # Write out sample-specific crabConfig
     with open('%s/condor_runsg_%s.jdl'%(jdl_folder, sample), "w") as sample_file:
         sample_file.write(file_data)
+
+print('>> jdl folder:',jdl_folder)

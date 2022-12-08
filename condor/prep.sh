@@ -21,8 +21,8 @@
 #tar -zcvf h2aa_nom-nom_bdtgtm0p96_relChgIsolt0p08.tgz ../ntupleAnalysis/*py
 
 #tar -zcvf h2aa.tgz ../ntupleAnalysis/*py
-#tar -zcvf h2aa_nom-nom_bdtgtm0p96_relChgIsolt0p07.tgz ../ntupleAnalysis/*py
-tar -zcvf h2aa_nom-inv_bdtgtm0p96_relChgIsolt0p07.tgz ../ntupleAnalysis/*py
+tar -zcvf h2aa_nom-nom_bdtgtm0p96_relChgIsolt0p07.tgz ../ntupleAnalysis/*py
+#tar -zcvf h2aa_nom-inv_bdtgtm0p96_relChgIsolt0p07.tgz ../ntupleAnalysis/*py
 
 #tar -zcvf h2aa-pi0.tgz ../ntupleAnalysis/*py
 

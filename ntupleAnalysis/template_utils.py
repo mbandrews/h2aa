@@ -37,6 +37,7 @@ def blind_hist(h, to_blind=None, blind_w=0.3):
                     blind_y = True
             if blind_x or blind_y:
                 h.SetBinContent(ix, iy, 0.)
+                h.SetBinError(ix, iy, 0.)
 
     print('      .. integral, after to_blind(%s): %f'%(to_blind, h.Integral(iblind_lo, iblind_hi, iblind_lo, iblind_hi)))
 

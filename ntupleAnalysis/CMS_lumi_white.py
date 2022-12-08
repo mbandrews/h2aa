@@ -103,6 +103,8 @@ def CMS_lumi(pad,  iPeriod,  iPosX ):
 
     latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText)
 
+    latex.SetTextColor(rt.kBlack) # custom
+
     if( outOfFrame ):
         latex.SetTextFont(cmsTextFont)
         latex.SetTextAlign(11) 
@@ -140,12 +142,16 @@ def CMS_lumi(pad,  iPeriod,  iPosX ):
             latex.SetTextFont(cmsTextFont)
             latex.SetTextSize(cmsTextSize*t)
             latex.SetTextAlign(align_)
+            latex.SetTextColor(16) # custom 
             latex.DrawLatex(posX_, posY_, cmsText)
+            latex.SetTextColor(rt.kBlack) # custom 
             if( writeExtraText ) :
                 latex.SetTextFont(extraTextFont)
                 latex.SetTextAlign(align_)
                 latex.SetTextSize(extraTextSize*t)
+                latex.SetTextColor(16) # custom 
                 latex.DrawLatex(posX_, posY_- relExtraDY*cmsTextSize*t, extraText)
+                latex.SetTextColor(rt.kBlack) # custom 
     elif( writeExtraText ):
         if( iPosX==0):
             posX_ =   l +  relPosX*(1-l-r)

@@ -347,6 +347,10 @@ ma0 = np.zeros(1, dtype='float32')
 ma1 = np.zeros(1, dtype='float32')
 tree_out.Branch('ma0', ma0, 'ma0/F')
 tree_out.Branch('ma1', ma1, 'ma1/F')
+vtx = np.zeros(2, dtype='float32')
+tree_out.Branch('vtx', ma0, 'vtx[2]/F')
+dvtx = np.zeros(2, dtype='float32')
+tree_out.Branch('dvtx', ma0, 'dvtx[2]/F')
 logger(flog, '   .. done.')
 
 # Load mass regressor model
@@ -490,7 +494,27 @@ for iEvt in range(iEvtStart,iEvtEnd):
     h['ma0vma1'].Fill(ma0_, ma1_)
     #print(ma0_, ma1_)
 
+    #print(len(img_tree.SC_vtx), img_tree.SC_vtx)
+    #print(len(img_tree.A_recoIdx), img_tree.A_recoIdx)
+    #print(len(img_tree.SC_dvtx), img_tree.SC_dvtx)
+    #print(pho_idx)
+    assert len(img_tree.SC_vtx) == len(gg_tree.phoPreselIdxs)
+    for i in range(len(gg_tree.phoPreselIdxs)):
+        idx_ = np.argwhere(np.int32(img_tree.A_recoIdx) == int(pho_idx[i])).flatten()#[0]
+        #print(idx_)
+        if len(idx_) != 0:
+            idx_ = idx_[0]
+            vtx[idx_] = img_tree.SC_vtx[i]
+            #print(vtx[idx_])
+            dvtx[idx_] = img_tree.SC_dvtx[i]
+            #print(dvtx[idx_])
+        else:
+            vtx[idx_] = -99.
+            dvtx[idx_] = -99.
+
     nWrite += 1
+    #if nWrite > 10:
+    #    break
 
 file_out.Write()
 sw.Stop()

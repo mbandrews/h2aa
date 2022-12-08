@@ -82,7 +82,7 @@ def run_eosfind(eos_basedir, sample, eos_redir='root://cmseos.fnal.gov'):
     # only keep files for this sample
     #print(len(file_list))
     #for i,f in enumerate(file_list):
-    #    print(f)
+    #    print(f, sample in f)
     #    if i > 20: break
     file_list = [f for f in file_list if sample in f]
     #print(sample, len(file_list))

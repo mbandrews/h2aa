@@ -53,20 +53,23 @@ sub_campaign = 'bdtgtm0p96_relChgIsolt0p07_etalt1p44/nom-%s'%sel # bdt > -0.96, 
 #sub_campaign = 'bdtgtm0p96_relChgIsolt0p08_etalt1p44/nom-%s'%sel # bdt > -0.96, relChgIso < 0.08
 #campaign_noptwgts = 'bkgNoPtWgts-Era04Dec2020v2/%s'%sub_campaign
 #campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v1/%s'%sub_campaign
-#campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v2/%s'%sub_campaign # v1 but with bin 50MeV [not used]
+campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v2/%s'%sub_campaign # v1 but with bin 50MeV [not used]
 #campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v3/%s'%sub_campaign # duplicate of v1 but with SFs on hgg template
-campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v4/%s'%sub_campaign # duplicate of v3, but with fhgg derived from SM br(hgg)
+#campaign_noptwgts = 'bkgNoPtWgts-Era22Jun2021v4/%s'%sub_campaign # duplicate of v3, but with fhgg derived from SM br(hgg)
 #campaign_ptwgts = 'bkgPtWgts-Era04Dec2020v2/%s'%sub_campaign
 #campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v1/%s'%sub_campaign
-#campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v2/%s'%sub_campaign # v1 but with bin 50MeV [not used]
+campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v2/%s'%sub_campaign # v1 but with bin 50MeV [not used]
 #campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v3/%s'%sub_campaign # duplicate of v1 but with SFs on hgg template
-campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v4/%s'%sub_campaign # duplicate of v3, but with fhgg from SM br(hgg)
+#campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v4/%s'%sub_campaign # duplicate of v3, but with fhgg from SM br(hgg)
+#campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v5/%s'%sub_campaign # v4, but with addtl ptwgts shifted down/up by stat uncerts
+#campaign_ptwgts = 'bkgPtWgts-Era22Jun2021v6/%s'%sub_campaign # v4, but with pt wgts smoothing (no shifting anymore)
 if doRun2: campaign_ptwgts += '/%s'%run2dir
 
 # f_hgg = ( intlumi * xs * br * N_hgg,sel / N_hgg,gen ) / N_sel,data
 # where the above equality is assumed to hold identically for sel = evt sel + (mH-SR & ma-SB) and sel = evt sel + (mH-SR & ma-SR)
 # so that we can derive it from (mH-SR & ma-SB) and use it for (mH-SR & ma-SR)
-hgg_campaign = 'sg-Era22Jun2021v4/%s'%sub_campaign # sg-Era22Jun2021v2 + interp masses (v3) + ss with SFs
+#hgg_campaign = 'sg-Era22Jun2021v4/%s'%sub_campaign # sg-Era22Jun2021v2 + interp masses (v3) + ss with SFs
+hgg_campaign = 'sg-Era22Jun2021v6/%s'%sub_campaign # v4, but xs_sg = 1pb (v5) and 50MeV
 skim_campaign = 'ggNtuples-Era20May2021v1_ggSkim-v2' # for getting mc nevtsgen
 # https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt1314TeV2014
 # total SM inclusive higgs prodn: 50.94, gluglu-only: 43.92
@@ -104,7 +107,7 @@ fhggs = {
          } # [nom fit value, fit uncert]
 '''
 
-#runs = ['2018']
+#runs = ['2016']
 runs = ['2016', '2017', '2018']
 
 for r in runs:
@@ -133,9 +136,12 @@ for r in runs:
     print('.. inpath: %s'%inpath)
     flo_files = glob.glob(inpath)
     print('.. found %d f_SBlows'%(len(flo_files)))
-    flo_ins = [float(flo.split('_')[-2].strip('flo')) for flo in flo_files]
+    #flo_ins = [float(flo.split('_')[-2].strip('flo')) for flo in flo_files]
+    flo_ins = [float(flo.split('_')[-2].strip('flo').strip('Down').strip('Up')) for flo in flo_files]
+    flo_ins = np.sort(np.unique(flo_ins))
     flo_nom = flo_ins[1]
 
+    #for flo_in in flo_ins[1:2]:
     for flo_in in flo_ins:
 
         print('>> Doing flo_in:',flo_in)
@@ -190,6 +196,52 @@ for r in runs:
         ksbhi = '%s_sbhi_%s'%(sample, k2dma)
         ksb2sr = '%s_sb2sr_%s'%(sample, k2dma)
         combine_sblohi(h, flo_in, flo_nom, ksblo, ksbhi, ksb2sr)
+        print('.. sblo', 3, 15, h[ksblo].GetBinContent(3, 15), h[ksblo].GetBinError(3, 15))
+        print('.. sbhi', 3, 15, h[ksbhi].GetBinContent(3, 15), h[ksbhi].GetBinError(3, 15))
+        print('.. sb2sr', 3, 15, h[ksb2sr].GetBinContent(3, 15), h[ksb2sr].GetBinError(3, 15))
+        print('.. h[%s].Integral(): %f'%(ksb2sr, h[ksb2sr].Integral()))
+
+        ## Get shifted bkg model
+        #if flo_in == flo_nom:
+
+        #    print('   >> Adding pt weight uncertainties')
+        #    hshift, hfshift = {}, {}
+        #    for shift in ['Down', 'Up']:
+
+        #        print('   .. Getting shift:',shift)
+        #        hshift[shift], hfshift[shift] = {}, {}
+        #        load_hists(hshift[shift], hfshift[shift], [sample], mh_regions, distns, ma_blind_input, workdir+shift)
+        #        #print('.. ',hshift[shift].keys())
+
+        #    for ksb in [ksblo, ksbhi]:
+        #        print('   .. Doing mhsb:',ksb)
+        #        #kratio = tgt+'%s_ratioClone%s'%(k, shift)
+        #        #h[kratio] = h[tgt+'%s_ratio'%k].Clone()
+        #        #h[kratio].SetName(kratio)
+        #        for ix in range(h[ksb].GetNbinsX()+2):
+        #            for iy in range(h[ksb].GetNbinsY()+2):
+        #                #if ix != 3: continue
+        #                #if iy != 15: continue
+        #                bincnom = h[ksb].GetBinContent(ix, iy)
+        #                binerrnom = h[ksb].GetBinError(ix, iy)
+        #                #bincup = hshift['Up'][ksb].GetBinContent(ix, iy)
+        #                #bincdn = hshift['Down'][ksb].GetBinContent(ix, iy)
+        #                bincup = abs(hshift['Up'][ksb].GetBinContent(ix, iy)-bincnom)
+        #                bincdn = abs(hshift['Down'][ksb].GetBinContent(ix, iy)-bincnom)
+        #                bincdiff = np.max([bincup, bincdn])
+        #                binerrtot = np.sqrt(binerrnom*binerrnom + bincdiff*bincdiff)
+        #                if bincnom = 0.:
+        #                    binerrtot = 0.
+        #                #print(ix, iy, bincnom, binerrnom, bincup, bincdn, bincdiff, binerrtot)
+        #                h[ksb].SetBinError(ix, iy, binerrtot)
+        #                #print(ix, iy, h[ksb].GetBinContent(ix, iy), h[ksb].GetBinError(ix, iy))
+
+        #combine_sblohi(h, flo_in, flo_nom, ksblo, ksbhi, ksb2sr)
+        #print('.. sblo', 3, 15, h[ksblo].GetBinContent(3, 15), h[ksblo].GetBinError(3, 15))
+        #print('.. sbhi', 3, 15, h[ksbhi].GetBinContent(3, 15), h[ksbhi].GetBinError(3, 15))
+        #print('.. sb2sr', 3, 15, h[ksb2sr].GetBinContent(3, 15), h[ksb2sr].GetBinError(3, 15))
+        #print('.. h[%s].Integral(): %f'%(ksb2sr, h[ksb2sr].Integral()))
+
         h[ksb2sr].Scale(sb2sr_norm)
         print('.. h[%s].Integral(): %f'%(ksb2sr, h[ksb2sr].Integral()))
 
@@ -259,6 +311,8 @@ for r in runs:
             #h[ksb2sr_hgg].Add(h[khgg], fhgg)
             h[ksb2sr_hgg].Add(h[khgg], fhgg*hgg2sr_norm)
             print('  .. h[%s].Integral(): %f'%(ksb2sr_hgg, h[ksb2sr_hgg].Integral()))
+
+            print('.. sb2sr+hgg', 3, 15, h[ksb2sr_hgg].GetBinContent(3, 15), h[ksb2sr_hgg].GetBinError(3, 15))
 
             # Draw
             c[ksb2sr_hgg] = ROOT.TCanvas(ksb2sr_hgg, ksb2sr_hgg, wd, ht)

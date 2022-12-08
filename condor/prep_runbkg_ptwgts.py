@@ -18,7 +18,10 @@ print('>> Input campaign: maNtuples-%s'%input_campaign)
 #ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v1' # no 2018A, 2016H+2018 failed lumis
 #ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v2' # 2016H+2018 failed lumis
 #ptwgts_campaign = 'bkgNoPtWgts-Era04Dec2020v3' # redo v2 with nVtx, nPU plots
-ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
+#ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v1' # data, h4g, hgg: redo with mgg95 trgs. [Note:new EB-only AOD skims]
+#ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v2' # v1 but with bin 50MeV [not used]
+#ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v3' # duplicate of v1 but with SFs on hgg template
+ptwgts_campaign = 'bkgNoPtWgts-Era22Jun2021v4' # duplicate of v3, but with fhgg derived from SM br(hgg). Added later: ptwgts shifted down/up by stat uncerts
 print('>> Input pt wgts campaign: %s'%ptwgts_campaign)
 
 #ptwgts_subcampaign = 'bdtgtm0p98_relChgIsolt0p05_etalt1p44/nom-nom' # a0nom-a1nom
@@ -42,7 +45,11 @@ print('>> Input pt wgts sub-campaign: %s'%ptwgts_subcampaign)
 #this_campaign = 'bkgPtWgts-Era04Dec2020v2' # using bkgNoPtWgts-Era04Dec2020v2/bdtgtm0p98_relChgIsolt0p05_etalt1p44
 #this_campaign = 'bkgPtWgts-Era04Dec2020v3' # using bkgNoPtWgts-Era04Dec2020v3/bdtgtm0p98_relChgIsolt0p05_etalt1p44 [same as v2 + nVtx, nPU plots]
 #this_campaign = 'bkgPtWgts-Era22Jun2021v1' # maNtuples-Era22Jun2021v1 + bkgNoPtWgts-Era22Jun2021v1/bdtgtm0p96_relChgIsolt0p07_etalt1p44 [mgg95 trgs]
-this_campaign = 'bkgPtWgts-Era22Jun2021v2' # bkgPtWgts-Era22Jun2021v1, bin50MeV
+#this_campaign = 'bkgPtWgts-Era22Jun2021v2' # bkgPtWgts-Era22Jun2021v1, bin50MeV
+#this_campaign = 'bkgPtWgts-Era22Jun2021v3' # duplicate of v1 but with SFs on hgg template
+#this_campaign = 'bkgPtWgts-Era22Jun2021v4' # duplicate of v3, but with fhgg from SM br(hgg)
+#this_campaign = 'bkgPtWgts-Era22Jun2021v5' # v4, but with addtl ptwgts shifted down/up by stat uncerts
+this_campaign = 'bkgPtWgts-Era22Jun2021v6' # v4, but with pt wgts smoothing (no shifting anymore)
 print('>> Output campaign:',this_campaign)
 
 exec_file = 'run_bkg_ptwgts.sh'
@@ -137,3 +144,4 @@ for r in runs:
                 with open('%s/condor_runbkg_%s_mh%s_flo%s.jdl'%(jdl_folder, sample, mhregion, flo_str), "w") as sample_file:
                     sample_file.write(file_data)
                 #'''
+print('>> jdl folder:',jdl_folder)
